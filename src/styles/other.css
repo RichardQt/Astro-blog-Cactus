@@ -1,0 +1,9 @@
+.katex-html {
+    display: none;
+} 
+
+
+.small-text {
+    font-size: 0.8em;
+    /* 调整这个值来缩小字体 */
+}

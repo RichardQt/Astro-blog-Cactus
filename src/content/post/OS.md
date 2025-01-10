@@ -13,14 +13,18 @@ ogImage: /social-card.avif
 
 ### 第一章 概论
 
-- 计算机系统是由 **硬件系统** 和 **软件系统** 组成。
-- 操作系统的基本类型主要有 **批处理操作系统、分时操作系统和实时操作系统**。
-- 程序 **并发执行** 与顺序执行相比多了些新的特征：分别是：**并发、共享、不确定性（不可再现性、异步性）、失去封闭性**
-- **并发执行失去了 <u>封闭性和可再现性</u>**
+- 计算机系统是由 **硬件系统** 和 **软件系统**。
+- 操作系统的基本类型主要有 **批处理操作系统 、分时操作系统和实时操作系统**。
+- ⚠️**多道程序设计技术** 能充分发挥 **CPU 与外设并行工作的能力，需要 <span style="color:#FF0000;"> 中断机构 </span> 的支持**；多道程序设计 **特点：多道、宏观上并行、微观上串行。**
+- 程序 **并发执行** 与顺序执行相比多了些新的特征：分别是：**并发、共享、不确定性（不可再现性、异步性）、失去封闭性** 
+  - **并发执行失去了 <u> 封闭性和可再现性 </u>**
+  - **:star::warning:并发进程失去封闭性和失去可再现性是指：并发进程共享变量，其执行结果与速度有关---> 并发进程共享系统的资源**     看到带有失去想共享、 速度有关
+    - **程序具有可再现性：并发进程的执行结果与速度无关**
 - **并发和共享是操作系统两个最基本的特征**
 - 操作系统中 **不可中断** 执行的操作称为：**原语**
-- **分时操作系统** 主要特征：**及时性、交互性、独立性**。分时操作系统是在 **用户态** 下执行。**分时操作系统追求的目标是比较 <u>快速响应用户</u>。**
-- **实时操作系统** 两个基本特征：**及时性和高可靠性**
+- **分时操作** 系统主要特征：**及时性、交互性、独立性**。分时操作系统是在 **用户态** 下执行。**分时操作系统追求的目标是比较 <u> 快速响应用户 </u>。**
+- **实时操作** 系统两个基本特征：**及时性和高可靠性**
+  - <span style="color:#FF0000;"> **实时系统比分时系统及时性更高** </span>
 - 批处理操作系统 **不允许用户随时干预自己程序的运行**
   - **批处理操作系统 <span style="color:#FF0000;"> 必须具有作业控制信息 </span>**
 
@@ -95,7 +99,7 @@ ogImage: /social-card.avif
   - 连续分配：单一连续分配、固定分区分配、动态分区分配  
   - 非连续分配（离散分配）：分页、分段、段页、请求分页
 - **请求分页存储管理**：分页请求系统是在 <span style="color:#FF0000;"> 分页系统的基础上 </span> 增加了 **<span style="color:#FF0000;"> 请求调页功能 </span>** 和 <span style="color:#FF0000;"> **页面置换功能** </span> 所形成的 **<span style="color:#FF0000;"> 页式虚拟存储系统 </span>**。
-- <span style="color:#FF0000;"> 请求分页系统中每个页表 </span> 包含：**页号、物理块号、<span style="color:#FF0000;"> 状态位 P </span>、<span style="color:#FF0000;"> 访问位、修改位 </span> M 和外存地址**。
+- - **<span style="color:#FF0000;">请求分页系统中每个页表</span>包含：页号、物理块号、<span style="color:#FF0000;">状态位 P</span>、<span style="color:#FF0000;">访问位、修改位</span> M 和外存地址。**
 - **请求分页存储管理** 中，**若把 <span style="color:#FF0000;"> 页面尺寸增加一倍 </span>，在程序顺序执行时，<span style="color:#FF0000;"> 则一般缺页中断次数为减少 </span>  (相反):star:**。
 - 关于 **缓冲技术** 中是 **以 <u> <span style="color:#FF0000;"> 空间换取时间 </span> </u> 的技术**
 - **可重定位分区** 分配的碎片是 **内存中容量小、无法利用的小分区**
@@ -109,7 +113,7 @@ ogImage: /social-card.avif
 - 常用设备分配技术：**独占分配、共享分配、虚拟分配**；<span style="color:#FF0000;"> I/O 设备可分为 **独占、共享 、虚拟** </span> 
 - 设备分配程序在 **分配外部设备** 时，**先分配 <span style="color:#FF0000;"> 设备 </span> ，再分配 <span style="color:#FF0000;"> 设备控制器 </span> ，最后 <span style="color:#FF0000;"> 分配通道 </span>**
 - 设备管理中引入 **缓冲机制** 的主要原因是为了：**缓和 cpu 和 I/O 设备速度不匹配的矛盾**、**减少对 cpu 的中断频率和放宽对 cpu 响应时间限制**、**提高 CPU 和 I/O 设备并行性**
-- <span style="color:#FF0000;"> 磁盘访问时间 </span> 由三部分时间组成：**寻道时间、 旋转延迟、及数据块的传输时间**。
+- **<span style="color:#FF0000;"> 磁盘访问时间 </span> 由三部分时间组成：**寻道时间、 旋转延迟、及数据块的传输时间**。
 - 磁盘与主机之间传递数据是以 **数据块** 为单位
 - 磁盘空间管理方法：**空闲表法、空闲链表法、位示图法和成组连接法**
 - **:star:文件在磁盘空间分配方法：顺序分配、链接分配、索引分配、混合索引分配**
@@ -159,7 +163,7 @@ ogImage: /social-card.avif
     - 每个进程都有独立的地址空间，而同一进程内的线程共享该进程的地址空间。
   - **引入线程的意义：** 提高了并发程度，提升了系统资源利用率和吞吐量。
 
-#### **阐述何为死锁及产生的四个条件及解决死锁方法：
+#### **阐述何为死锁及产生的四个条件及解决死锁方法：**
 
 - 死锁 **定义**：**由于系统中存在一些不可剥夺资源，当两个或两个以上的进程占有自身的资源并请求其他资源时，会导致每个进程都无法向前推进，这就是死锁。**
 
@@ -182,7 +186,7 @@ ogImage: /social-card.avif
 
 #### 画出进程状态的转换图，以及状态之间转换所需要的条件。
 
-![image-20241123155927046](https://cdn.jsdelivr.net/gh/RichardQt/PicBed/note/202411231559152.png)
+![image-20241123155927046](https://fastly.jsdelivr.net/gh/RichardQt/PicBed/note/202411231559152.png)
 
 - **就绪--> 运行：进程被调度后，活得处理机资源**
 - **运行--> 就绪：时间片用完后，让出处理机，进入到就绪** 状态
@@ -234,7 +238,7 @@ fcfs 先来先调度算法--先到先服务 不会发生抢占-有利于长作�
 
 spf：短作业优先调度算法-分为抢占和非抢占-有利于短作业调度-平均等待时间最短-公平性较低-会发生饥饿现象-实现较复杂-系统交互性好-适用于任务执行时间已知的场景
 
-#### 什么是多级反馈队列调度算法？（记一下）
+#### 什么是多级反馈队列调度算法？
 
 **<span style="border:1px solid #330000;"> 多级反馈队列调度算法是一种 <span style="color:#FF0000;"> 基于队列的进程调度方法 </span>，它使用多个队列来组织进程，并为每个队列分配不同的优先级。这些队列按照不同的优先级排列，<span style="color:#FF0000;"> 通常较高优先级的队列具有更短的时间片 </span>，<span style="color:#FF0000;"> 而较低优先级的队列具有更长的时间片 </span>。</span>**
 
@@ -390,7 +394,7 @@ FAT 文件系统中的文件分配表（FAT）负责跟踪和管理文件在磁�
 
 ## 单道多道CPU利用率
 
-<img src="https://cdn.jsdelivr.net/gh/RichardQt/PicBed/note/202412082333668.png" alt="image-20241208233331557" style="zoom: 50%;" />
+<img src="https://fastly.jsdelivr.net/gh/RichardQt/PicBed/note/202412082333668.png" alt="image-20241208233331557" style="zoom: 50%;" />
 
 **单道程序CPU利用率=`CPU运行时间/总运行时间（全部相加）=40/80`**
 
@@ -398,7 +402,7 @@ FAT 文件系统中的文件分配表（FAT）负责跟踪和管理文件在磁�
 
 **分析：A在适用CPU或者设备时，B若使用相同设备必须等待，A和B交叉使用**
 
-<img src="https://cdn.jsdelivr.net/gh/RichardQt/PicBed/note/202412082336700.png" alt="image-20241208233608562" style="zoom:30%;" />
+<img src="https://fastly.jsdelivr.net/gh/RichardQt/PicBed/note/202412082336700.png" alt="image-20241208233608562" style="zoom:30%;" />
 
 ## 作业调度七种算法
 
@@ -414,29 +418,29 @@ FAT 文件系统中的文件分配表（FAT）负责跟踪和管理文件在磁�
 
 ### 先来先服务算法(FCFS)
 
-<img src="https://cdn.jsdelivr.net/gh/RichardQt/PicBed/note/202410231909783.png" alt="image-20241023190959697" style="zoom: 67%;" />  
+<img src="https://fastly.jsdelivr.net/gh/RichardQt/PicBed/note/202410231909783.png" alt="image-20241023190959697" style="zoom: 67%;" />  
 
 ### 短作业优先算法(SJF)
 
 **注：不同到达时间， 先到达的作业优先执行 ，当执行完的时候看其他几个作业是否到达，如果剩下作业都到达按照短作业优先"**
 
-<img src="https://cdn.jsdelivr.net/gh/RichardQt/PicBed/note/202410231911235.png" alt="image-20241023191142172" style="zoom: 67%;" />  
+<img src="https://fastly.jsdelivr.net/gh/RichardQt/PicBed/note/202410231911235.png" alt="image-20241023191142172" style="zoom: 67%;" />  
 
 #### 非抢占
 
-<img src="https://cdn.jsdelivr.net/gh/RichardQt/PicBed/note/202410231912394.png" alt="image-20241023191214346" style="zoom:67%;" />  
+<img src="https://fastly.jsdelivr.net/gh/RichardQt/PicBed/note/202410231912394.png" alt="image-20241023191214346" style="zoom:67%;" />  
 
 #### 抢占
 
 - **基于最短剩余时间(SRTN)**  
 
-<img src="https://cdn.jsdelivr.net/gh/RichardQt/PicBed/note/202410231914174.png" alt="image-20241023191413120" style="zoom:67%;" />  
+<img src="https://fastly.jsdelivr.net/gh/RichardQt/PicBed/note/202410231914174.png" alt="image-20241023191413120" style="zoom:67%;" />  
 
 **注：当 D 执行到第八秒的时候，D 还剩 2 秒要小于 E 服务时间 4 秒故还是先执行完 D 再执行 E**  
 
 ### 优先级别调度算法
 
-<img src="https://cdn.jsdelivr.net/gh/RichardQt/PicBed/note/202410231921740.png" alt="image-20241023192100671" style="zoom:67%;" />  
+<img src="https://fastly.jsdelivr.net/gh/RichardQt/PicBed/note/202410231921740.png" alt="image-20241023192100671" style="zoom:67%;" />  
 
 ### :star:高响应比调度算法(HRRN)
 
@@ -444,37 +448,37 @@ FAT 文件系统中的文件分配表（FAT）负责跟踪和管理文件在磁�
 
 ​	⚠️：**带权周转时间：周转时间/服务时间**
 
-<img src="https://cdn.jsdelivr.net/gh/RichardQt/PicBed/note/202410231924212.png" alt="image-20241023192419032" style="zoom:67%;" />  
+<img src="https://fastly.jsdelivr.net/gh/RichardQt/PicBed/note/202410231924212.png" alt="image-20241023192419032" style="zoom:67%;" />  
 
 <span style="color:#FF0000;"> **注：等待时间为调度时间减去到达时间（单位：分钟），先算出第一次调度优先级，当计算第二次调度作业时第二次调度的开始时间要变为第一次调度开始时间再加上最先调度作业的服务时间**  </span>
 
 **（第二次调度时间开始为 10：40，等待时间 = 开始时间 - 到达时间）**  
 
-<img src="https://cdn.jsdelivr.net/gh/RichardQt/PicBed/note/202410231934608.png" alt="image-20241023193404502" style="zoom:67%;" />  
+<img src="https://fastly.jsdelivr.net/gh/RichardQt/PicBed/note/202410231934608.png" alt="image-20241023193404502" style="zoom:67%;" />  
 
 ### 时间片轮转调度算法（RR）
 
 #### 不同到达时间
 
-<img src="https://cdn.jsdelivr.net/gh/RichardQt/PicBed/note/202410232049804.png" alt="image-20241023204948616" style="zoom: 50%;" /> **将准备序列调入到cpu是从靠左边开始调，添加到就绪队列是从右边开始添加**
+<img src="https://fastly.jsdelivr.net/gh/RichardQt/PicBed/note/202410232049804.png" alt="image-20241023204948616" style="zoom: 50%;" /> **将准备序列调入到cpu是从靠左边开始调，添加到就绪队列是从右边开始添加**
 
 **解题思路：当不再加入新任务时，即此时时间来到第四秒结束，此时序列为 BDAEC，后一直按照此序列重复下去，若某一作业当满足服务时间后，去除该作业，其他作业继续重复，直到全部满足。**  
 
 **当 q(时间片)为 4 的时候为最大服务时间则不会执行时间片轮转改为先来先服务算法（FCFS）**  
 
-<img src="https://cdn.jsdelivr.net/gh/RichardQt/PicBed/note/202410232052592.png" alt="image-20241023205202535" style="zoom: 80%;" />  
+<img src="https://fastly.jsdelivr.net/gh/RichardQt/PicBed/note/202410232052592.png" alt="image-20241023205202535" style="zoom: 80%;" />  
 
 #### 相同到达时间
 
-<img src="https://cdn.jsdelivr.net/gh/RichardQt/PicBed/note/202410232300936.png" alt="image-20241023230054832" style="zoom:67%;" />  
+<img src="https://fastly.jsdelivr.net/gh/RichardQt/PicBed/note/202410232300936.png" alt="image-20241023230054832" style="zoom:67%;" />  
 
 **解题思路：相同到达时间即一直重复 ABCDE，若某一作业当满足服务时间后，去除该作业，其他作业继续重复，直到全部满足**  
 
-![image-20241023230136540](https://cdn.jsdelivr.net/gh/RichardQt/PicBed/note/202410232301599.png)  
+![image-20241023230136540](https://fastly.jsdelivr.net/gh/RichardQt/PicBed/note/202410232301599.png)  
 
 **当 q(时间片)为 4 的时候为最大服务时间则不会执行时间片轮转改为先来先服务算法（FCFS）**  
 
-<img src="https://cdn.jsdelivr.net/gh/RichardQt/PicBed/note/202410232306269.png" alt="image-20241023230651200" style="zoom: 80%;" />  
+<img src="https://fastly.jsdelivr.net/gh/RichardQt/PicBed/note/202410232306269.png" alt="image-20241023230651200" style="zoom: 80%;" />  
 
 ### 最早截止时间算法（EDF）
 
@@ -598,7 +602,7 @@ FAT 文件系统中的文件分配表（FAT）负责跟踪和管理文件在磁�
     - **<span style="color:#FF0000;">**<span style="color:#FF0000;">**核心：命中是快表时间+一次内存时间，未命中是两次内存时间**</span>
 - **未采用快表查询时间为访问内存两次：t+t**
 
-<img src="https://cdn.jsdelivr.net/gh/RichardQt/PicBed/note/202410261520807.png" alt="image-20241026152012740" style="zoom:67%;" />  
+<img src="https://fastly.jsdelivr.net/gh/RichardQt/PicBed/note/202410261520807.png" alt="image-20241026152012740" style="zoom:67%;" />  
 
 **解：**  
 
@@ -617,7 +621,7 @@ FAT 文件系统中的文件分配表（FAT）负责跟踪和管理文件在磁�
 
 
 
-<img src="https://cdn.jsdelivr.net/gh/RichardQt/PicBed/note/202410261612574.png" alt="image-20241026161200471" style="zoom:67%;" />  
+<img src="https://fastly.jsdelivr.net/gh/RichardQt/PicBed/note/202410261612574.png" alt="image-20241026161200471" style="zoom:67%;" />  
 
 **解**：逻辑地址空间大小 = 2^16 * 2^10 = 2^26B ，则逻辑地址位数为 26 位。  
 
@@ -627,7 +631,7 @@ FAT 文件系统中的文件分配表（FAT）负责跟踪和管理文件在磁�
 
 综上，页目录位 = 26-10-9 = 7 位，故页目录个数为 2^7 = 128 个  
 
-![image-20241026163934637](https://cdn.jsdelivr.net/gh/RichardQt/PicBed/note/202410261639718.png)
+![image-20241026163934637](https://fastly.jsdelivr.net/gh/RichardQt/PicBed/note/202410261639718.png)
 
 **解：页面大小为 4KB = 2^12B，则页内偏移量位数为 12 位，则页号位数为 48-12 = 36 位**
 
@@ -669,14 +673,14 @@ $$
 
 ### 例 1：不考虑快表和其命中率，考虑置换率
 
-<img src="https://cdn.jsdelivr.net/gh/RichardQt/PicBed/note/202411112333650.png" alt="image-20241111233355560" style="zoom:67%;" />
+<img src="https://fastly.jsdelivr.net/gh/RichardQt/PicBed/note/202411112333650.png" alt="image-20241111233355560" style="zoom:67%;" />
 
 **解**
 
 $$
 \boldsymbol{式子也可以写成：} \pmb{(1-p)*1 + p [(0.7*20+(1-0.7)*8)+1]}
 $$
-<img src="https://cdn.jsdelivr.net/gh/RichardQt/PicBed/note/202411112354707.png" alt="image-20241111235447556" style="zoom:67%;" />
+<img src="https://fastly.jsdelivr.net/gh/RichardQt/PicBed/note/202411112354707.png" alt="image-20241111235447556" style="zoom:67%;" />
 
 
 
@@ -689,14 +693,14 @@ $$
 - 选择的被淘汰页面是以后 **永不使用的，或者长时间不再被访问（未来最远出现）** 的页面
 - **性能最好，但该算法无法实现**
 
-<img src="https://cdn.jsdelivr.net/gh/RichardQt/PicBed/note/202410271827663.png" alt="image-20241027182711481" style="zoom: 50%;" />
+<img src="https://fastly.jsdelivr.net/gh/RichardQt/PicBed/note/202410271827663.png" alt="image-20241027182711481" style="zoom: 50%;" />
 
 ### :star:先进先出置换算法 FIFO
 
 - 1、淘汰在 **内存中停留时间最长** 的页面 **2、实现容易，但性能稍差，而且 belady 异常会发生在算法中**   3、**没有基于局部性原理**
 - :star: **淘汰最早进入内存页面 ===> 根据装入内存时间 **
 
-<img src="https://cdn.jsdelivr.net/gh/RichardQt/PicBed/note/202410271836306.png" alt="image-20241027183634180" style="zoom:50%;" />
+<img src="https://fastly.jsdelivr.net/gh/RichardQt/PicBed/note/202410271836306.png" alt="image-20241027183634180" style="zoom:50%;" />
 
 ### :star:最久未使用置换算法 LRU（淘汰过去最远的）
 
@@ -705,7 +709,7 @@ $$
 
 
 
-<img src="https://cdn.jsdelivr.net/gh/RichardQt/PicBed/note/202410271912475.png" alt="image-20241027191232389" style="zoom:80%;" />
+<img src="https://fastly.jsdelivr.net/gh/RichardQt/PicBed/note/202410271912475.png" alt="image-20241027191232389" style="zoom:80%;" />
 
 ### :star:Clock 置换算法
 
@@ -718,7 +722,7 @@ $$
 
 【Clock 置换算法原理+例题讲解】https://www.bilibili.com/video/BV1LZ421z7vJ?vd_source = c8b64e308ba0a6999b868fdf4177d69f
 
-<img src="https://cdn.jsdelivr.net/gh/RichardQt/PicBed/note/202410271942845.png" alt="image-20241027194254700" style="zoom: 80%;" />
+<img src="https://fastly.jsdelivr.net/gh/RichardQt/PicBed/note/202410271942845.png" alt="image-20241027194254700" style="zoom: 80%;" />
 
 #### :star:改进型 CLOCK 置换算法
 
@@ -726,11 +730,11 @@ $$
 
   - **增加了修改位 M，未修改为 0，已修改为 1**
 
-  <img src="https://cdn.jsdelivr.net/gh/RichardQt/PicBed/note/202410272059716.png" alt="image-20241027205926627" style="zoom:80%;" />
+  <img src="https://fastly.jsdelivr.net/gh/RichardQt/PicBed/note/202410272059716.png" alt="image-20241027205926627" style="zoom:80%;" />
 
   **例题：**
 
-<img src="https://cdn.jsdelivr.net/gh/RichardQt/PicBed/note/202410272107577.png" alt="image-20241027210721467" style="zoom: 50%;" />
+<img src="https://fastly.jsdelivr.net/gh/RichardQt/PicBed/note/202410272107577.png" alt="image-20241027210721467" style="zoom: 50%;" />
 
 
 ## :star:混合索引分配相关习题
@@ -752,21 +756,21 @@ $$
 
 
 
-![image-20241030221611198](https://cdn.jsdelivr.net/gh/RichardQt/PicBed/note/202410302216296.png)
+![image-20241030221611198](https://fastly.jsdelivr.net/gh/RichardQt/PicBed/note/202410302216296.png)
 
 【**解答**】https://www.bilibili.com/video/BV18P411J7Z1?vd_source 
 
-![image-20241031230538564](https://cdn.jsdelivr.net/gh/RichardQt/PicBed/note/202410312305633.png)
+![image-20241031230538564](https://fastly.jsdelivr.net/gh/RichardQt/PicBed/note/202410312305633.png)
 
 ​																					**最后将占用的数据块、直接索引指向的数据块、一/二级地址所需要的索引块相加**
 
-![image-20241031225507615](https://cdn.jsdelivr.net/gh/RichardQt/PicBed/note/202410312255685.png)
+![image-20241031225507615](https://fastly.jsdelivr.net/gh/RichardQt/PicBed/note/202410312255685.png)
 
 **解答**：
 
-![image-20241031231027928](https://cdn.jsdelivr.net/gh/RichardQt/PicBed/note/202410312310009.png)
+![image-20241031231027928](https://fastly.jsdelivr.net/gh/RichardQt/PicBed/note/202410312310009.png)
 
-![image-20241031230257417](https://cdn.jsdelivr.net/gh/RichardQt/PicBed/note/202410312302495.png)
+![image-20241031230257417](https://fastly.jsdelivr.net/gh/RichardQt/PicBed/note/202410312302495.png)
 
 **⚠️如果问需要访问磁盘次数：取决于访问的数据块在索引结构中的位置，如果访问文件占用数据块在二次间接地址索引中，则需要访问磁盘三次（二级+1），分别是：第一次从二级间接地址中获取索引结点表地址（一级），第二次从索引结点表中获取索引块地址，第三次从索引块中获取所访问的最终文件的地址。**
 

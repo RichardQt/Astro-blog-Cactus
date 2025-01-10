@@ -8,14 +8,32 @@ interface Props {
 }
 
 const { headings } = Astro.props;
-
 const toc = generateToc(headings);
 ---
 
-<aside class="sticky top-20 order-2 -me-32 hidden basis-64 lg:block">
-	<!-- 修改：目录 -->
-	<h2 class="title text-lg">目录</h2>
-	<ul class="mt-4 text-xs">
+<aside class="sticky top-20 order-2 -me-48 hidden basis-80 lg:block">
+	<h2 class="title mb-4 text-xl font-semibold">目录</h2>
+	<ul class="mt-4 max-h-[80vh] overflow-auto text-base">
 		{toc.map((heading) => <TOCHeading heading={heading} />)}
 	</ul>
 </aside>
+
+<style>
+	ul {
+		scrollbar-width: thin;
+		scrollbar-color: var(--accent-2) transparent;
+	}
+
+	ul::-webkit-scrollbar {
+		width: 4px;
+	}
+
+	ul::-webkit-scrollbar-track {
+		background: transparent;
+	}
+
+	ul::-webkit-scrollbar-thumb {
+		background-color: var(--accent-2);
+		border-radius: 2px;
+	}
+</style>

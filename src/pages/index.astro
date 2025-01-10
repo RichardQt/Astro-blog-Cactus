@@ -24,17 +24,19 @@ const latestNotes = allNotes.sort(collectionDateSort).slice(0, MAX_NOTES);
 <!-- 修改：主页 -->
 <PageLayout meta={{ title: "主页" }}>
 	<!-- 修改：注释 -->
-	<!-- <section>
-		<h1 class="title mb-6">Hello World!</h1>
+	<section>
+		<h1 class="title mb-6">Richard Castle</h1>
 		<p class="mb-4">
-			Hi, I’m a theme for Astro, a simple starter that you can use to create your website or blog.
-			If you want to know more about how you can customise me, add more posts, and make it your own,
-			click on the GitHub icon link below and it will take you to my repo.
+			Hi, I'm Castle, an AI enthusiast and developer based in Xuzhou, Jiangsu, China. I graduated
+			from NJTECH and have a deep love for all things computer science. I'm constantly exploring new
+			technologies and ideas, and this blog is my space to share my discoveries and experiences,
+			both technical and personal.
+			<span class="small-text">--Gemini generated</span>
 		</p>
-		<SocialList />
-	</section> -->
+		<!-- <SocialList /> -->
+	</section>
 	<section aria-label="Blog post list">
-		<h2 class="title mb-6 text-xl text-accent"><a href="/">最近文章</a></h2>
+		<h2 class="title mb-6 text-xl text-accent"><a href="/">时下文章</a></h2>
 		<ul class="space-y-4" role="list">
 			{
 				allPostsByDate.map((p) => (

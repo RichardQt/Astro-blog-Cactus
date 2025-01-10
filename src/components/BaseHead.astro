@@ -3,8 +3,7 @@ import { WEBMENTION_PINGBACK, WEBMENTION_URL } from "astro:env/client";
 import { siteConfig } from "@/site.config";
 import type { SiteMeta } from "@/types";
 import "@/styles/global.css";
-import '../styles/math.css';
-
+import "../styles/other.css";
 
 type Props = SiteMeta;
 
@@ -21,7 +20,7 @@ const socialImageURL = new URL(ogImage ? ogImage : "/social-card.avif", Astro.ur
 <title>{siteTitle}</title>
 
 {/* Icons */}
-<link href="/icons/site.avif" rel="icon" type="image/avif" />
+<link href="/icons/logo-planet-small.png" rel="icon" type="image/png" />
 {
 	import.meta.env.PROD && (
 		<>
