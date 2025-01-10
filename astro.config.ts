@@ -12,18 +12,12 @@ import { siteConfig } from "./src/site.config";
 import vercel from "@astrojs/vercel";
 
 // Remark plugins
-import remarkDirective from "remark-directive";  // Handle ::: directives as nodes
-import { remarkAdmonitions } from "./src/plugins/remark-admonitions";  // Add admonitions
+import remarkDirective from "remark-directive";  
+import { remarkAdmonitions } from "./src/plugins/remark-admonitions";  
 import { remarkReadingTime } from "./src/plugins/remark-reading-time";
-import remarkMath from "remark-math"; // Add LaTeX support
-import remarkGemoji from "remark-gemoji"; // Add emoji support
-
 // Rehype plugins
 import rehypeExternalLinks from "rehype-external-links";
-import rehypeUnwrapImages from "rehype-unwrap-images";
-import rehypeKatex from "rehype-katex"; // Render LaTeX with KaTeX
-
-
+import rehypeUnwrapImages from "rehype-unwrap-images"; 
 import decapCmsOauth from "astro-decap-cms-oauth";
 import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
