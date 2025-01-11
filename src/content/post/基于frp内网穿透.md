@@ -3,7 +3,7 @@ title: 基于frp内网穿透
 description: 基于frp内网穿透
 publishDate: 2025-01-11
 tags:
-  - 考研
+  - frp
 ogImage: /social-card.avif
 ---
 
