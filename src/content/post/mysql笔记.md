@@ -3,10 +3,9 @@ title: MySQL笔记
 description: MySQL笔记
 publishDate: 2025-01-10
 tags:
-  - 考研
+  - Mysql
 ogImage: /social-card.avif
 ---
-
 # MySQL笔记
 
 ## 登陆和退出mysql
@@ -18,8 +17,6 @@ $ mysql -u root -p12345612 -h
 # 退出MySQL数据库服务器
 exit;
 ```
-
-
 
 ## 一、检索数据
 
@@ -50,7 +47,6 @@ select 列名 from products limit 3 offset 5;               offset：偏移量�
 使用完全限定的表名
 select 表名.列名 from products;
 select 表名.列名 from 数据库名.表名;
-
 ```
 
 ## 二、排序检索数据
@@ -75,16 +71,12 @@ select prod_id,prod_price,prod_name from products order by prod_price desc; 【d
 select prod_id,prod_price,prod_name from products order by prod_price asc;【asc是关键字，意为对列进行升序排序，默认是升序，可不写】
 ```
 
-
-
 ## 三、过滤数据(条件查询)
 
-
-
-| **< 或者<=**      | **小于或者小于等于** |
-| ----------------- | -------------------- |
-| **>或者>=**       | **大于或者大于等于** |
-| **!= 也可写成<>** | **不等于**           |
+| **< 或者<=**    | **小于或者小于等于** |
+| ------------- | ------------ |
+| **\>或者>=**    | **大于或者大于等于** |
+| **!= 也可写成<>** | **不等于**      |
 
 ### **3-1、where子句**
 
@@ -120,38 +112,33 @@ select vend_id,prod_name,prod_price from products where (vend_id = 1002 or vend_
 
 #### **3-1--2、in操作符（not in操作符）**
 
-- **in操作符完成与or操作符相同的功能,但比or操作符简化了许多操作**
+* **in操作符完成与or操作符相同的功能,但比or操作符简化了许多操作**
 
-   - ```sql
-      select vend_id,prod_name,prod_price from products where vend_id = 1002 or vend_id=1003;
-      等同于
-      select vend_id,prod_name,prod_price from products where vend_id in(1002,1003)
-      【表示查询vend_id = 1002或vend_id = 1003 】
-      ```
+  * ```sql
+     select vend_id,prod_name,prod_price from products where vend_id = 1002 or vend_id=1003;
+     等同于
+     select vend_id,prod_name,prod_price from products where vend_id in(1002,1003)
+     【表示查询vend_id = 1002或vend_id = 1003 】
+    ```
 
-      **in 后面接上的不是一个区间，而是具体的值**
+     **in 后面接上的不是一个区间，而是具体的值**
+* **in操作符后面也可以嵌套子查询**
 
-   
-
-- **in操作符后面也可以嵌套子查询**
-
-   - ```sql
-      SELECT
-      	cust_name,
-      	cust_contact 
-      FROM
-      	customers 
-      WHERE
-      	cust_id IN (
-      	SELECT
-      		cust_id 
-      	FROM
-      		orders 
-      	WHERE
-      	order_num IN ( SELECT order_num FROM orderitems WHERE prod_id = 'TNT2' ));
-      ```
-      
-      
+  * ```sql
+     SELECT
+     	cust_name,
+     	cust_contact 
+     FROM
+     	customers 
+     WHERE
+     	cust_id IN (
+     	SELECT
+     		cust_id 
+     	FROM
+     		orders 
+     	WHERE
+     	order_num IN ( SELECT order_num FROM orderitems WHERE prod_id = 'TNT2' ));
+    ```
 
 #### **3-1-3、not操作符**
 
@@ -162,11 +149,11 @@ select vend_id,prod_name,prod_price from products where vend_id not in (1002,100
 【匹配除vend_id 等于1002和1003之外其他所有的id】
 ```
 
-#### 3-1-4、between  值1 and  值2 
+#### 3-1-4、between  值1 and  值2
 
 **表示在两个值之间，等同于 >= 值1 and  <=值2**
 
-**注意：在使用between  .. and时需要遵循左小右大原则，两边均为闭区间 **
+**注意：在使用between  .. and时需要遵循左小右大原则，两边均为闭区间** 
 
 #### 3-1-5、IS NULL 代表 NULL （is not NULL 代表不为空）
 
@@ -184,8 +171,6 @@ select cust_name from customers where cust_contact is null;
 ```sql
 select cust_name,ifnull(cust_contact,0) from customers
 ```
-
-
 
 ## **四、用通配符进行过滤（模糊查询）**
 
@@ -215,10 +200,10 @@ select prod_id,prod_name from products where prod_name like '%anv%';【匹配pro
 select prod_id,prod_name from products where prod_name like '_arrots';【匹配prod_name中值为Carrots】
 select prod_id,prod_name from products where prod_name like '__rrots';【匹配prod_name中值为Carrots】
 ```
+
 **注意：**
 
 * **若要查找特殊字符时，需要在前面加上转义字符 `\`**
-
 * ```sql
    查找特殊字符‘\’需要在前面在加上一个‘\’
    select * from products where prod_name like '\\';  【查找单个\】
@@ -227,15 +212,10 @@ select prod_id,prod_name from products where prod_name like '__rrots';【匹配p
    +---------+---------+-----------+------------+-----------------------------+
    | TNT2    |    1003 | \         |      10.00 | TNT, red, pack of 10 sticks |
    +---------+---------+-----------+------------+-----------------------------+
-   ```
-
-* **对于使用SQLAlchemy查询sql语句的时候，需要将SQL中单个百分号 `%` 改成两个百分号 `%%` 。(切记) **
-
-
+  ```
+* **对于使用SQLAlchemy查询sql语句的时候，需要将SQL中单个百分号 `%` 改成两个百分号 `%%` 。(切记)** 
 
 ## **五、用正则表达式进行匹配（使用REGEXP）**
-
-
 
 ### **5-1、基本字符匹配 （`.` 字符）**
 
@@ -299,7 +279,7 @@ select prod_name from products where prod_name like '%1000' or prod_name like '%
 select prod_name from products where prod_name regexp '[123]' order by prod_name;【[123]定义一组字符，它的意思是匹配1或2或3】
 ```
 
-***正如所见 `[]` 是另一种形式的  `or`语句，事实上正则表达式`[123] `为`[1|2|3] `的缩写***
+***正如所见 `[]` 是另一种形式的  `or`语句，事实上正则表达式`[123]`为`[1|2|3]`的缩写***
 
 **等同于**
 
@@ -318,13 +298,12 @@ select prod_name from products where prod_name regexp '1|2|3';【任意匹配所
 ```sql
 select prod_name from products where prod_name regexp '[^123]' order by prod_name;【匹配除含123之外的其他值】
 ```
+
 **区别于**
 
 ```sql
 select prod_name from products where prod_name regexp '^[1|2|3]';   【匹配以1或2或3开头的字段】
 ```
-
-
 
 ### 5-4、匹配范围（`—`的使用）
 
@@ -348,22 +327,22 @@ select vend_name  from vendors where vend_name regexp '\\.';【匹配含.的所�
 
 ### 5-6、匹配字符类（常用）
 
-| **类**        | **说明**                       |
-| ------------- | ------------------------------ |
-| **[:alnum:]** | **任意字母和数字**             |
-| **[:alpha:]** | **任意字符**                   |
-| **[:digit:]** | **任意数字[0-9]**              |
-| **[:space:]** | **包含空白在内的任意空白字符** |
+| **类**          | **说明**            |
+| -------------- | ----------------- |
+| **\[:alnum:]** | **任意字母和数字**       |
+| **\[:alpha:]** | **任意字符**          |
+| **\[:digit:]** | **任意数字\[0-9]**    |
+| **\[:space:]** | **包含空白在内的任意空白字符** |
 
 ### 5-7、匹配多个实例
 
-|   **元字符**   |             **说明**              |
-| :------------: | :-------------------------------: |
-|    **`*`**     |        **0个或者多个匹配**        |
-|    **`+`**     |        **1个或者多个匹配**        |
-| **`？`(常见)** |        **0个或者1个匹配**         |
-|  **`｛n｝`**   |        **指定数目的匹配**         |
-|  **`{n,m}`**   | **匹配数目的范围【m,不少于255】** |
+| **元字符**     | **说明**                |
+| ----------- | --------------------- |
+| **`*`**     | **0个或者多个匹配**          |
+| **`+`**     | **1个或者多个匹配**          |
+| **`？`(常见)** | **0个或者1个匹配**          |
+| **`｛n｝`**   | **指定数目的匹配**           |
+| **`{n,m}`** | **匹配数目的范围【m,不少于255】** |
 
 **例1、**
 
@@ -371,7 +350,7 @@ select vend_name  from vendors where vend_name regexp '\\.';【匹配含.的所�
 select prod_name from products where prod_name regexp '\\( [0-9] sticks? \\)' order by prod_name;
 ```
 
-**【正则表达式说明`\\( [0-9] sticks? \\)`： 其中`\\( `  [匹配括号]；[0-9]匹配一个任意数字，`sticks?`匹配`stick`和`sticks`（加上？使得`s`可选）】**
+**【正则表达式说明`\\( [0-9] sticks? \\)`： 其中`\\(`  \[匹配括号]；\[0-9]匹配一个任意数字，`sticks?`匹配`stick`和`sticks`（加上？使得`s`可选）】**
 
 **例2、**
 
@@ -389,12 +368,12 @@ select prod_name from products where prod_name regexp '[0-9][0-9][0-9][0-9]';
 
 ### **5-8、定位符**
 
-| **元字符**  | **类**         |
-| ----------- | -------------- |
-| `^`         | **文本的开始** |
-| **$**       | **文本的结尾** |
-| **[[:<:]]** | **词的开始**   |
-| **[[:>:]]** | **词的结尾**   |
+| **元字符**      | **类**     |
+| ------------ | --------- |
+| `^`          | **文本的开始** |
+| **$**        | **文本的结尾** |
+| **\[[:<:]]** | **词的开始**  |
+| **\[[:>:]]** | **词的结尾**  |
 
 ```sql
 select prod_name from products where prod_name regexp '^[0-9\.]';
@@ -535,16 +514,16 @@ select prod_id,quantity,item_price,quantity*item_price as expand_price from orde
 
 **常用的文本处理函数**
 
-| **函数**                                  | **说明**                        |
-| ----------------------------------------- | ------------------------------- |
-| **left()**                                | **返回串左边的字符**            |
-| **length()**                              | **返回串的长度**                |
-| **locate(要查找的字符串,列名)**           | **查找字符串的位置（从1开始）** |
-| **lower()**                               | **将字符串转换 为小写**         |
-| **upper()**                               | **将字符串转换为大写**          |
-| **L/Rtrim()**                             | **去掉左右边的空格**            |
-| **soundex()**                             | **返回串的soundex值**           |
-| **substr(列名,第一个字符串的位置, 长度)** | **返回字符串的字符**            |
+| **函数**                       | **说明**             |
+| ---------------------------- | ------------------ |
+| **left()**                   | **返回串左边的字符**       |
+| **length()**                 | **返回串的长度**         |
+| **locate(要查找的字符串,列名)**       | **查找字符串的位置（从1开始）** |
+| **lower()**                  | **将字符串转换 为小写**     |
+| **upper()**                  | **将字符串转换为大写**      |
+| **L/Rtrim()**                | **去掉左右边的空格**       |
+| **soundex()**                | **返回串的soundex值**   |
+| **substr(列名,第一个字符串的位置, 长度)** | **返回字符串的字符**       |
 
 ```sql
 select vend_city,locate('ari',vend_city) as locate from vendors;
@@ -573,11 +552,11 @@ select vend_city,substr(vend_city,2,3) from vendors where vend_city = 'Paris' ;
 
 ### 7-2、日期和时间处理函数
 
-| **函数**   | **说明**                       |
-| ---------- | ------------------------------ |
+| **函数**     | **说明**             |
+| ---------- | ------------------ |
 | **Date()** | **返回值的日期部分(包含年月)** |
-| **Year()** | **返回值的年份部分**           |
-| **time()** | **返回值的时间部分**           |
+| **Year()** | **返回值的年份部分**       |
+| **time()** | **返回值的时间部分**       |
 
 ```sql
 select cust_id,order_num from orders where date(order_date) = '2005-09-01';
@@ -598,13 +577,13 @@ select cust_id from orders where time(order_date) = '14:17:00';
 
 ### 7-3、数值处理函数
 
-| **函数**   | **说明**             |
-| ---------- | -------------------- |
-| **abs()**  | **返回值的绝对值**   |
-| **pi()**   | **返回圆周率**       |
-| **sqrt()** | **返回值的平方根**   |
+| **函数**     | **说明**       |
+| ---------- | ------------ |
+| **abs()**  | **返回值的绝对值**  |
+| **pi()**   | **返回圆周率**    |
+| **sqrt()** | **返回值的平方根**  |
 | **Mod()**  | **返回除操作的余数** |
-| **rand**   | **返回一个随机数**   |
+| **rand**   | **返回一个随机数**  |
 
 ## **八、汇总数据（多行处理函数）**
 
@@ -612,12 +591,12 @@ select cust_id from orders where time(order_date) = '14:17:00';
 
 **常见分组函数**
 
-| **函数**             | **说明**                     |
-| -------------------- | ---------------------------- |
-| **avg()**            | **返回某列的平均值**         |
-| **count()/count(*)** | **返回某列的行数**           |
+| **函数**               | **说明**           |
+| -------------------- | ---------------- |
+| **avg()**            | **返回某列的平均值**     |
+| **count()/count(*)** | **返回某列的行数**      |
 | **max()/min()**      | **返回某列的最大值、最小值** |
-| **sum()**            | **返回某列值之和**           |
+| **sum()**            | **返回某列值之和**      |
 
 ```sql
 select avg(prod_price) as avg_price from products;
@@ -626,24 +605,25 @@ select avg(prod_price) as avg_price from products;
 ```sql
 select count(*) as num_count from customers;                    
 ```
+
 **【对表中行数进行计数，无论是否包含空值（NULL）】**
 
 ```sql
 select count(cust_email) as count_email from customers;
 ```
+
 **【对特定列进行计数，忽略NULL值】**
 
 ```sql
 select sum(item_price*quantity) as total_price from orderitems where order_num = 20005
 ```
+
 【**在求和过程中可同时进行算术运算】**
 
 **注意：**
 
 * **分组函数使用前必须先分组，如果没有分组，则整表默认为一组**
 * **分组函数不能直接使用在`where`子句中**
-
-
 
 ### 8-2、聚集不同值
 
@@ -699,8 +679,10 @@ select vend_id,count(*) as num_prods from products;
 **注意：**
 
 1. **使用`group by` 必须放在 `where`子句的后面，`order by`子句的前面，且`order by`子句一般放在最后(limit之前)**		
+
    2. ***如果分组列中存在`NULL`值，则会将`NULL`作为一个组单独统计。***
-3. **`group by`子句中列出的每个列必须是检索列或者有效的表达式，但不能是分组函数**
+2. **`group by`子句中列出的每个列必须是检索列或者有效的表达式，但不能是分组函数**
+
    1. **在一条select语句中，如果有`group by`语句的话 ，`select`语句后面只能跟参加分组的字段，以及分组函数，其他的字段一律不能跟（虽然在`mysql`语句中不会报错，但在其他数据库中会报错）**
 
 ```sql
@@ -738,17 +720,15 @@ select cust_id,count(*) as orders from orders group by cust_id having count(*) >
  select vend_id,count(*) as num_prods from products where prod_price >= 10 group by vend_id having num_prods >= 2;
 ```
 
-
-
 **<u>注意：order by和group by都会对数据进行排序，但有时候group by输出的结果可能不是分组的顺序，所以如果需要排序时一般在使用group by子句后，应该也加上order by子句</u>**
 
 ### **9-3、select子句的顺序**
 
-**`select `..... `from `.... `where `.....` group by` .... `having `... `order by` ..... `limit `.....**
+**`select`..... `from`.... `where`.....`group by` .... `having`... `order by` ..... `limit`.....**
 
 **一般对于group by子句执行的顺序是：**
 
-**先执行`from`..... `where`...... `group by`....... `having `........`select`....... `order by`...... `limit`.....**
+**先执行`from`..... `where`...... `group by`....... `having`........`select`....... `order by`...... `limit`.....**
 
 ## **十、使用子查询(嵌套查询)**
 
@@ -765,7 +745,7 @@ select cust_id from orders where order_num in (select order_num from orderitems 
 
 **注意：**
 
-**在`where `子句中使用子查询中应该保证`select`语句具有`where`子句中相同数目的列**
+**在`where`子句中使用子查询中应该保证`select`语句具有`where`子句中相同数目的列**
 
 ### **10-2、作为计算字段使用子查询**
 
@@ -777,11 +757,11 @@ select cust_name,cust_state,(select count(*) from orders where orders.cust_id = 
 
 ## **十一、连接（联结）**
 
-### **11-1、创建连接**					
+### **11-1、创建连接**
 
 **联结是一种机制，用来在一条select语句中关联表，可以联结多个表返回一组输出，联结在运行时关联表中正确的行**
 
-*使用where进行两个表的连接是 `sql92`语法，**不推荐***
+\*使用where进行两个表的连接是 `sql92`语法，**不推荐***
 
 ```sql
 select vend_name,prod_name, prod_price from vendors,products where vendors.vend_id = products.vend_id
@@ -807,7 +787,7 @@ select vend_name,prod_name,prod_price from vendors,products order by vend_name,p
 
 **注意：**
 
-***SQL规范首选` INNER JOIN … ON `语法[`on`后面紧跟两个表的连接条件],可省略 `inner `直接写成 `join .. on ..`。 尽管使用WHERE子句定义比较简单，但是使用明确的联结语法能够确保不会忘记联结条件，有时候这样做也能提升性能。***
+***SQL规范首选`INNER JOIN … ON`语法[`on`后面紧跟两个表的连接条件],可省略 `inner`直接写成 `join .. on ..`。 尽管使用WHERE子句定义比较简单，但是使用明确的联结语法能够确保不会忘记联结条件，有时候这样做也能提升性能。***
 
 ```sql
 select vend_name,prod_name,prod_price from vendors inner join products on vendors.vend_id = products.vend_id;
@@ -834,6 +814,7 @@ WHERE
 	AND orderitems.prod_id = products.prod_id 
 	AND order_num = 20005;
 ```
+
 **使用内连接`join`进行三表连接(已省略`inner`)（`sql99`写法）**
 
 ```sql
@@ -852,7 +833,7 @@ WHERE
 
 ***子查询可以转换为连接:***
 
-- **使用子查询进行连接**
+* **使用子查询进行连接**
 
 ```sql
 SELECT
@@ -870,7 +851,7 @@ WHERE
 	order_num IN ( SELECT order_num FROM orderitems WHERE prod_id = 'TNT2' ));
 ```
 
-- **使用内连接`join`进行三表连接**
+* **使用内连接`join`进行三表连接**
 
 ```sql
 SELECT
@@ -898,8 +879,6 @@ FROM
 	JOIN salgrade AS s 
 	ON e.sal BETWEEN s.losal AND s.hisal
 ```
-
-
 
 ### 11-3、创建高级连接
 
@@ -929,9 +908,9 @@ WHERE
 
 ### **11-4、外部联结**
 
-#### 	**11-4-1、左联结**
+#### **11-4-1、左联结**
 
-**在`from`子句中使用关键字`left outer join`（或者` left join`）**（而不是在`where`子句中）
+**在`from`子句中使用关键字`left outer join`（或者`left join`）**（而不是在`where`子句中）
 
 ```sql
 SELECT
@@ -942,9 +921,9 @@ FROM
 	LEFT OUTER JOIN orders AS o ON c.cust_id = o.cust_id;
 ```
 
-#### 	**11--4-2、右联结**
+#### **11--4-2、右联结**
 
-**在`from`子句中使用关键字`right outer join `(或者`right join`)**（而不是在`where`子句中）
+**在`from`子句中使用关键字`right outer join`(或者`right join`)**（而不是在`where`子句中）
 
 ```sql
 SELECT
@@ -992,7 +971,7 @@ UNION
 
 **注意：**
 
-1. **`union`从查询结果集中自动除去重复的行，若想返回所有的行，可以使用`union all` 。
+1. \*\*`union`从查询结果集中自动除去重复的行，若想返回所有的行，可以使用`union all` 。
 2. **若想对组合查询结果排序，则`order by`必须出现在最后一条`select`语句之后，因为在用`union`组合查询时，只能出现一条`order by`子句。**
 
 ## 十三、插入数据
@@ -1021,7 +1000,6 @@ values('li shi run','100 main street','los angeles','ca','90046','usa',null,null
 ### 13-2、插入多行数据
 
 1. **使用多条insert语句**
-
 2. **只要每条insert语句中的列名和次序相同**
 
    ```sql
@@ -1030,8 +1008,6 @@ values('li shi run','100 main street','los angeles','ca','90046','usa',null,null
    ('zhang qi run','200 main street','xu zhou','ac','90047','usb');
    【单条insert语句有多组值，每组值用一对 圆括号括起来，用逗号分割】
    ```
-
-   
 
 ### 13-3、插入检索出的数据
 
@@ -1048,7 +1024,7 @@ insert into customers(cust_id,cust_address,cust_email,cust_name,cust_city,cust_s
 
 ## 十四、更新和删除数据
 
-### **14-1、**更新数据****
+### **14-1、**更新数据\*\*\*\*
 
 **为了更新（修改）表中的数据可以使用UPDATE语句**
 
@@ -1079,7 +1055,6 @@ where cust_id = 10005;
 **注意：**
 
 1. **在更新多个列时，只需要使用单个Set命令，每个“列=值”对之间用逗号分隔（最后一列之后不用逗号）**
-
 2. **在update语句中也可以嵌套使用子查询，一般位置位于where子句之后**
 
    ```sql
@@ -1087,7 +1062,6 @@ where cust_id = 10005;
    set order_date = '2021-8-30 14:17'
    where order_num in (select order_num from orderitems where prod_id = 'FC');
    ```
-
 3. **为了删除某个列的值，可以将它设置为NULL：**
 
    ```sql
@@ -1096,8 +1070,6 @@ where cust_id = 10005;
    where cust_id = 10005;
    【不加where子句是删除该列的所有值】
    ```
-
-   
 
 ### 14-2、删除表中部分数据
 
@@ -1113,15 +1085,17 @@ delete from customers where cust_id = 10006;
 **下列两种仅删除表中数据，不删除表的结构**
 
 1. **使用`delete table + 表名` 语句即可**
-   - **删除效率较低，且不支持回滚，但删除后可以恢复数据**
+
+   * **删除效率较低，且不支持回滚，但删除后可以恢复数据**
 2. **使用`truncate table + 表名` 删除**
-   - **删除效率高，但是全部删除完，不能删除单条	，但删除后不支持恢复**
+
+   * **删除效率高，但是全部删除完，不能删除单条	，但删除后不支持恢复**
 
 **注意：**
 
-- **`delete`不需要列名或者通配符**
-- **`delete`是用于删除整行而不是删除列，如果为了删除特定列，可以使用`drop`语句，当然也可以使用`update`将某列所有值都变为`NULL`**
-- **如果要删除某表中的所有行，也可以使用truncate 表名，其速度更快，它的实际意义是删除原来的表并重新创建一个相同同字段的空白表**
+* **`delete`不需要列名或者通配符**
+* **`delete`是用于删除整行而不是删除列，如果为了删除特定列，可以使用`drop`语句，当然也可以使用`update`将某列所有值都变为`NULL`**
+* **如果要删除某表中的所有行，也可以使用truncate 表名，其速度更快，它的实际意义是删除原来的表并重新创建一个相同同字段的空白表**
 
 ### 14-4、删除表
 
@@ -1152,11 +1126,8 @@ CREATE TABLE test_creat (
 **注意：**
 
 1. **在创建新表时，指定的表名必须不存在，否则将出错，在表名后面加上 IF NOT EXISTS可以避免检测表模式是否匹配而只是检查表名是否存在，并且在表名不存在时创建它**
-
 2. **主键值必须唯一，即每个行必须具有唯一的主键值。如果主键使用单个列，则它的值必须唯一。如果使用多个列，则这些列的组合值必须唯一；为创建多个列组成的主键，应该以逗号分隔的列表给出各列名，且主键所在的列不能使用NULL值**
-
 3. **使用`AUTO_INCREMENT`是告诉MySQL，本列每增加一行时自动增量，且每个表只允许一个`AUTO_INCREMENT`列，而且它必须被索引**
-
 4. **如果插入时没有给出值，MySQL允许指定此时使用的默认值。默认值用create table语句的列定义中的default关键字**
 
    ```sql
@@ -1194,7 +1165,6 @@ values (相关列的数据)
      index index_id(cust_id) 【格式：index 索引名称(索引所在的列名)】
    )ENGINE = InnoDB;
    ```
-
 2. **在创建表后单独创建索引**
 
    ```sql
@@ -1202,7 +1172,6 @@ values (相关列的数据)
    create index index_id on test1(cust_id，cust_name);【复合索引】
    【格式：create index 索引名 on 表名(索引所在的列名)】
    ```
-
 3. ```sql
    查看索引：show index from 表名;
    删除索引：drop index 索引名 on 表名
@@ -1254,7 +1223,7 @@ alter tables custnew change cust_zip cust_zips char(25);
 
 #### **15-2-5、修改表名**
 
-**ALTER TABLE <旧表名> RENAME [TO] <新表名>;**
+**ALTER TABLE <旧表名> RENAME \[TO] <新表名>;**
 
 ```sql
 alter table test_creat rename to create_test;
@@ -1297,11 +1266,8 @@ rename table create_test to test_new;
    ***create view 视图名 as*** 
 
    ***相关检索语句***
-
 2. **使用`show create view 视图名`；来查看创建视图的语句。**
-
 3. **使用`drop view` 视图名来删除视图。**
-
 4. **更新视图时，可以先用drop再用create语句，也可以直接用`create or replace view` 语句**
 
    **注意：**
@@ -1339,7 +1305,7 @@ where prod_id = 'TNT2';
 【productcustomers是视图，是一个虚拟的表，它不包含表中应该有的任何列和数据，它包含的是一个相同的查询】
 ```
 
-###  **16-3、视图的重要作用:**
+### **16-3、视图的重要作用:**
 
 ​	**1、*重新格式化检索出的数据***
 
@@ -1372,57 +1338,51 @@ select * from vendorlocations;
 
 **约束包括哪些：**
 
-| ***非空约束***   |
-| ---------------- |
-| ***主键约束***   |
-| ***外键约束***   |
+| ***非空约束***  |
+| ----------- |
+| ***主键约束***  |
+| ***外键约束***  |
 | ***唯一性约束*** |
 
-### 17-1、非空约束 not null 
+### 17-1、非空约束 not null
 
-- **表示约束的字段不能为空**
+* **表示约束的字段不能为空**
 
 ### 17-2、唯一性约束 unique
 
 ### 17-3、**主键约束  primary key 简称（PK）**
 
-- **主键值是每一行记录的唯一标识，任何一张表都应该有主键，没有主键的表是无效的，主键值不能为空，也不能为`NULL`值**
-- **主键又分为单一主键和复合主键，复合主键写法：`primary  key(id,name)`，在实际开发中，不建议使用复合主键，建议使用单一主键**
-- **一张表，主键约束只能为一个**
+* **主键值是每一行记录的唯一标识，任何一张表都应该有主键，没有主键的表是无效的，主键值不能为空，也不能为`NULL`值**
+* **主键又分为单一主键和复合主键，复合主键写法：`primary  key(id,name)`，在实际开发中，不建议使用复合主键，建议使用单一主键**
+* **一张表，主键约束只能为一个**
 
 ### 17-4、**外键约束  foreign key 简称（FK）**
 
-- **外键用来建立主表与从表的关联关系，为两个表的数据建立连接，约束两个表中数据的一致性和完整性。**
-
-- **外键值可以为NULL，且 子表中的外键引用父表中的某个字段不一定要为主表中的主键，但一定要具有唯一性**
-
-- ```sql
+* **外键用来建立主表与从表的关联关系，为两个表的数据建立连接，约束两个表中数据的一致性和完整性。**
+* **外键值可以为NULL，且 子表中的外键引用父表中的某个字段不一定要为主表中的主键，但一定要具有唯一性**
+* ```sql
    外键约束用法：
      create table 从表名
      	字段1
      	字段2
      	foreign key(字段3) reference 主表（字段）
-   ```
+  ```
+* **表示约束的字段不能重复，但可以为NULL**
 
-- **表示约束的字段不能重复，但可以为NULL**
-
-------
+- - -
 
 ## **十八、常用的存储引擎**
 
-### 18-1、MyISAM 存储引擎 
+### 18-1、MyISAM 存储引擎
 
  **MyISAM 存储引擎是 MySQL 最常用的引擎。** 
 
 – 它管理的表具有以下**特征**：
 
-- 使用三个文件表示每个表： 
-
-- 格式文件 — 存储表结构的定义（mytable.frm）
-
-- 数据文件 — 存储表行的内容（mytable.MYD）
-
-- 索引文件 — 存储表上索引（mytable.MYI） 
+* 使用三个文件表示每个表： 
+* 格式文件 — 存储表结构的定义（mytable.frm）
+* 数据文件 — 存储表行的内容（mytable.MYD）
+* 索引文件 — 存储表上索引（mytable.MYI） 
 
 – 灵活的 AUTO_INCREMENT 字段处理 – 可被转换为压缩、只读表来节省空间 
 
@@ -1432,13 +1392,13 @@ select * from vendorlocations;
 
 – 它管理的表具有下列**主要特征**： 
 
-- 每个 InnoDB 表在数据库目录中以.frm 格式文件表示 
-- InnoDB 表空间 tablespace 被用于存储表的内容 
-- 提供一组用来记录事务性活动的日志文件 – 用 COMMIT(提交)、SAVEPOINT 及 ROLLBACK(回滚)支持事务处理 
-- 提供全 ACID 兼容
-- 在 MySQL 服务器崩溃后提供自动恢复 
-- 多版本（MVCC）和行级锁定 
-- 支持外键及引用的完整性，包括级联删除和更新 
+* 每个 InnoDB 表在数据库目录中以.frm 格式文件表示 
+* InnoDB 表空间 tablespace 被用于存储表的内容 
+* 提供一组用来记录事务性活动的日志文件 – 用 COMMIT(提交)、SAVEPOINT 及 ROLLBACK(回滚)支持事务处理 
+* 提供全 ACID 兼容
+* 在 MySQL 服务器崩溃后提供自动恢复 
+* 多版本（MVCC）和行级锁定 
+* 支持外键及引用的完整性，包括级联删除和更新 
 
 ### 18-3、MEMORY 存储引擎
 
@@ -1446,15 +1406,11 @@ select * from vendorlocations;
 
 – MEMORY 存储引擎管理的表具有**下列特征**： 
 
-- 在数据库目录内，每个表均以.frm 格式的文件表示。
-
-- 表数据及索引被存储在内存中。
-
-- 表级锁机制。 – 不能包含 TEXT 或 BLOB 字段。
+* 在数据库目录内，每个表均以.frm 格式的文件表示。
+* 表数据及索引被存储在内存中。
+* 表级锁机制。 – 不能包含 TEXT 或 BLOB 字段。
 
 – **MEMORY 存储引擎以前被称为 HEAP 引擎**
-
-
 
 ## 十九、SQL面试题
 
@@ -1524,8 +1480,6 @@ WHERE
 	AND SNO IN ( SELECT SNO FROM sc  WHERE CNO = 2))
 ```
 
-
-
 ## 二十、数据库的三大设计范式
 
 ### 第一范式(1 NF)
@@ -1559,7 +1513,7 @@ CREATE TABLE myorder (
 
 **总结：**
 
-- ~~**一般来说，一张表中只要不是联合主键，基本上都满足第二范式**~~
+* **~~一般来说，一张表中只要不是联合主键，基本上都满足第二范式~~**
 
 **所以需要将上文中的联合主键拆分成两个主键，即当作两个表：**
 
@@ -1624,10 +1578,10 @@ CREATE TABLE customer (
 
 这是一张学生课表：
 
-| 课程编号	（主键） | 课程名字       | 上课时间 | 任课老师 | 老师电话    | 老师职位 |
-| -------------------- | -------------- | -------- | -------- | ----------- | -------- |
-| 101                  | 马克思理论基础 | 8：00     | Lily     | 18016253155 | 讲师     |
-| 102                  | 经济学         | 14：00    | Lucy     | 18055231233 | 教授     |
+| 课程编号	（主键） | 课程名字    | 上课时间  | 任课老师 | 老师电话        | 老师职位 |
+| --------- | ------- | ----- | ---- | ----------- | ---- |
+| 101       | 马克思理论基础 | 8：00  | Lily | 18016253155 | 讲师   |
+| 102       | 经济学     | 14：00 | Lucy | 18055231233 | 教授   |
 
 **大致一看，上表中的非主键列确实完全是依赖于主键（课程编号）的，符合第二范式但是**
 
@@ -1638,23 +1592,21 @@ CREATE TABLE customer (
 
 **课程表：**
 
-| 课程编号 | 课程名字       | 上课时间 | 任课老师 |
-| -------- | -------------- | -------- | -------- |
-| 101      | 马克思理论基础 | 8：00     | Lily     |
-| 102      | 经济学         | 14：00    | Lucy     |
+| 课程编号 | 课程名字    | 上课时间  | 任课老师 |
+| ---- | ------- | ----- | ---- |
+| 101  | 马克思理论基础 | 8：00  | Lily |
+| 102  | 经济学     | 14：00 | Lucy |
 
 **教师表：**
 
-| 任课老师 | 老师电话    | 老师职位 |
-| -------- | ----------- | -------- |
-| Lily     | 18016253155 | 讲师     |
-| Lucy     | 18055231233 | 教授     |
+| 任课老师 | 老师电话        | 老师职位 |
+| ---- | ----------- | ---- |
+| Lily | 18016253155 | 讲师   |
+| Lucy | 18055231233 | 教授   |
 
 #### 口诀 ：
 
 ​	**一对多，两张表，多的表加外键**
-
-
 
 ## **补充**
 
@@ -1689,23 +1641,21 @@ show create table 表名
 
 ### **5、在进行or匹配时有三种写法：**
 
-- **在where子句用or进行连接**
+* **在where子句用or进行连接**
 
-   - ```sql
-      where vend_id = 1001 or vend_id = 1002
-      ```
+  * ```sql
+     where vend_id = 1001 or vend_id = 1002
+    ```
+* **在where子句中使用in操作符**
 
-- **在where子句中使用in操作符**
+  * ```sql
+     where vend_id in (1001 ,1002)
+    ```
+* **在where子句中使用正则表达式：`|`符号**
 
-   - ```sql
-      where vend_id in (1001 ,1002)
-      ```
-
-- **在where子句中使用正则表达式：`|`符号**
-
-   - ```sql
-      where vend_id regexp '1001|1002'
-      ```
+  * ```sql
+     where vend_id regexp '1001|1002'
+    ```
 
 ### 6、mysql字符编码
 
@@ -1757,7 +1707,7 @@ mysql> show variables like 'collation_%';
 mysql>create database mydb character set utf-8;
 ```
 
-####   6-2、修改表的编码方式
+#### 6-2、修改表的编码方式
 
 `alter table 表名称 character set utf-8;`
 
@@ -1767,7 +1717,7 @@ mysql>create database mydb character set utf-8;
 
 ##### 6-2-2、修改表中单一字段的编码方式
 
-`alter table 表名称 modify column 字段 varchar(255) character set 字符编码（utf8、latin1） `
+`alter table 表名称 modify column 字段 varchar(255) character set 字符编码（utf8、latin1）`
 
 **注意：character set不能省略**
 
