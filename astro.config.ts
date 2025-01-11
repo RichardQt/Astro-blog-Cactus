@@ -12,12 +12,12 @@ import { siteConfig } from "./src/site.config";
 import vercel from "@astrojs/vercel";
 
 // Remark plugins
-import remarkDirective from "remark-directive";  
-import { remarkAdmonitions } from "./src/plugins/remark-admonitions";  
+import remarkDirective from "remark-directive";
+import { remarkAdmonitions } from "./src/plugins/remark-admonitions";
 import { remarkReadingTime } from "./src/plugins/remark-reading-time";
 // Rehype plugins
 import rehypeExternalLinks from "rehype-external-links";
-import rehypeUnwrapImages from "rehype-unwrap-images"; 
+import rehypeUnwrapImages from "rehype-unwrap-images";
 import decapCmsOauth from "astro-decap-cms-oauth";
 import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
@@ -30,12 +30,15 @@ export default defineConfig({
 	output: "server",
 	adapter: vercel(),
 	image: {
-		domains: ["webmention.io"],
+		domains: [
+			"webmention.io",
+			"cdn.jsdelivr.net",
+		],
 		service: {
-			entrypoint: 'astro/assets/services/sharp',
+			entrypoint: "astro/assets/services/sharp",
 			config: {
-				formats: ['webp', 'avif', 'png', 'jpg', 'jpeg']
-			}
+				formats: ["webp", "avif", "png", "jpg", "jpeg"],
+			},
 		},
 	},
 	integrations: [
@@ -124,8 +127,8 @@ export default defineConfig({
 			remarkAdmonitions,
 			[
 				remarkMath,
-                {
-                    strict: false,
+				{
+					strict: false,
 					// 修改这里
 					singleDollarTextMath: true,
 				},
@@ -153,16 +156,30 @@ export default defineConfig({
 	// ! 改为你的网站地址，不然社交图片无法加载
 	site: "https://www.240723.xyz/",
 	vite: {
+		define: {
+			//OAUTH_GITHUB
+			"import.meta.env.OAUTH_GITHUB_CLIENT_ID": `"${process.env.OAUTH_GITHUB_CLIENT_ID}"`,
+			"import.meta.env.OAUTH_GITHUB_CLIENT_SECRET": `"${process.env.OAUTH_GITHUB_CLIENT_SECRET}"`,
+		},
 		optimizeDeps: {
 			exclude: ["@resvg/resvg-js"],
 		},
 		plugins: [rawFonts([".ttf", ".woff"])],
+		ssr: {
+			noExternal: ["astro:env"],
+		},
 	},
 	env: {
 		schema: {
 			WEBMENTION_API_KEY: envField.string({ context: "server", access: "secret", optional: true }),
 			WEBMENTION_URL: envField.string({ context: "client", access: "public", optional: true }),
 			WEBMENTION_PINGBACK: envField.string({ context: "client", access: "public", optional: true }),
+			GISCUS_REPO: envField.string({ context: "client", access: "public" }),
+			GISCUS_REPO_ID: envField.string({ context: "client", access: "public" }),
+			GISCUS_CATEGORY_ID: envField.string({ context: "client", access: "public" }),
+			GISCUS_LANG: envField.string({ context: "client", access: "public" }),
+			OAUTH_GITHUB_CLIENT_ID: envField.string({ context: "client", access: "public" }),
+			OAUTH_GITHUB_CLIENT_SECRET: envField.string({ context: "server", access: "secret" }),
 		},
 	},
 });
