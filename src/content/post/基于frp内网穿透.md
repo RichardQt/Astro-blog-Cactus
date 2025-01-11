@@ -6,7 +6,6 @@ tags:
   - frp
 ogImage: /social-card.avif
 ---
-
 # 基于frp内网穿透
 
 ## 服务器端
@@ -37,14 +36,13 @@ vhost_https_port = 7081
 token = 123456
 ```
 
-- **docker参数：**
-  - 服务器镜像：snowdreamtech/frps
-  - 重启：always
+* **docker参数：**
 
-  - 网络模式：host
-
-  - 文件映射：/etc/frp/frps.ini:/etc/frp/frps.ini
-- **运行docker**
+  * 服务器镜像：`snowdreamtech/frps`
+  * 重启：always
+  * 网络模式：host
+  * 文件映射：`/etc/frp/frps.ini:/etc/frp/frps.ini`
+* **运行docker**
 
 ```dockerfile
 docker run --restart=always --network host -d -v /etc/frp/frps.ini:/etc/frp/frps.ini --name frps snowdreamtech/frps
