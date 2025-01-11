@@ -13,18 +13,30 @@ const titleSeparator = "•";
 const siteTitle = `${title} ${titleSeparator} ${siteConfig.title}`;
 const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 const socialImageURL = new URL(ogImage ? ogImage : "/social-card.avif", Astro.url).href;
+
+const isProd = import.meta.env.PROD;
+const devCSP = `
+	default-src 'self';
+	script-src 'self' 'unsafe-inline' 'unsafe-eval' https://giscus.app;
+	style-src 'self' 'unsafe-inline' https://giscus.app;
+	img-src 'self' data: https: http:;
+	frame-src 'self' https://giscus.app;
+	connect-src 'self' ws: http: https:;
+`;
+
+const prodCSP = `
+	default-src 'self';
+	script-src 'self' 'unsafe-inline' 'unsafe-eval' https://giscus.app;
+	style-src 'self' 'unsafe-inline' https://giscus.app;
+	img-src 'self' https://giscus.app https://avatars.githubusercontent.com https://cdn.jsdelivr.net https://fastly.jsdelivr.net data:;
+	frame-src 'self' https://giscus.app;
+	connect-src 'self' https://giscus.app https://cdn.jsdelivr.net https://fastly.jsdelivr.net;
+`;
 ---
 
 <meta charset="utf-8" />
 <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-<meta http-equiv="Content-Security-Policy" content="
-    default-src 'self';
-    script-src 'self' 'unsafe-inline' 'unsafe-eval' https://giscus.app;
-    style-src 'self' 'unsafe-inline' https://giscus.app;
-    img-src 'self' https://giscus.app https://avatars.githubusercontent.com https://cdn.jsdelivr.net data:;
-    frame-src 'self' https://giscus.app;
-    connect-src 'self' https://giscus.app https://cdn.jsdelivr.net;
-">
+<meta http-equiv="Content-Security-Policy" content={isProd ? prodCSP : devCSP} />
 <title>{siteTitle}</title>
 
 {/* Icons */}
