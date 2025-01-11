@@ -31,6 +31,12 @@ export default defineConfig({
 	adapter: vercel(),
 	image: {
 		domains: ["webmention.io"],
+		service: {
+			entrypoint: 'astro/assets/services/sharp',
+			config: {
+				formats: ['webp', 'avif', 'png', 'jpg', 'jpeg']
+			}
+		},
 	},
 	integrations: [
 		expressiveCode(expressiveCodeOptions),
@@ -118,7 +124,8 @@ export default defineConfig({
 			remarkAdmonitions,
 			[
 				remarkMath,
-				{
+                {
+                    strict: false,
 					// 修改这里
 					singleDollarTextMath: true,
 				},
