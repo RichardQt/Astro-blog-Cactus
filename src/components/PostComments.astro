@@ -4,17 +4,21 @@ const GISCUS_CONFIG = {
 	REPO: "RichardQt/Astro-blog-Cactus",
 	REPO_ID: "R_kgDONoGd2A",
 	CATEGORY_ID: "DIC_kwDONoGd2M4Cl7rH",
-	LANG: "zh-CN"
+	LANG: "zh-CN",
 };
 ---
-
+708695
 <div id="comments" class="mt-8">
 	<div class="giscus"></div>
 </div>
 
 <script define:vars={{ config: GISCUS_CONFIG }}>
 	function getCurrentTheme() {
-		return document.documentElement.classList.contains("dark") ? "dark_dimmed" : "light";
+		const isDark = document.documentElement.classList.contains("dark");
+		console.log("isDark:", isDark);
+		const theme = isDark ? "dark_dimmed" : "light";
+		console.log("returning theme:", theme);
+		return theme;
 	}
 
 	function createGiscusScript() {
@@ -36,7 +40,6 @@ const GISCUS_CONFIG = {
 		script.setAttribute("data-lang", config.LANG);
 		script.setAttribute("data-loading", "lazy");
 		script.setAttribute("crossorigin", "anonymous");
-		
 		script.setAttribute("data-host", "https://giscus.app");
 		script.setAttribute("data-origins", window.location.origin);
 		script.async = true;
@@ -50,18 +53,46 @@ const GISCUS_CONFIG = {
 		createGiscusScript();
 	}
 
-	// 主题切换
-	document.querySelector("#theme-btn")?.addEventListener("click", () => {
-		setTimeout(() => {
-			const theme = getCurrentTheme();
-			console.log("Theme changed to:", theme);
-			const iframe = document.querySelector("iframe.giscus-frame");
-			if (iframe && iframe.contentWindow) {
+	// 替换为监听主题变化事件
+	document.addEventListener("theme-change", (e) => {
+		const theme = e.detail.theme === "dark" ? "dark_dimmed" : "light";
+		console.log("Theme change event received:", theme);
+		
+		const iframe = document.querySelector("iframe.giscus-frame");
+		if (iframe) {
+			try {
 				iframe.contentWindow.postMessage(
 					{ giscus: { setConfig: { theme } } },
 					"https://giscus.app"
 				);
+				console.log("Theme message sent to iframe");
+			} catch (e) {
+				console.error("Failed to update giscus theme:", e);
 			}
-		}, 300);
+		} else {
+			console.warn("Giscus iframe not found");
+		}
+	});
+
+	// MutationObserver 可以保留作为备份
+	const observer = new MutationObserver((mutations) => {
+		mutations.forEach((mutation) => {
+			if (mutation.attributeName === "class") {
+				const isDark = document.documentElement.classList.contains("dark");
+				const theme = isDark ? "dark_dimmed" : "light";
+				const iframe = document.querySelector("iframe.giscus-frame");
+				if (iframe) {
+					iframe.contentWindow.postMessage(
+						{ giscus: { setConfig: { theme } } },
+						"https://giscus.app"
+					);
+				}
+			}
+		});
+	});
+
+	observer.observe(document.documentElement, {
+		attributes: true,
+		attributeFilter: ["class"]
 	});
 </script>
