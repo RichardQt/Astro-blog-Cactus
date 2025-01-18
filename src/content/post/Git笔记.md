@@ -73,18 +73,14 @@ git是一个分布式版本控制系统，在使用`git init` 初始化后，会
 
 ### 7、git push
 
-**作用：将放在本地仓库中的文件提交到远程仓库中**
+**在`github`创建仓库时会默认创建一个别名`origin`，所以我们在提交代码时，可以使用`git push origin <branch>`**
 
-**命令一般为：git push 远程仓库的地址  分支名（默认为`master`）--------- 例如：`git push git@github.com:RichardQt/PicBed.git master `**
-
-**注意**
-
- 但在`github`创建仓库时会默认创建一个别名`origin`，所以我们在提交代码时，可以直接使用`git push origin master`
-
-- **`-u` ---将会关联到远程的master 分支上，以后就可以`git push`不指定参数了**
-  - **`git push -u origin main` -------将你本地分支上的所有提交和更新推送到别名为 `origin` 的远程仓库的 `main` 分支上** 
+- **`-u` **
+  - **`git push -u origin main` -------将你本地分支上的所有提交和更新推送到别名为 `origin` 的远程仓库的 `main` 分支上【仅需首次使用此参数】** 
 
 - **`-f` 或 `--force`: 强制推送（慎用！）。**
+
+**注：后续更新代码时可直接使用`git push origin main`**
 
 ### 8、git pull
 
