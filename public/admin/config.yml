@@ -3,7 +3,7 @@ backend:
   branch: main # change this to your branch
   repo: RichardQt/Astro-blog-Cactus # 1、change this to your repo
   site_domain: 240723.xyz # 2、change this to your domain
-  base_url: https://www.240723.xyz # 3、change this to your prod URL
+  base_url: https://blog.240723.xyz # 3、change this to your prod URL
   auth_endpoint: oauth # the oauth route provided by the integration
 
 collections:
