@@ -154,7 +154,7 @@ export default defineConfig({
 		prefetchAll: true,
 	},
 	// ! 改为你的网站地址，不然社交图片无法加载
-	site: "https://www.240723.xyz/",
+	site: "https://blog.240723.xyz/",
 	vite: {
 		define: {
 			//OAUTH_GITHUB
