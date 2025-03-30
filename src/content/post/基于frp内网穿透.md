@@ -69,3 +69,23 @@ remotePort = 8077
 ```cmd
 .\frpc.exe -c .\frpc.toml
 ```
+
+## 更新--2025-3-28
+
+### frp服务端
+
+* 使用`bash <(curl -sL kejilion.sh)`工具箱部署
+* 现已部署完：
+
+  * 公网IP：47.120.44.206
+
+    * 面板端口：8056
+    * 面板账户：user_589456cb
+    * 面板密码：dcb317039f6f2ee7
+  * token：4732d84ee5129e13f33e7dddc1eed26f
+
+### frp客户端
+
+改用gui界面来实现
+
+![](/assets/images/snipaste_2025-03-30_12-16-16.jpg)
