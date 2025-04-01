@@ -1,7 +1,7 @@
 ---
 title: 基于frp内网穿透
 description: 基于frp内网穿透
-publishDate: 2025-01-11
+publishDate: 2025-04-01
 tags:
   - frp
 ogImage: /social-card.avif
@@ -74,15 +74,18 @@ remotePort = 8077
 
 ### frp服务端
 
-* 使用`bash <(curl -sL kejilion.sh)`工具箱部署
+* **使用`bash <(curl -sL kejilion.sh)`工具箱部署，命令输入`k`可快速启动脚本**
+
+![工具箱.png](https://cfimgbed.240723.xyz/file/1743521078365_1.png)
+
 * 现已部署完：
 
   * 公网IP：47.120.44.206
 
     * 面板端口：8056
-    * 面板账户：user_589456cb
-    * 面板密码：dcb317039f6f2ee7
-  * token：4732d84ee5129e13f33e7dddc1eed26f
+    * **面板账户**：user_589456cb
+    * **面板密码**：dcb317039f6f2ee7
+  * **token：4732d84ee5129e13f33e7dddc1eed26f**
 
 ### frp客户端
 
