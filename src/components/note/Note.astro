@@ -29,7 +29,7 @@ const { Content } = await render(note);
 			)
 		}
 	</Tag>
-  <!-- 修改：narrow 年月日 -->
+	<!-- 修改：narrow 年月日 -->
 	<FormattedDate
 		dateTimeOptions={{
 			hour: "2-digit",
@@ -40,10 +40,23 @@ const { Content } = await render(note);
 		}}
 		date={note.data.publishDate}
 	/>
-	<div
-		class="prose prose-sm prose-cactus mt-4 max-w-none [&>p:last-of-type]:mb-0"
-		class:list={{ "line-clamp-6": isPreview }}
-	>
-		<Content />
-	</div>
+	{
+		isPreview ? (
+			<div class="prose prose-sm prose-cactus mt-4 max-w-none overflow-hidden [&>p:last-of-type]:mb-0">
+				<div class="relative max-h-[150px] overflow-hidden">
+					<Content />
+					<div class="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-[rgb(240,240,240)] dark:from-[rgb(33,35,38)]" />
+				</div>
+				<div class="mt-2">
+					<a class="text-sm font-medium text-accent" href={`/notes/${note.id}/`}>
+						阅读更多...
+					</a>
+				</div>
+			</div>
+		) : (
+			<div class="prose prose-sm prose-cactus mt-4 max-w-none [&>p:last-of-type]:mb-0">
+				<Content />
+			</div>
+		)
+	}
 </article>

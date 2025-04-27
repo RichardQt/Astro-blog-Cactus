@@ -32,7 +32,7 @@ export default defineConfig({
 	image: {
 		domains: [
 			"webmention.io",
-			"cdn.jsdelivr.net",
+			"jsdelivr.240723.xyz",
 		],
 		service: {
 			entrypoint: "astro/assets/services/sharp",
@@ -65,20 +65,20 @@ export default defineConfig({
 			short_name: "Richard Castle",
 			description: siteConfig.description,
 			lang: siteConfig.lang,
-			icon: "public/icon.svg", // the source for generating favicon & icons
+            icon: "public/icons/logo-planet.png", // the source for generating favicon & icons
 			icons: [
 				{
-					src: "icons/apple-touch-icon.png", // used in src/components/BaseHead.astro L:26
+					src: "icons/logo-planet.png", // used in src/components/BaseHead.astro L:26
 					sizes: "180x180",
 					type: "image/png",
 				},
 				{
-					src: "icons/icon-192.png",
+					src: "icons/logo-planet.png",
 					sizes: "192x192",
 					type: "image/png",
 				},
 				{
-					src: "icons/icon-512.png",
+					src: "icons/logo-planet.png",
 					sizes: "512x512",
 					type: "image/png",
 				},

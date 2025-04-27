@@ -13,11 +13,11 @@ ogImage: /social-card.avif
 
 传送门：[MySQL官网](https://dev.mysql.com/downloads/)
 
-![img](https://cdn.jsdelivr.net/gh/RichardQt/PicBed/note/202206171440031.png)
+![img](https://jsdelivr.240723.xyz/gh/RichardQt/PicBed/note/202206171440031.png)
 
-![img](https://cdn.jsdelivr.net/gh/RichardQt/PicBed/note/202206171440369.png)
+![img](https://jsdelivr.240723.xyz/gh/RichardQt/PicBed/note/202206171440369.png)
 
-![img](https://cdn.jsdelivr.net/gh/RichardQt/PicBed/note/202206171440672.png)
+![img](https://jsdelivr.240723.xyz/gh/RichardQt/PicBed/note/202206171440672.png)
 
 ## 第二步：新老版本替换
 
@@ -42,18 +42,18 @@ ogImage: /social-card.avif
 
 用cmd命令行，在`D:/PHPStudy/PHPTutorial/MySQL/bin/`执行命令`mysqld install;`
 
-![img](https://cdn.jsdelivr.net/gh/RichardQt/PicBed/note/202206171440098.png)
+![img](https://jsdelivr.240723.xyz/gh/RichardQt/PicBed/note/202206171440098.png)
 
 初始化MySQL命令：`mysqld --install;`
 
 启动MySQL服务命令：`net start mysql;`
 
-![img](https://cdn.jsdelivr.net/gh/RichardQt/PicBed/note/202206171440465.png)
+![img](https://jsdelivr.240723.xyz/gh/RichardQt/PicBed/note/202206171440465.png)
 
 注意：若无法启动，或者启动后库内没有mysql表，则运行：
 `mysqld --initialize-insecure --initialize-insecure --user=mysql;`
 
-![img](https://cdn.jsdelivr.net/gh/RichardQt/PicBed/note/202206171440798.png)
+![img](https://jsdelivr.240723.xyz/gh/RichardQt/PicBed/note/202206171440798.png)
 
 ## 第四步：修改MySQL密码
 
@@ -63,13 +63,13 @@ ogImage: /social-card.avif
 
 然后在执行`flush privileges;`
 
-![img](https://cdn.jsdelivr.net/gh/RichardQt/PicBed/note/202206171440973.png)
+![img](https://jsdelivr.240723.xyz/gh/RichardQt/PicBed/note/202206171440973.png)
 
 ## 第五步：PHPstudy控制MySQL启动
 
 如果用PHPstudy无法启动MySQL
 
-![img](https://cdn.jsdelivr.net/gh/RichardQt/PicBed/note/202206171440522.png)
+![img](https://jsdelivr.240723.xyz/gh/RichardQt/PicBed/note/202206171440522.png)
 
 检查服务是否启动，打开`任务管理器=>服务`，查找MySQL服务，如果只有一个MySQL服务就手动的启动，如果有两个MySQL服务，如`MySQL`和`MySQLa`,就需要删除一个服务，在`D:/PHPStudy/PHPTutorial/MySQL/bin/`执行`sc delete mysql`就好了。
 
