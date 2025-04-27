@@ -1,7 +1,7 @@
 ---
 title: "示例3 添加封面图"
 description: "这篇文章是如何添加封面的示例"
-publishDate: "1998-07-28"
+publishDate: "2025-01-01"
 coverImage:
   src: "./cover.png"
   alt: "封面图"
@@ -17,7 +17,7 @@ ogImage: "/social-card.avif"
 ---
 title: "示例3 添加封面图"
 description: "这篇文章是如何添加封面的示例"
-publishDate: "1998-07-28"
+publishDate: "2025-01-01"
 coverImage:
   src: "./cover.png"
   alt: "封面图"

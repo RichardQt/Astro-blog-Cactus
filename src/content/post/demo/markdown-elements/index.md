@@ -1,7 +1,7 @@
 ---
 title: "示例1 Markdown 基本语法"
 description: "这篇文章用于测试和列出多种不同的Markdown元素"
-publishDate: "1998-07-30"
+publishDate: "2025-01-01"
 tags: ["示例"]
 ogImage: "/social-card.avif"
 ---

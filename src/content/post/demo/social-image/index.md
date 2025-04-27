@@ -1,6 +1,6 @@
 ---
 title: "示例5 社交图片卡片"
-publishDate: "1998-07-26"
+publishDate: "2025-01-01"
 description: "详细说明如何在 frontmatter 中添加自定义社交图片卡片"
 tags: ["示例"]
 ogImage: "/social-card.avif"
@@ -21,7 +21,7 @@ ogImage: "/social-card.avif"
 ```yaml
 ---
 title: "示例5 社交图片卡片"
-publishDate: "1998-07-26"
+publishDate: "2025-01-01"
 description: "详细说明如何在 frontmatter 中添加自定义社交图片卡片"
 tags: ["示例"]
 ogImage: "/social-card.avif"

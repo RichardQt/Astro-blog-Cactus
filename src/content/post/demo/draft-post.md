@@ -1,7 +1,7 @@
 ---
 title: "示例4 草稿"
 description: "This post is for testing the draft post functionality"
-publishDate: "1998-07-27"
+publishDate: "2025-01-01"
 tags: ["示例"]
 draft: true
 ogImage: "/social-card.avif"
@@ -17,7 +17,7 @@ ogImage: "/social-card.avif"
 ---
 title: "示例4 草稿"
 description: "This post is for testing the draft post functionality"
-publishDate: "1998-07-27"
+publishDate: "2025-01-01"
 tags: ["示例"]
 draft: true
 ogImage: "/social-card.avif"

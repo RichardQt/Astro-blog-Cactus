@@ -2,6 +2,7 @@
 title: 基于frp内网穿透
 description: 基于frp内网穿透
 publishDate: 2025-04-01
+draft: true
 tags:
   - frp
 ogImage: /social-card.avif
@@ -69,7 +70,9 @@ remotePort = 8077
 ```cmd
 .\frpc.exe -c .\frpc.toml
 ```
-
+:::note
+客户端和服务器部署更新
+:::
 ## 更新--2025-3-28
 
 ### frp服务端
