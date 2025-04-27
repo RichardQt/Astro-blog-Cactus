@@ -1,6 +1,6 @@
 {
 	"name": "",
-	"version": "5.1.4",
+	"version": "5.7.5",
 	"scripts": {
 		"dev": "astro dev",
 		"start": "astro dev",
@@ -14,12 +14,12 @@
 		"check": "astro check"
 	},
 	"dependencies": {
-		"@astrojs/mdx": "4.0.4",
+		"@astrojs/mdx": "4.2.5",
 		"@astrojs/rss": "4.0.11",
-		"@astrojs/sitemap": "3.2.1",
-		"@astrojs/tailwind": "5.1.4",
-		"@astrojs/vercel": "^8.0.1",
-		"astro": "5.1.4",
+		"@astrojs/sitemap": "3.3.1",
+		"@astrojs/tailwind": "6.0.2",
+		"@astrojs/vercel": "^8.1.4",
+		"astro": "5.7.5",
 		"astro-decap-cms-oauth": "^0.5.1",
 		"astro-expressive-code": "^0.38.3",
 		"astro-icon": "^1.1.4",
@@ -27,6 +27,7 @@
 		"astro-webmanifest": "^1.0.0",
 		"cssnano": "^7.0.6",
 		"hastscript": "^9.0.0",
+		"marked": "^15.0.11",
 		"mdast-util-directive": "^3.0.0",
 		"mdast-util-to-markdown": "^2.1.2",
 		"mdast-util-to-string": "^4.0.0",
@@ -37,16 +38,14 @@
 		"rehype-unwrap-images": "^1.0.0",
 		"remark-directive": "^3.0.0",
 		"remark-emoji": "^5.0.1",
+		"remark-gemoji": "^8.0.0",
 		"remark-gfm": "^4.0.0",
 		"remark-math": "^6.0.0",
 		"satori": "0.12.0",
 		"satori-html": "^0.3.2",
 		"sharp": "^0.33.5",
 		"unified": "^11.0.5",
-		"unist-util-visit": "^5.0.0",
-    "rehype-katex": "^7.0.1",
-    "remark-gemoji": "^8.0.0",
-		"remark-math": "^6.0.0"
+		"unist-util-visit": "^5.0.0"
 	},
 	"devDependencies": {
 		"@astrojs/check": "^0.9.4",
