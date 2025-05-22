@@ -1,7 +1,7 @@
 ---
 title: 基于frp内网穿透
 description: 基于frp内网穿透
-publishDate: 2025-05-21
+publishDate: 2025-05-23
 draft: false
 tags:
   - frp
@@ -105,4 +105,16 @@ remotePort = 8077
 <img src="https://cfimgbed.240723.xyz/file/1747929936843_20250523000530701.png" alt="image-20250523000530494" style="zoom:67%;" />
 
 **最终通过 `公网IP:远程端口号`访问**
+
+:::warning
+
+使用端口号时，需确保在**云服务器管理控制台安全组**中设置（若使用**宝塔面板也需在宝塔面板中安全添加规则**）
+
+***（建议：在云服务器安全组设置目的:1/65535，源:所有IPv4(0.0.0.0/0)，然后在宝塔面板中再按需设置相应端口）***
+
+<img src="https://cfimgbed.240723.xyz/file/1747931195671_20250523002625986.png" alt="image-20250523002625685" style="zoom: 50%;" />
+
+<img src="https://cfimgbed.240723.xyz/file/1747931104284_20250523002450960.png" alt="image-20250523002450745" style="zoom: 67%;" />
+
+:::
 
