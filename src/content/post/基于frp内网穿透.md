@@ -1,7 +1,7 @@
 ---
 title: 基于frp内网穿透
 description: 基于frp内网穿透
-publishDate: 2025-04-01
+publishDate: 2025-05-21
 draft: false
 tags:
   - frp
@@ -54,7 +54,7 @@ docker run --restart=always --network host -d -v /etc/frp/frps.ini:/etc/frp/frps
 ### frpc.ini文件
 
 ```ini
-serverAddr = "47.120.44.206"
+serverAddr = "47.120.44...." (脱敏)
 serverPort = 7000
 auth.method = "token"
 auth.token = "52010"
@@ -79,19 +79,30 @@ remotePort = 8077
 
 **使用`bash <(curl -sL kejilion.sh)`工具箱部署，命令输入`k`选11再选择55可快速启动脚本**
 
-![工具箱.png](https://cfimgbed.240723.xyz/file/1743521078365_1.png)
+<img src="https://cfimgbed.240723.xyz/file/1743521078365_1.png" alt="工具箱.png" style="zoom:67%;" />
 
 * 现已部署完：
 
-  * 公网IP：47.120.44.206
+  * 公网IP：
 
     * 面板端口：8056
+    * **服务端口：8055**
     * **面板账户**：user_82422771
     * **面板密码**：67ae346dc51f2daf
   * **token：aae61e541cf60d8588c1d192ccc4a394**
+* **面板地址：`公网IP:8056`**
 
 ### frp客户端
 
-改用gui界面来实现
+- **新建配置并添加token认证**   **（注：服务端口需设置为：8055）**
 
-![](/assets/images/snipaste_2025-03-30_12-16-16.jpg)
+<img src="https://cfimgbed.240723.xyz/file/1747930283086_20250523001115031.png" alt="image-20250523001114814" style="zoom:67%;" />
+
+<img src="https://cfimgbed.240723.xyz/file/1747929865934_20250523000415974.png" alt="image-20250523000415784" style="zoom: 80%;" />
+
+- **添加代理并设置本地端口号和远程端口号**
+
+<img src="https://cfimgbed.240723.xyz/file/1747929936843_20250523000530701.png" alt="image-20250523000530494" style="zoom:67%;" />
+
+**最终通过 `公网IP:远程端口号`访问**
+
