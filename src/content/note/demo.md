@@ -2,6 +2,7 @@
 title: prompt提示词
 description: 生成提示词的prompt（非纯原创 改良版）
 publishDate: 2025-04-25T21:00
+draft: true
 ---
 ````markdown
 # SYSTEM PROMPT: ADVANCED TASK EXECUTION CORE
