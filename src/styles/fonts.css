@@ -1,0 +1,236 @@
+/* 现代简洁字体方案 */
+
+/* Inter - 现代无衬线英文字体 */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+/* 思源黑体 - 简洁中文字体 */
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap');
+
+/* JetBrains Mono - 现代代码字体 */
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+
+/* 字体变量定义 */
+:root {
+  /* 主要字体栈 - 现代简洁 */
+  --font-sans: 'Inter', 'Noto Sans SC', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  
+  /* 代码字体 */
+  --font-mono: 'JetBrains Mono', 'Cascadia Code', 'Fira Code', Consolas, Monaco, monospace;
+}
+
+/* 全局字体应用 */
+body {
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 1.6;
+  font-weight: 400;
+  letter-spacing: -0.011em;
+  font-feature-settings: 'liga' 1, 'kern' 1;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* 标题字体 - 使用粗体无衬线 */
+h1, h2, h3, h4, h5, h6,
+.title {
+  font-family: var(--font-sans);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+/* 大标题特殊处理 */
+h1 {
+  font-size: 2.5rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+
+h2 {
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+h4 {
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+h5 {
+  font-size: 1.125rem;
+  font-weight: 600;
+}
+
+h6 {
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+/* 文章正文优化 */
+article {
+  font-size: 1.0625rem;
+  line-height: 1.7;
+  font-weight: 400;
+}
+
+article p {
+  margin-bottom: 1.5rem;
+}
+
+/* 引用样式 - 简洁现代 */
+blockquote {
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  border-left: 3px solid var(--theme-accent);
+  padding-left: 1.5rem;
+  margin: 2rem 0;
+  color: var(--theme-text-light);
+}
+
+.prose blockquote {
+  font-weight: 500;
+  font-style: normal;
+}
+
+/* 代码样式 */
+code, kbd, samp, pre,
+.prose code,
+.prose pre {
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  font-weight: 500;
+  font-feature-settings: 'liga' 1, 'calt' 1;
+}
+
+/* 行内代码 */
+:not(pre) > code {
+  background: rgba(var(--theme-accent-rgb), 0.08);
+  padding: 0.125rem 0.375rem;
+  border-radius: 4px;
+  font-size: 0.875em;
+  font-weight: 500;
+}
+
+/* 中文内容优化 */
+:lang(zh),
+:lang(zh-CN),
+.chinese {
+  letter-spacing: 0.02em;
+  line-height: 1.75;
+}
+
+/* 英文内容优化 */
+:lang(en),
+.english {
+  letter-spacing: -0.011em;
+}
+
+/* 文章正文特殊优化 */
+.prose {
+  font-size: 1.0625rem;
+  line-height: 1.75;
+}
+
+.prose p {
+  margin-bottom: 1.25rem;
+}
+
+/* 导航和UI元素 */
+nav,
+button,
+.btn,
+.nav-link,
+.tag,
+.meta,
+.post-meta {
+  font-family: var(--font-sans);
+  letter-spacing: -0.01em;
+}
+
+/* 文章元信息样式 */
+.post-meta {
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* 响应式字体大小 */
+@media (max-width: 768px) {
+  body {
+    font-size: 15px;
+  }
+  
+  h1 {
+    font-size: 2rem;
+  }
+  
+  h2 {
+    font-size: 1.5rem;
+  }
+  
+  h3 {
+    font-size: 1.25rem;
+  }
+  
+  article {
+    font-size: 1rem;
+  }
+  
+  .prose {
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 640px) {
+  body {
+    font-size: 14px;
+  }
+  
+  h1 {
+    font-size: 1.75rem;
+  }
+  
+  h2 {
+    font-size: 1.375rem;
+  }
+  
+  h3 {
+    font-size: 1.125rem;
+  }
+}
+
+/* 打印优化 */
+@media print {
+  body {
+    font-family: var(--font-sans);
+    font-size: 12pt;
+    line-height: 1.5;
+  }
+}
+
+/* 优化数字显示 */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+/* 优化小型大写字母 */
+.small-caps {
+  font-variant-caps: small-caps;
+  letter-spacing: 0.05em;
+}
+
+/* 移除首字母大写装饰，保持简洁 */
+.prose > p:first-of-type::first-letter {
+  font-size: inherit;
+  font-weight: inherit;
+  line-height: inherit;
+  float: none;
+  margin: 0;
+}

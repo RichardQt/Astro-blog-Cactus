@@ -1,0 +1,137 @@
+---
+export interface Props {
+  variant?: "dots" | "wave" | "gradient" | "geometric";
+  className?: string;
+}
+
+const { variant = "dots", className = "" } = Astro.props;
+---
+
+<div class={`divider-container ${className}`} data-variant={variant}>
+  {variant === "dots" && (
+    <div class="dots-divider">
+      <span></span>
+      <span></span>
+      <span></span>
+    </div>
+  )}
+  
+  {variant === "wave" && (
+    <svg class="wave-divider" viewBox="0 0 1200 120" preserveAspectRatio="none">
+      <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z"></path>
+    </svg>
+  )}
+  
+  {variant === "gradient" && (
+    <div class="gradient-divider">
+      <div class="gradient-line"></div>
+    </div>
+  )}
+  
+  {variant === "geometric" && (
+    <div class="geometric-divider">
+      <div class="diamond"></div>
+      <div class="line"></div>
+      <div class="diamond"></div>
+    </div>
+  )}
+</div>
+
+<style>
+  .divider-container {
+    @apply relative my-16 flex items-center justify-center;
+  }
+
+  /* 点状分隔线 */
+  .dots-divider {
+    @apply flex items-center gap-3;
+  }
+
+  .dots-divider span {
+    @apply h-2 w-2 rounded-full bg-gray-300 dark:bg-gray-600;
+    animation: pulse 2s ease-in-out infinite;
+  }
+
+  .dots-divider span:nth-child(2) {
+    animation-delay: 0.2s;
+  }
+
+  .dots-divider span:nth-child(3) {
+    animation-delay: 0.4s;
+  }
+
+  /* 波浪分隔线 */
+  .wave-divider {
+    @apply h-20 w-full;
+    fill: hsl(var(--theme-accent) / 0.1);
+  }
+
+  /* 渐变分隔线 */
+  .gradient-divider {
+    @apply relative h-px w-full overflow-hidden;
+  }
+
+  .gradient-line {
+    @apply absolute inset-0;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      hsl(var(--theme-accent) / 0.5),
+      hsl(var(--theme-accent)),
+      hsl(var(--theme-accent) / 0.5),
+      transparent
+    );
+    animation: shimmer 3s ease-in-out infinite;
+  }
+
+  /* 几何分隔线 */
+  .geometric-divider {
+    @apply flex items-center gap-4;
+  }
+
+  .geometric-divider .line {
+    @apply h-px w-32 bg-gray-300 dark:bg-gray-600;
+  }
+
+  .geometric-divider .diamond {
+    @apply relative h-3 w-3 rotate-45 bg-gradient-to-br from-purple-500 to-pink-500;
+    animation: rotate 4s linear infinite;
+  }
+
+  /* 动画 */
+  @keyframes pulse {
+    0%, 100% {
+      opacity: 0.3;
+      transform: scale(0.8);
+    }
+    50% {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  @keyframes shimmer {
+    0% {
+      transform: translateX(-100%);
+    }
+    100% {
+      transform: translateX(100%);
+    }
+  }
+
+  @keyframes rotate {
+    from {
+      transform: rotate(45deg);
+    }
+    to {
+      transform: rotate(405deg);
+    }
+  }
+
+  /* 响应式调整 */
+  @media (max-width: 640px) {
+    .geometric-divider .line {
+      @apply w-20;
+    }
+  }
+</style>

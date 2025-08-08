@@ -1,3 +1,6 @@
+/* 导入自定义字体 */
+@import './fonts.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -13,6 +16,12 @@
 		--theme-accent: 351deg 66% 48%;
 		--theme-accent-2: 0deg 0% 7%;
 		--theme-quote: 351deg 66% 48%;
+		
+		/* 新增渐变色变量 */
+		--gradient-purple-pink: linear-gradient(135deg, #667eea 0%, #f687b3 100%);
+		--gradient-blue-cyan: linear-gradient(135deg, #3b82f6 0%, #06b6d4 100%);
+		--gradient-green-teal: linear-gradient(135deg, #10b981 0%, #14b8a6 100%);
+		--gradient-orange-red: linear-gradient(135deg, #f97316 0%, #ef4444 100%);
 	}
 
 	:root[data-theme="dark"] {
@@ -23,5 +32,325 @@
 		--theme-accent: 159deg 64% 45%;
 		--theme-accent-2: 0deg 0% 93%;
 		--theme-quote: 102deg 100% 86%;
+		
+		/* 暗色模式渐变色变量 */
+		--gradient-purple-pink: linear-gradient(135deg, #9333ea 0%, #ec4899 100%);
+		--gradient-blue-cyan: linear-gradient(135deg, #2563eb 0%, #0891b2 100%);
+		--gradient-green-teal: linear-gradient(135deg, #059669 0%, #0d9488 100%);
+		--gradient-orange-red: linear-gradient(135deg, #ea580c 0%, #dc2626 100%);
+	}
+
+	/* 全局平滑滚动 */
+	html {
+		scroll-behavior: smooth;
+	}
+
+	/* 优化选中文本样式 */
+	::selection {
+		background-color: hsl(var(--theme-accent) / 0.3);
+		color: hsl(var(--theme-text));
+	}
+
+	/* 优化焦点样式 */
+	:focus-visible {
+		outline: 2px solid hsl(var(--theme-accent));
+		outline-offset: 2px;
+	}
+}
+
+/* 动画关键帧定义 */
+@layer utilities {
+	/* 淡入动画 */
+	@keyframes fadeIn {
+		from {
+			opacity: 0;
+		}
+		to {
+			opacity: 1;
+		}
+	}
+
+	/* 从下方淡入 */
+	@keyframes fadeInUp {
+		from {
+			opacity: 0;
+			transform: translateY(20px);
+		}
+		to {
+			opacity: 1;
+			transform: translateY(0);
+		}
+	}
+
+	/* 从上方淡入 */
+	@keyframes fadeInDown {
+		from {
+			opacity: 0;
+			transform: translateY(-20px);
+		}
+		to {
+			opacity: 1;
+			transform: translateY(0);
+		}
+	}
+
+	/* 缩放淡入 */
+	@keyframes fadeInScale {
+		from {
+			opacity: 0;
+			transform: scale(0.95);
+		}
+		to {
+			opacity: 1;
+			transform: scale(1);
+		}
+	}
+
+	/* 旋转动画 */
+	@keyframes spin {
+		from {
+			transform: rotate(0deg);
+		}
+		to {
+			transform: rotate(360deg);
+		}
+	}
+
+	/* 脉冲动画 */
+	@keyframes pulse {
+		0%, 100% {
+			opacity: 1;
+		}
+		50% {
+			opacity: 0.5;
+		}
+	}
+
+	/* 弹跳动画 */
+	@keyframes bounce {
+		0%, 100% {
+			transform: translateY(-25%);
+			animation-timing-function: cubic-bezier(0.8, 0, 1, 1);
+		}
+		50% {
+			transform: translateY(0);
+			animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
+		}
+	}
+
+	/* 摇摆动画 */
+	@keyframes wiggle {
+		0%, 100% {
+			transform: rotate(-3deg);
+		}
+		50% {
+			transform: rotate(3deg);
+		}
+	}
+
+	/* 渐变背景动画 */
+	@keyframes gradientShift {
+		0% {
+			background-position: 0% 50%;
+		}
+		50% {
+			background-position: 100% 50%;
+		}
+		100% {
+			background-position: 0% 50%;
+		}
+	}
+
+	/* 动画工具类 */
+	.animate-fadeIn {
+		animation: fadeIn 0.6s ease-out;
+	}
+
+	.animate-fadeInUp {
+		animation: fadeInUp 0.6s ease-out;
+	}
+
+	.animate-fadeInDown {
+		animation: fadeInDown 0.6s ease-out;
+	}
+
+	.animate-fadeInScale {
+		animation: fadeInScale 0.6s ease-out;
+	}
+
+	.animate-spin-slow {
+		animation: spin 3s linear infinite;
+	}
+
+	.animate-pulse-slow {
+		animation: pulse 3s ease-in-out infinite;
+	}
+
+	.animate-bounce-slow {
+		animation: bounce 2s infinite;
+	}
+
+	.animate-wiggle {
+		animation: wiggle 1s ease-in-out infinite;
+	}
+
+	.animate-gradient {
+		background-size: 200% 200%;
+		animation: gradientShift 3s ease infinite;
+	}
+
+	/* 延迟动画类 */
+	.animation-delay-100 {
+		animation-delay: 100ms;
+	}
+
+	.animation-delay-200 {
+		animation-delay: 200ms;
+	}
+
+	.animation-delay-300 {
+		animation-delay: 300ms;
+	}
+
+	.animation-delay-400 {
+		animation-delay: 400ms;
+	}
+
+	.animation-delay-500 {
+		animation-delay: 500ms;
+	}
+
+	/* 过渡效果增强 */
+	.transition-all-300 {
+		transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
+	}
+
+	.transition-transform-300 {
+		transition: transform 300ms cubic-bezier(0.4, 0, 0.2, 1);
+	}
+
+	.transition-colors-300 {
+		transition: color 300ms, background-color 300ms, border-color 300ms;
+	}
+
+	/* 悬停效果工具类 */
+	.hover-lift {
+		transition: transform 300ms cubic-bezier(0.4, 0, 0.2, 1);
+	}
+
+	.hover-lift:hover {
+		transform: translateY(-4px);
+	}
+
+	.hover-scale {
+		transition: transform 300ms cubic-bezier(0.4, 0, 0.2, 1);
+	}
+
+	.hover-scale:hover {
+		transform: scale(1.05);
+	}
+
+	.hover-rotate {
+		transition: transform 300ms cubic-bezier(0.4, 0, 0.2, 1);
+	}
+
+	.hover-rotate:hover {
+		transform: rotate(3deg);
+	}
+
+	/* 渐变文本效果 */
+	.gradient-text {
+		background-clip: text;
+		-webkit-background-clip: text;
+		-webkit-text-fill-color: transparent;
+		background-image: var(--gradient-purple-pink);
+	}
+
+	.gradient-text-blue {
+		background-clip: text;
+		-webkit-background-clip: text;
+		-webkit-text-fill-color: transparent;
+		background-image: var(--gradient-blue-cyan);
+	}
+
+	/* 玻璃态效果 */
+	.glass {
+		background: rgba(255, 255, 255, 0.1);
+		backdrop-filter: blur(10px);
+		-webkit-backdrop-filter: blur(10px);
+		border: 1px solid rgba(255, 255, 255, 0.2);
+	}
+
+	.glass-dark {
+		background: rgba(0, 0, 0, 0.1);
+		backdrop-filter: blur(10px);
+		-webkit-backdrop-filter: blur(10px);
+		border: 1px solid rgba(255, 255, 255, 0.1);
+	}
+
+	/* 光晕效果 */
+	.glow {
+		box-shadow: 0 0 20px rgba(147, 51, 234, 0.5);
+	}
+
+	.glow-lg {
+		box-shadow: 0 0 40px rgba(147, 51, 234, 0.5);
+	}
+
+	/* 文本阴影效果 */
+	.text-shadow {
+		text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+	}
+
+	.text-shadow-lg {
+		text-shadow: 4px 4px 8px rgba(0, 0, 0, 0.2);
+	}
+
+	/* 装饰性元素 */
+	.decoration-wavy {
+		text-decoration-style: wavy;
+		text-decoration-thickness: 2px;
+		text-underline-offset: 4px;
+	}
+
+	/* 响应式工具类 */
+	@media (prefers-reduced-motion: reduce) {
+		*,
+		*::before,
+		*::after {
+			animation-duration: 0.01ms !important;
+			animation-iteration-count: 1 !important;
+			transition-duration: 0.01ms !important;
+		}
+	}
+}
+
+/* 自定义滚动条样式 */
+@layer components {
+	/* Webkit 浏览器 */
+	::-webkit-scrollbar {
+		width: 12px;
+		height: 12px;
+	}
+
+	::-webkit-scrollbar-track {
+		background: hsl(var(--theme-bg));
+		border-radius: 6px;
+	}
+
+	::-webkit-scrollbar-thumb {
+		background: hsl(var(--theme-text) / 0.3);
+		border-radius: 6px;
+		transition: background 0.3s;
+	}
+
+	::-webkit-scrollbar-thumb:hover {
+		background: hsl(var(--theme-text) / 0.5);
+	}
+
+	/* Firefox */
+	* {
+		scrollbar-width: thin;
+		scrollbar-color: hsl(var(--theme-text) / 0.3) hsl(var(--theme-bg));
 	}
 }

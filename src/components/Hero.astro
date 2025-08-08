@@ -1,0 +1,46 @@
+---
+import SocialList from "@/components/SocialList.astro";
+---
+
+<section class="hero-section mb-16 py-12 sm:py-20">
+	<div class="flex flex-col items-center text-center">
+		<!-- 头像区域 - 简洁设计 -->
+		<div class="relative mb-6">
+			<img
+				src="/icons/dog-fly.png"
+				alt="Richard Castle Avatar"
+				class="h-28 w-28 rounded-full border-2 border-gray-200 shadow-lg transition-transform duration-300 hover:scale-105 dark:border-gray-700"
+			/>
+		</div>
+
+		<!-- 标题和副标题 - 简洁排版 -->
+		<h1 class="mb-3 text-3xl font-bold tracking-tight text-textColor sm:text-4xl md:text-5xl">
+			Hi, I'm Richard Castle
+		</h1>
+
+		<p class="mx-auto mb-6 max-w-xl text-base text-gray-600 dark:text-gray-400 sm:text-lg">
+			Based in Nanjing, China, passionate about AI and sharing insights on emerging tech.
+		</p>
+
+		<!-- 社交链接 -->
+		<div class="mb-6">
+			<SocialList />
+		</div>
+
+		<!-- CTA 按钮 - 简洁风格 -->
+		<div class="flex flex-col gap-3 sm:flex-row">
+			<a
+				href="/posts/"
+				class="inline-flex items-center justify-center rounded-lg bg-accent px-6 py-2.5 text-sm font-medium text-white transition-colors hover:bg-accent/90"
+			>
+				探索文章
+			</a>
+			<a
+				href="/about/"
+				class="inline-flex items-center justify-center rounded-lg border border-gray-300 bg-white px-6 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+			>
+				关于我
+			</a>
+		</div>
+	</div>
+</section>

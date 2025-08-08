@@ -1,0 +1,58 @@
+---
+import type { CollectionEntry } from "astro:content";
+import FormattedDate from "@/components/FormattedDate.astro";
+
+type Props = {
+  post: CollectionEntry<"post">;
+};
+
+const { post } = Astro.props;
+
+// 获取文章标签
+const tags = post.data.tags || [];
+---
+
+<article class="group relative flex flex-col overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm transition-shadow hover:shadow-md dark:border-gray-700 dark:bg-gray-800">
+  <div class="p-4 sm:p-5">
+    <div class="mb-2 flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+      <FormattedDate date={post.data.publishDate} />
+      {post.data.draft && (
+        <span class="inline-flex items-center rounded-full bg-yellow-100 px-2 py-0.5 text-xs font-medium text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400">
+          草稿
+        </span>
+      )}
+    </div>
+
+    <h3 class="text-lg font-semibold leading-tight text-gray-900 dark:text-white">
+      <a href={`/posts/${post.id}/`} data-astro-prefetch>
+        {post.data.title}
+      </a>
+    </h3>
+
+    {post.data.description && (
+      <p class="mt-1.5 line-clamp-2 text-sm text-gray-600 dark:text-gray-400">
+        {post.data.description}
+      </p>
+    )}
+
+    {tags.length > 0 && (
+      <div class="mt-2 flex flex-wrap gap-2">
+        {tags.slice(0, 3).map((tag) => (
+          <a
+            href={`/tags/${tag}/`}
+            class="inline-flex items-center rounded-full bg-gray-100 px-3 py-0.5 text-xs font-medium text-gray-600 transition-colors hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
+          >
+            #{tag}
+          </a>
+        ))}
+      </div>
+    )}
+  </div>
+  <a
+    href={`/posts/${post.id}/`}
+    class="group mt-auto block rounded-b-lg bg-gray-50 px-4 py-2 text-center text-sm font-medium text-gray-700 transition-colors hover:bg-gray-100 focus-visible:outline-none focus-visible:ring focus-visible:ring-primary-500 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
+    data-astro-prefetch
+  >
+    阅读更多
+  </a>
+</article>

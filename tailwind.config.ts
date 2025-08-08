@@ -45,9 +45,29 @@ export default {
 				textColor: "hsl(var(--theme-text) / <alpha-value>)",
 			},
 			fontFamily: {
-				// Add any custom fonts here
-				sans: [...fontFamily.sans],
-				serif: [...fontFamily.serif],
+				// 优雅文艺风格字体栈
+				serif: [
+					'Crimson Pro',
+					'EB Garamond',
+					'LXGW WenKai',
+					'Noto Serif SC',
+					'Songti SC',
+					'SimSun',
+					'宋体',
+					...fontFamily.serif
+				],
+				sans: [
+					...fontFamily.sans,
+					'PingFang SC',
+					'Microsoft YaHei',
+					'微软雅黑'
+				],
+				mono: [
+					'Fira Code',
+					'JetBrains Mono',
+					'Source Code Pro',
+					...fontFamily.mono
+				],
 			},
 			transitionProperty: {
 				height: "height",
