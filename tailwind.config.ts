@@ -45,8 +45,8 @@ export default {
 				textColor: "hsl(var(--theme-text) / <alpha-value>)",
 			},
 			fontFamily: {
-				// Add any custom fonts here
-				sans: [...fontFamily.sans],
+				// Custom primary sans uses CSS variable set in global.css (falls back to tailwind default stack)
+				sans: ['var(--font-sans)', ...fontFamily.sans],
 				serif: [...fontFamily.serif],
 			},
 			transitionProperty: {
