@@ -32,7 +32,7 @@ export default defineConfig({
 	image: {
 		domains: [
 			"webmention.io",
-			"jsdelivr.240723.xyz",
+			"cdn.mengze.vip",
 		],
 		service: {
 			entrypoint: "astro/assets/services/sharp",
