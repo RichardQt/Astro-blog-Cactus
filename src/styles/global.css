@@ -5,7 +5,7 @@
 /* Custom English font from provided CDN */
 @font-face {
     font-family: 'SiteLatin';
-    src: url('https://fontsapi.zeoseven.com/443/main.woff2') format('woff2');
+    src: url('https://cdn.mengze.vip/gh/RichardQt/Static_Resource_Acceleration/main.woff2') format('woff2');
     font-weight: 400;
     font-style: normal;
     font-display: swap;
