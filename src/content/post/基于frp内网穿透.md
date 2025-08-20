@@ -79,7 +79,7 @@ remotePort = 8077
 
 **使用`bash <(curl -sL kejilion.sh)`工具箱部署，命令输入`k`选11再选择55可快速启动脚本**
 
-<img src="https://cfimgbed.240723.xyz/file/1743521078365_1.png" alt="工具箱.png" style="zoom:67%;" />
+<img src="https://cfimgbed.richardli.de/file/1743521078365_1.png" alt="工具箱.png" style="zoom:67%;" />
 
 * 现已部署完：
 
@@ -96,13 +96,13 @@ remotePort = 8077
 
 - **新建配置并添加token认证**   **（注：服务端口需设置为：8055）**
 
-<img src="https://cfimgbed.240723.xyz/file/1747930283086_20250523001115031.png" alt="image-20250523001114814" style="zoom:67%;" />
+<img src="https://cfimgbed.richardli.de/file/1747930283086_20250523001115031.png" alt="image-20250523001114814" style="zoom:67%;" />
 
-<img src="https://cfimgbed.240723.xyz/file/1747929865934_20250523000415974.png" alt="image-20250523000415784" style="zoom: 80%;" />
+<img src="https://cfimgbed.richardli.de/file/1747929865934_20250523000415974.png" alt="image-20250523000415784" style="zoom: 80%;" />
 
 - **添加代理并设置本地端口号和远程端口号**
 
-<img src="https://cfimgbed.240723.xyz/file/1747929936843_20250523000530701.png" alt="image-20250523000530494" style="zoom:67%;" />
+<img src="https://cfimgbed.richardli.de/file/1747929936843_20250523000530701.png" alt="image-20250523000530494" style="zoom:67%;" />
 
 **最终通过 `公网IP:远程端口号`访问**
 
@@ -112,9 +112,9 @@ remotePort = 8077
 
 ***（建议：在云服务器安全组设置目的:1/65535，源:所有IPv4(0.0.0.0/0)，然后在宝塔面板中再按需设置相应端口）***
 
-<img src="https://cfimgbed.240723.xyz/file/1747931195671_20250523002625986.png" alt="image-20250523002625685" style="zoom: 50%;" />
+<img src="https://cfimgbed.richardli.de/file/1747931195671_20250523002625986.png" alt="image-20250523002625685" style="zoom: 50%;" />
 
-<img src="https://cfimgbed.240723.xyz/file/1747931104284_20250523002450960.png" alt="image-20250523002450745" style="zoom: 67%;" />
+<img src="https://cfimgbed.richardli.de/file/1747931104284_20250523002450960.png" alt="image-20250523002450745" style="zoom: 67%;" />
 
 :::
 
