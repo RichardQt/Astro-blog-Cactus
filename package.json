@@ -14,13 +14,13 @@
 		"check": "astro check"
 	},
 	"dependencies": {
-		"@astrojs/mdx": "4.2.5",
-		"@astrojs/rss": "4.0.11",
-		"@astrojs/sitemap": "3.3.1",
+		"@astrojs/mdx": "4.3.4",
+		"@astrojs/rss": "4.0.12",
+		"@astrojs/sitemap": "3.5.1",
 		"@astrojs/tailwind": "6.0.2",
-		"@astrojs/vercel": "^8.1.4",
+		"@astrojs/vercel": "^8.2.6",
 		"@types/dompurify": "^3.2.0",
-		"astro": "5.7.5",
+		"astro": "5.13.3",
 		"astro-decap-cms-oauth": "^0.5.1",
 		"astro-expressive-code": "^0.38.3",
 		"astro-icon": "^1.1.4",
