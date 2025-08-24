@@ -80,3 +80,59 @@ export interface Summary {
 }
 
 export type AdmonitionType = "tip" | "note" | "important" | "caution" | "warning";
+
+// RSS相关类型定义
+export interface RSSSource {
+  id: string;
+  name: string;
+  url: string;
+  description?: string;
+  category?: string;
+  language?: string;
+  lastBuildDate?: string;
+  ttl?: number;
+  imageUrl?: string;
+  itemCount?: number;
+  isActive?: boolean;
+  enabled?: boolean; // 添加enabled属性
+  lastFetched?: string;
+  fetchInterval?: number; // 分钟
+}
+
+export interface RSSItem {
+  id: string;
+  title: string;
+  description?: string;
+  content?: string;
+  link: string;
+  pubDate: string;
+  author?: string;
+  category?: string[];
+  sourceId: string;
+  sourceName: string;
+  guid?: string;
+  imageUrl?: string | undefined;
+  read?: boolean;
+}
+
+export interface RSSFeed {
+  source: RSSSource;
+  items: RSSItem[];
+  lastBuildDate?: string;
+  ttl?: number | undefined;
+}
+
+export interface RSSConfig {
+  sources: RSSSource[];
+  defaultFetchInterval: number;
+  maxItemsPerSource: number;
+  cacheEnabled: boolean;
+  cacheDuration: number; // 分钟
+}
+
+export interface RSSState {
+  feeds: RSSFeed[];
+  loading: boolean;
+  error: string | null;
+  lastUpdated: string | null;
+}

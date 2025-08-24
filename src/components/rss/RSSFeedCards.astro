@@ -1,0 +1,422 @@
+---
+// 改进的RSS订阅源卡片组件
+// 使用卡片布局显示RSS内容，支持按源筛选
+
+import { rssManager } from "@/utils/rss";
+import type { RSSSource, RSSFeed } from "@/types";
+import { Icon } from "astro-icon/components";
+
+interface Props {
+  sources?: RSSSource[];
+  selectedSource?: string;
+  maxItems?: number;
+}
+
+const {
+  sources = [],
+  selectedSource = 'all',
+  maxItems = 20
+} = Astro.props;
+
+// 获取所有订阅源
+const allSources = sources.length > 0 ? sources : rssManager.getSources();
+
+// 获取订阅源的最新内容
+const feeds: RSSFeed[] = [];
+for (const source of allSources) {
+  // 如果选择了特定源，只获取该源
+  if (selectedSource !== 'all' && source.id !== selectedSource) {
+    continue;
+  }
+  
+  try {
+    const feed = await rssManager.getFeed(source.id);
+    if (feed) {
+      feeds.push(feed);
+    }
+  } catch (error) {
+    console.error(`获取订阅源 ${source.name} 失败:`, error);
+  }
+}
+
+// 收集所有项目并按时间排序
+const allItems = feeds
+  .flatMap(feed => feed.items)
+  .sort((a, b) => new Date(b.pubDate).getTime() - new Date(a.pubDate).getTime())
+  .slice(0, maxItems);
+
+// 格式化日期
+function formatDate(dateString: string): string {
+  const date = new Date(dateString);
+  const now = new Date();
+  const diffTime = Math.abs(now.getTime() - date.getTime());
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  
+  if (diffDays === 1) {
+    return '昨天';
+  } else if (diffDays < 7) {
+    return `${diffDays}天前`;
+  } else {
+    return date.toLocaleDateString('zh-CN', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit'
+    });
+  }
+}
+
+// 获取源的颜色主题
+function getSourceColor(sourceId: string): string {
+  const colors = [
+    'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400',
+    'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400',
+    'bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400',
+    'bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400',
+    'bg-pink-100 dark:bg-pink-900/30 text-pink-600 dark:text-pink-400',
+  ];
+  
+  // 基于源ID生成稳定的颜色索引
+  let hash = 0;
+  for (let i = 0; i < sourceId.length; i++) {
+    hash = ((hash << 5) - hash) + sourceId.charCodeAt(i);
+    hash = hash & hash;
+  }
+  return colors[Math.abs(hash) % colors.length];
+}
+
+// 清理HTML内容
+function cleanDescription(html: string): string {
+  if (!html) return '';
+  // 移除HTML标签
+  let text = html.replace(/<[^>]*>/g, ' ');
+  // 解码HTML实体
+  text = text
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&nbsp;/g, ' ');
+  // 清理多余空格
+  text = text.replace(/\s+/g, ' ').trim();
+  // 限制长度
+  if (text.length > 200) {
+    text = text.substring(0, 200) + '...';
+  }
+  return text;
+}
+---
+
+<!-- RSS源筛选器 -->
+<div class="rss-filter-container mb-8">
+  <div class="rss-filter-header mb-4">
+    <h2 class="text-lg font-semibold text-gray-900 dark:text-white">筛选订阅源</h2>
+  </div>
+  <div class="rss-filter-pills">
+    <button 
+      class={`rss-filter-pill ${selectedSource === 'all' ? 'active' : ''}`}
+      data-source="all"
+    >
+      全部
+      <span class="rss-filter-count">{allItems.length}</span>
+    </button>
+    {allSources.map(source => {
+      const sourceItems = feeds.find(f => f.source.id === source.id)?.items.length || 0;
+      return (
+        <button
+          class={`rss-filter-pill ${selectedSource === source.id ? 'active' : ''}`}
+          data-source={source.id}
+        >
+          {source.name}
+          <span class="rss-filter-count">{sourceItems}</span>
+        </button>
+      );
+    })}
+  </div>
+</div>
+
+<!-- RSS内容卡片网格 -->
+<div class="rss-cards-grid">
+  {allItems.length === 0 ? (
+    <div class="rss-empty-state col-span-full">
+      <div class="text-center py-12">
+        <div class="inline-flex items-center justify-center w-16 h-16 mb-4 rounded-full bg-gray-100 dark:bg-gray-800">
+          <Icon name="mdi:rss-off" class="w-8 h-8 text-gray-400" />
+        </div>
+        <p class="text-xl font-semibold text-gray-900 dark:text-white mb-2">暂无订阅内容</p>
+        <p class="text-gray-600 dark:text-gray-400">请稍后刷新页面或检查订阅源配置</p>
+      </div>
+    </div>
+  ) : (
+    allItems.map((item) => (
+      <article class="rss-card" data-source={item.sourceId}>
+        <!-- 卡片头部：源信息和时间 -->
+        <div class="rss-card-header">
+          <span class={`rss-source-badge ${getSourceColor(item.sourceId)}`}>
+            {item.sourceName}
+          </span>
+          <time class="rss-card-time" datetime={item.pubDate}>
+            {formatDate(item.pubDate)}
+          </time>
+        </div>
+
+        <!-- 卡片主体：标题和描述 -->
+        <div class="rss-card-body">
+          <h3 class="rss-card-title">
+            <a 
+              href={item.link}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="rss-card-link"
+            >
+              {item.title}
+            </a>
+          </h3>
+          
+          {item.description && (
+            <p class="rss-card-description">
+              {cleanDescription(item.description)}
+            </p>
+          )}
+        </div>
+
+        <!-- 卡片底部：元信息和操作 -->
+        <div class="rss-card-footer">
+          {item.author && (
+            <span class="rss-card-author">
+              <Icon name="mdi:account-outline" class="w-4 h-4 inline-block mr-1" />
+              {item.author}
+            </span>
+          )}
+          
+          {item.category && item.category.length > 0 && (
+            <div class="rss-card-tags">
+              {item.category.slice(0, 2).map(cat => (
+                <span class="rss-card-tag">{cat}</span>
+              ))}
+            </div>
+          )}
+          
+          <a
+            href={item.link}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="rss-card-action"
+            title="在新标签页中打开"
+          >
+            <Icon name="mdi:open-in-new" class="w-4 h-4" />
+          </a>
+        </div>
+      </article>
+    ))
+  )}
+</div>
+
+<style>
+  /* 筛选器样式 */
+  .rss-filter-container {
+    @apply bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-200 dark:border-gray-700;
+  }
+
+  .rss-filter-pills {
+    @apply flex flex-wrap gap-2;
+  }
+
+  .rss-filter-pill {
+    @apply px-4 py-2 rounded-full text-sm font-medium transition-all duration-200;
+    @apply bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300;
+    @apply hover:bg-gray-200 dark:hover:bg-gray-600 cursor-pointer;
+    @apply flex items-center gap-2;
+  }
+
+  .rss-filter-pill.active {
+    background-color: hsl(var(--theme-accent));
+    color: white;
+    @apply shadow-md transform scale-105;
+  }
+
+  .rss-filter-count {
+    @apply inline-flex items-center justify-center px-2 py-0.5 text-xs rounded-full;
+    @apply bg-gray-200 dark:bg-gray-600 text-gray-600 dark:text-gray-200;
+  }
+
+  .rss-filter-pill.active .rss-filter-count {
+    @apply bg-white/20 text-white;
+  }
+
+  /* 卡片网格布局 */
+  .rss-cards-grid {
+    @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6;
+  }
+
+  /* 卡片样式 - 匹配博客主题 */
+  .rss-card {
+    @apply bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-lg;
+    @apply border border-gray-200 dark:border-gray-700;
+    @apply transition-all duration-300 transform hover:-translate-y-1;
+    @apply p-6 flex flex-col;
+    @apply relative overflow-hidden;
+  }
+
+  .rss-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(to right, hsl(var(--theme-accent)), hsl(var(--theme-link)));
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
+    transform-origin: left;
+  }
+
+  .rss-card:hover::before {
+    @apply scale-x-100;
+  }
+
+  /* 卡片头部 */
+  .rss-card-header {
+    @apply flex items-center justify-between mb-4 pb-2 border-b border-gray-100 dark:border-gray-700;
+  }
+
+  .rss-source-badge {
+    @apply px-3 py-1 rounded-full text-xs font-semibold;
+  }
+
+  .rss-card-time {
+    @apply text-xs text-gray-500 dark:text-gray-400;
+  }
+
+  /* 卡片主体 */
+  .rss-card-body {
+    @apply flex-grow mb-4;
+  }
+
+  .rss-card-title {
+    @apply mb-3;
+  }
+
+  .rss-card-link {
+    @apply text-lg font-bold;
+    color: hsl(var(--theme-text));
+    transition: color 0.2s ease;
+    @apply line-clamp-2;
+    font-family: var(--font-sans);
+  }
+  
+  .rss-card-link:hover {
+    color: hsl(var(--theme-accent));
+  }
+
+  .rss-card-description {
+    @apply text-sm leading-relaxed line-clamp-3;
+    color: hsl(var(--theme-text) / 0.75);
+    font-family: var(--font-sans);
+  }
+
+  /* 卡片底部 */
+  .rss-card-footer {
+    @apply flex items-center justify-between pt-4 border-t border-gray-100 dark:border-gray-700;
+    @apply text-xs text-gray-500 dark:text-gray-400;
+  }
+
+  .rss-card-author {
+    @apply flex items-center truncate max-w-[40%];
+  }
+
+  .rss-card-tags {
+    @apply flex gap-1 flex-grow justify-center;
+  }
+
+  .rss-card-tag {
+    @apply px-2 py-0.5 bg-gray-100 dark:bg-gray-700 rounded text-xs;
+  }
+
+  .rss-card-action {
+    @apply p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700;
+    @apply transition-colors duration-200;
+  }
+
+  /* 空状态 */
+  .rss-empty-state {
+    @apply bg-white dark:bg-gray-800 rounded-xl p-12;
+    @apply border-2 border-dashed border-gray-300 dark:border-gray-600;
+  }
+
+  /* 响应式调整 */
+  @media (max-width: 768px) {
+    .rss-cards-grid {
+      @apply grid-cols-1;
+    }
+
+    .rss-filter-pills {
+      @apply gap-1;
+    }
+
+    .rss-filter-pill {
+      @apply px-3 py-1.5 text-xs;
+    }
+  }
+
+  /* 文本截断辅助类 */
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+</style>
+
+<script>
+  // 客户端筛选功能
+  document.addEventListener('DOMContentLoaded', () => {
+    const filterPills = document.querySelectorAll('.rss-filter-pill');
+    const cards = document.querySelectorAll('.rss-card');
+    
+    filterPills.forEach(pill => {
+      pill.addEventListener('click', () => {
+        const source = pill.getAttribute('data-source');
+        
+        // 更新选中状态
+        filterPills.forEach(p => p.classList.remove('active'));
+        pill.classList.add('active');
+        
+        // 过滤卡片
+        cards.forEach(card => {
+          if (source === 'all' || card.getAttribute('data-source') === source) {
+            (card as HTMLElement).style.display = '';
+          } else {
+            (card as HTMLElement).style.display = 'none';
+          }
+        });
+        
+        // 更新URL（可选）
+        const url = new URL(window.location.href);
+        if (source === 'all') {
+          url.searchParams.delete('source');
+        } else {
+          url.searchParams.set('source', source);
+        }
+        window.history.pushState({}, '', url);
+      });
+    });
+    
+    // 从URL参数恢复筛选状态
+    const urlParams = new URLSearchParams(window.location.search);
+    const sourceParam = urlParams.get('source');
+    if (sourceParam) {
+      const pill = document.querySelector(`[data-source="${sourceParam}"]`);
+      if (pill) {
+        (pill as HTMLElement).click();
+      }
+    }
+  });
+</script>

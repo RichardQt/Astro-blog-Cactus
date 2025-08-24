@@ -1,0 +1,264 @@
+/* RSS 样式文件 */
+
+/* RSS 订阅源列表样式 */
+.rss-feed-list {
+  @apply space-y-6;
+}
+
+.rss-feed-item {
+  @apply bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 p-6;
+}
+
+.rss-feed-header {
+  @apply flex items-start justify-between mb-4;
+}
+
+.rss-feed-meta {
+  @apply flex items-center space-x-4 text-sm text-gray-600 dark:text-gray-400;
+}
+
+.rss-feed-source {
+  @apply font-medium text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300;
+}
+
+.rss-feed-date {
+  @apply text-gray-500 dark:text-gray-400;
+}
+
+.rss-feed-title {
+  @apply text-xl font-bold text-gray-900 dark:text-white mb-2 hover:text-blue-600 dark:hover:text-blue-400 transition-colors;
+}
+
+.rss-feed-description {
+  @apply text-gray-700 dark:text-gray-300 mb-4 leading-relaxed;
+}
+
+.rss-feed-actions {
+  @apply flex items-center space-x-2;
+}
+
+.rss-read-button {
+  @apply px-3 py-1 text-sm bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded-full hover:bg-blue-200 dark:hover:bg-blue-800 transition-colors;
+}
+
+.rss-external-link {
+  @apply text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors;
+}
+
+/* RSS 项目卡片样式 */
+.rss-item-card {
+  @apply bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 p-6 border-l-4 border-blue-500;
+}
+
+.rss-item-card.read {
+  @apply border-gray-300 bg-gray-50 dark:bg-gray-700;
+}
+
+.rss-item-header {
+  @apply flex items-start justify-between mb-3;
+}
+
+.rss-item-title {
+  @apply text-lg font-semibold text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition-colors flex-1;
+}
+
+.rss-item-meta {
+  @apply flex items-center space-x-3 text-sm text-gray-600 dark:text-gray-400 mt-2;
+}
+
+.rss-item-source {
+  @apply font-medium text-blue-600 dark:text-blue-400;
+}
+
+.rss-item-date {
+  @apply text-gray-500 dark:text-gray-400;
+}
+
+.rss-item-description {
+  @apply text-gray-700 dark:text-gray-300 mb-4 leading-relaxed;
+}
+
+.rss-item-content {
+  @apply text-gray-600 dark:text-gray-400 text-sm mb-4;
+}
+
+.rss-item-tags {
+  @apply flex flex-wrap gap-2 mb-4;
+}
+
+.rss-item-tag {
+  @apply px-2 py-1 text-xs bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-full;
+}
+
+.rss-item-actions {
+  @apply flex items-center justify-between;
+}
+
+.rss-item-read-toggle {
+  @apply px-3 py-1 text-sm bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 rounded-full hover:bg-green-200 dark:hover:bg-green-800 transition-colors;
+}
+
+.rss-item-read-toggle.read {
+  @apply bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400;
+}
+
+/* RSS 加载状态样式 */
+.rss-loading {
+  @apply flex items-center justify-center py-12;
+}
+
+.rss-loading-spinner {
+  @apply animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600;
+}
+
+.rss-loading-text {
+  @apply ml-3 text-gray-600 dark:text-gray-400;
+}
+
+/* RSS 错误状态样式 */
+.rss-error {
+  @apply bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-6 my-6;
+}
+
+.rss-error-title {
+  @apply text-lg font-semibold text-red-800 dark:text-red-200 mb-2;
+}
+
+.rss-error-message {
+  @apply text-red-700 dark:text-red-300 mb-4;
+}
+
+.rss-error-actions {
+  @apply flex space-x-3;
+}
+
+.rss-retry-button {
+  @apply px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors;
+}
+
+/* RSS 分页样式 */
+.rss-pagination {
+  @apply flex items-center justify-between mt-8;
+}
+
+.rss-pagination-info {
+  @apply text-sm text-gray-600 dark:text-gray-400;
+}
+
+.rss-pagination-controls {
+  @apply flex space-x-2;
+}
+
+.rss-pagination-button {
+  @apply px-3 py-2 text-sm bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed;
+}
+
+.rss-pagination-button.active {
+  @apply bg-blue-600 text-white border-blue-600 hover:bg-blue-700;
+}
+
+/* RSS 内容视图样式 */
+.rss-content-view {
+  @apply max-w-4xl mx-auto;
+}
+
+.rss-content-header {
+  @apply mb-8;
+}
+
+.rss-content-title {
+  @apply text-3xl font-bold text-gray-900 dark:text-white mb-4;
+}
+
+.rss-content-meta {
+  @apply flex items-center space-x-4 text-sm text-gray-600 dark:text-gray-400 mb-6;
+}
+
+.rss-content-body {
+  @apply prose dark:prose-invert max-w-none;
+}
+
+.rss-content-body h1,
+.rss-content-body h2,
+.rss-content-body h3,
+.rss-content-body h4,
+.rss-content-body h5,
+.rss-content-body h6 {
+  @apply text-gray-900 dark:text-white font-bold mb-4;
+}
+
+.rss-content-body p {
+  @apply text-gray-700 dark:text-gray-300 mb-4 leading-relaxed;
+}
+
+.rss-content-body a {
+  @apply text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors;
+}
+
+.rss-content-body img {
+  @apply rounded-lg shadow-md my-6;
+}
+
+.rss-content-body blockquote {
+  @apply border-l-4 border-blue-500 pl-4 italic text-gray-600 dark:text-gray-400 my-6;
+}
+
+/* RSS 响应式设计 */
+@media (max-width: 768px) {
+  .rss-feed-header,
+  .rss-item-header {
+    @apply flex-col space-y-2;
+  }
+
+  .rss-feed-meta,
+  .rss-item-meta {
+    @apply flex-wrap;
+  }
+
+  .rss-pagination-controls {
+    @apply flex-wrap;
+  }
+
+  .rss-content-title {
+    @apply text-2xl;
+  }
+}
+
+/* RSS 动画效果 */
+@keyframes rss-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.rss-fade-in {
+  animation: rss-fade-in 0.3s ease-out;
+}
+
+/* RSS 工具提示样式 */
+.rss-tooltip {
+  @apply relative;
+}
+
+.rss-tooltip::before {
+  content: attr(data-tooltip);
+  @apply absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 text-sm text-white bg-gray-900 dark:bg-gray-700 rounded-lg opacity-0 pointer-events-none transition-opacity duration-300 whitespace-nowrap z-10;
+}
+
+.rss-tooltip:hover::before {
+  @apply opacity-100;
+}
+
+.rss-tooltip::after {
+  content: '';
+  @apply absolute bottom-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900 dark:border-t-gray-700 opacity-0 pointer-events-none transition-opacity duration-300;
+}
+
+.rss-tooltip:hover::after {
+  @apply opacity-100;
+}

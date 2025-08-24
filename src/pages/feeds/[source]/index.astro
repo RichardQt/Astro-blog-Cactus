@@ -1,0 +1,325 @@
+---
+// 特定订阅源的项目列表页面
+// 显示来自特定RSS订阅源的所有项目
+
+import { rssManager } from "@/utils/rss";
+import PageLayout from "@/layouts/Base.astro";
+import type { RSSFeed } from "@/types";
+
+export const prerender = true;
+
+export async function getStaticPaths() {
+  const sources = rssManager.getSources();
+  return sources.map((source) => ({
+    params: { source: source.id },
+    props: { source },
+  }));
+}
+
+const { source } = Astro.props;
+
+const meta = {
+  title: `${source.name} - RSS订阅源`,
+  description: `浏览来自${source.name}的最新内容。${source.description || ''}`,
+  ogImage: "/og-image.png"
+};
+
+// 获取特定订阅源的内容
+const feed: RSSFeed | null = await rssManager.getFeed(source.id);
+const items = feed ? feed.items : [];
+---
+
+<PageLayout meta={meta}>
+  <section class="rss-source-header">
+    <div class="rss-source-info">
+      <div class="rss-source-meta">
+        <h1 class="title mb-4">{source.name}</h1>
+        {source.description && (
+          <p class="rss-source-description text-lg text-gray-700 dark:text-gray-300 leading-relaxed mb-6">
+            {source.description}
+          </p>
+        )}
+
+        <div class="rss-source-details">
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+            <div class="rss-detail-card">
+              <div class="rss-detail-number text-2xl font-bold text-blue-600 dark:text-blue-400">
+                {items.length}
+              </div>
+              <div class="rss-detail-label text-gray-600 dark:text-gray-400">
+                文章数
+              </div>
+            </div>
+            <div class="rss-detail-card">
+              <div class="rss-detail-number text-2xl font-bold text-green-600 dark:text-green-400">
+                {source.category || '未分类'}
+              </div>
+              <div class="rss-detail-label text-gray-600 dark:text-gray-400">
+                分类
+              </div>
+            </div>
+            <div class="rss-detail-card">
+              <div class="rss-detail-number text-2xl font-bold text-purple-600 dark:text-purple-400">
+                {source.language || '中文'}
+              </div>
+              <div class="rss-detail-label text-gray-600 dark:text-gray-400">
+                语言
+              </div>
+            </div>
+          </div>
+
+          <div class="rss-source-actions">
+            <a
+              href={source.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="rss-source-link"
+            >
+              访问原始源 →
+            </a>
+            <a
+              href="/feeds"
+              class="rss-back-link"
+            >
+              ← 返回所有订阅源
+            </a>
+          </div>
+        </div>
+      </div>
+
+      {source.imageUrl && (
+        <div class="rss-source-image">
+          <img
+            src={source.imageUrl}
+            alt={`${source.name} logo`}
+            class="rss-source-logo"
+            loading="lazy"
+          />
+        </div>
+      )}
+    </div>
+  </section>
+
+  <!-- RSS项目列表 -->
+  <section class="rss-items-section">
+    <h2 class="title mb-6 text-xl text-accent">最新文章</h2>
+
+    {items.length === 0 ? (
+      <div class="rss-empty-state">
+        <p class="rss-empty-text">暂无文章内容</p>
+        <p class="rss-empty-subtext">请稍后刷新页面或检查订阅源配置</p>
+        <div class="rss-empty-actions">
+          <button
+            onclick="window.location.reload()"
+            class="rss-refresh-btn"
+          >
+            刷新页面
+          </button>
+        </div>
+      </div>
+    ) : (
+      <div class="rss-items-grid">
+        {items.map((item) => (
+          <div class="rss-item-card">
+            <div class="rss-item-header">
+              <h3 class="rss-item-title">
+                <a href={`/feeds/${source.id}/${item.id || 'unknown'}`}>
+                  {item.title}
+                </a>
+              </h3>
+              <time class="rss-item-date" datetime={item.pubDate}>
+                {new Date(item.pubDate).toLocaleDateString('zh-CN')}
+              </time>
+            </div>
+
+            {item.description && (
+              <p class="rss-item-description">
+                {item.description.length > 150
+                  ? `${item.description.substring(0, 150)}...`
+                  : item.description}
+              </p>
+            )}
+
+            <div class="rss-item-footer">
+              <a
+                href={`/feeds/${source.id}/${item.id || 'unknown'}`}
+                class="rss-item-readmore"
+              >
+                阅读全文 →
+              </a>
+            </div>
+          </div>
+        ))}
+      </div>
+    )}
+  </section>
+
+  <!-- 订阅源信息 -->
+  <section class="rss-source-about mt-16">
+    <div class="rss-about-card">
+      <h3 class="text-lg font-semibold mb-4 text-gray-900 dark:text-white">
+        关于 {source.name}
+      </h3>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm text-gray-600 dark:text-gray-400">
+        <div>
+          <h4 class="font-medium mb-2 text-gray-800 dark:text-gray-200">更新频率</h4>
+          <p>{source.fetchInterval ? `每${source.fetchInterval}分钟` : '定期更新'}</p>
+        </div>
+        <div>
+          <h4 class="font-medium mb-2 text-gray-800 dark:text-gray-200">最后更新</h4>
+          <p>{source.lastFetched ? new Date(source.lastFetched).toLocaleString('zh-CN') : '未知'}</p>
+        </div>
+        <div>
+          <h4 class="font-medium mb-2 text-gray-800 dark:text-gray-200">活跃状态</h4>
+          <p>{source.isActive !== false ? '活跃' : '暂停'}</p>
+        </div>
+        <div>
+          <h4 class="font-medium mb-2 text-gray-800 dark:text-gray-200">内容语言</h4>
+          <p>{source.language || '中文'}</p>
+        </div>
+      </div>
+    </div>
+  </section>
+</PageLayout>
+
+<style>
+  .rss-source-header {
+    @apply mb-12;
+  }
+
+  .rss-source-info {
+    @apply flex flex-col lg:flex-row gap-8 items-start;
+  }
+
+  .rss-source-meta {
+    @apply flex-1;
+  }
+
+  .rss-source-description {
+    @apply max-w-3xl;
+  }
+
+  .rss-detail-card {
+    @apply bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 text-center border border-gray-200 dark:border-gray-700;
+  }
+
+  .rss-detail-number {
+    @apply mb-1;
+  }
+
+  .rss-detail-label {
+    @apply text-sm font-medium;
+  }
+
+  .rss-source-actions {
+    @apply flex flex-wrap gap-4 mt-6;
+  }
+
+  .rss-source-link,
+  .rss-back-link {
+    @apply inline-flex items-center px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200;
+  }
+
+  .rss-source-link {
+    @apply bg-blue-600 text-white hover:bg-blue-700;
+  }
+
+  .rss-back-link {
+    @apply bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600;
+  }
+
+  .rss-source-image {
+    @apply flex-shrink-0;
+  }
+
+  .rss-source-logo {
+    @apply w-32 h-32 object-contain rounded-lg shadow-md border border-gray-200 dark:border-gray-700;
+  }
+
+  .rss-items-section {
+    @apply mb-12;
+  }
+
+  .rss-empty-state {
+    @apply text-center py-12;
+  }
+
+  .rss-empty-text {
+    @apply text-xl font-semibold text-gray-900 dark:text-white mb-2;
+  }
+
+  .rss-empty-subtext {
+    @apply text-gray-600 dark:text-gray-400 mb-6;
+  }
+
+  .rss-empty-actions {
+    @apply flex justify-center;
+  }
+
+  .rss-refresh-btn {
+    @apply bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors duration-200;
+  }
+
+  .rss-items-grid {
+    @apply grid grid-cols-1 md:grid-cols-2 gap-6;
+  }
+
+  .rss-item-card {
+    @apply bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 p-6 border border-gray-200 dark:border-gray-700;
+  }
+
+  .rss-item-header {
+    @apply mb-4;
+  }
+
+  .rss-item-title {
+    @apply text-lg font-semibold text-gray-900 dark:text-white mb-2 leading-tight;
+  }
+
+  .rss-item-title a {
+    @apply hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200;
+  }
+
+  .rss-item-date {
+    @apply text-sm text-gray-500 dark:text-gray-400;
+  }
+
+  .rss-item-description {
+    @apply text-gray-600 dark:text-gray-400 mb-4 leading-relaxed;
+  }
+
+  .rss-item-footer {
+    @apply flex justify-end;
+  }
+
+  .rss-item-readmore {
+    @apply text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium transition-colors duration-200;
+  }
+
+  .rss-source-about {
+    @apply border-t border-gray-200 dark:border-gray-700 pt-16;
+  }
+
+  .rss-about-card {
+    @apply bg-gray-50 dark:bg-gray-800/50 rounded-lg p-8 border border-gray-200 dark:border-gray-700;
+  }
+
+  /* 响应式设计 */
+  @media (max-width: 768px) {
+    .rss-source-info {
+      @apply flex-col;
+    }
+
+    .rss-source-logo {
+      @apply w-24 h-24;
+    }
+
+    .rss-source-actions {
+      @apply flex-col;
+    }
+
+    .rss-items-grid {
+      @apply grid-cols-1;
+    }
+  }
+</style>

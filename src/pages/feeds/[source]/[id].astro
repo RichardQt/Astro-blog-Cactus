@@ -1,0 +1,413 @@
+---
+// 单个RSS项目详情页面
+// 显示特定RSS项目的完整内容
+
+import { rssManager } from "@/utils/rss";
+import PageLayout from "@/layouts/Base.astro";
+
+export const prerender = true;
+
+export async function getStaticPaths() {
+  const sources = rssManager.getSources();
+  const paths = [];
+
+  for (const source of sources) {
+    const feed = await rssManager.getFeed(source.id);
+    if (feed && feed.items) {
+      for (const item of feed.items) {
+        paths.push({
+          params: {
+            source: source.id,
+            id: item.id || 'unknown'
+          },
+          props: {
+            source,
+            item,
+            feed
+          }
+        });
+      }
+    }
+  }
+
+  return paths;
+}
+
+const { source, item, feed } = Astro.props;
+
+const meta = {
+  title: `${item.title} - ${source.name}`,
+  description: item.description ? item.description.substring(0, 160) + '...' : `来自${source.name}的文章`,
+  ogImage: "/og-image.png"
+};
+
+// 格式化发布日期
+const formatDate = (dateString: string) => {
+  try {
+    return new Date(dateString).toLocaleDateString('zh-CN', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  } catch {
+    return dateString;
+  }
+};
+
+// 清理和格式化内容
+const cleanContent = (content: string) => {
+  if (!content) return '';
+
+  // 移除多余的换行和空格
+  return content
+    .replace(/\n\s*\n/g, '\n\n')
+    .replace(/\s+/g, ' ')
+    .trim();
+};
+
+// 获取相关文章（同源的最新文章）
+const relatedItems = feed.items
+  .filter(feedItem => feedItem.id !== item.id)
+  .slice(0, 4);
+---
+
+<PageLayout meta={meta}>
+  <article class="rss-article">
+    <!-- 文章头部信息 -->
+    <header class="rss-article-header">
+      <div class="rss-article-meta">
+        <div class="rss-article-source">
+          <a href={`/feeds/${source.id}`} class="rss-source-link">
+            <img
+              src={source.imageUrl || '/default-feed-icon.png'}
+              alt={`${source.name} logo`}
+              class="rss-source-icon"
+              loading="lazy"
+            />
+            <span class="rss-source-name">{source.name}</span>
+          </a>
+        </div>
+        <div class="rss-article-info">
+          <time class="rss-article-date" datetime={item.pubDate}>
+            {formatDate(item.pubDate)}
+          </time>
+          {item.author && (
+            <span class="rss-article-author">作者: {item.author}</span>
+          )}
+        </div>
+      </div>
+
+      <h1 class="rss-article-title">{item.title}</h1>
+
+      {item.description && (
+        <p class="rss-article-description">
+          {item.description}
+        </p>
+      )}
+    </header>
+
+    <!-- 文章内容 -->
+    <div class="rss-article-content">
+      {item.content ? (
+        <div class="rss-article-body" set:html={cleanContent(item.content)}></div>
+      ) : item.description ? (
+        <div class="rss-article-body">
+          <p>{item.description}</p>
+        </div>
+      ) : (
+        <div class="rss-article-body">
+          <p class="rss-no-content">暂无详细内容</p>
+        </div>
+      )}
+    </div>
+
+    <!-- 文章操作 -->
+    <div class="rss-article-actions">
+      <a
+        href={item.link}
+        target="_blank"
+        rel="noopener noreferrer"
+        class="rss-read-original"
+      >
+        阅读原文 →
+      </a>
+
+      <div class="rss-share-actions">
+        <button
+          onclick="navigator.clipboard.writeText(window.location.href)"
+          class="rss-share-btn"
+          title="复制链接"
+        >
+          📋 复制链接
+        </button>
+
+        {item.link && (
+          <a
+            href={`https://twitter.com/intent/tweet?url=${encodeURIComponent(item.link)}&text=${encodeURIComponent(item.title)}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="rss-share-btn"
+            title="分享到Twitter"
+          >
+            🐦 分享
+          </a>
+        )}
+      </div>
+    </div>
+
+    <!-- 相关文章 -->
+    {relatedItems.length > 0 && (
+      <section class="rss-related-articles">
+        <h3 class="rss-related-title">相关文章</h3>
+        <div class="rss-related-grid">
+          {relatedItems.map((relatedItem) => (
+            <div class="rss-related-item">
+              <h4 class="rss-related-item-title">
+                <a href={`/feeds/${source.id}/${relatedItem.id || 'unknown'}`}>
+                  {relatedItem.title}
+                </a>
+              </h4>
+              <time class="rss-related-item-date" datetime={relatedItem.pubDate}>
+                {new Date(relatedItem.pubDate).toLocaleDateString('zh-CN')}
+              </time>
+            </div>
+          ))}
+        </div>
+      </section>
+    )}
+
+    <!-- 返回导航 -->
+    <div class="rss-article-footer">
+      <a href={`/feeds/${source.id}`} class="rss-back-to-source">
+        ← 返回 {source.name}
+      </a>
+      <a href="/feeds" class="rss-back-to-feeds">
+        ← 返回所有订阅源
+      </a>
+    </div>
+  </article>
+</PageLayout>
+
+<style>
+  .rss-article {
+    @apply max-w-4xl mx-auto;
+  }
+
+  .rss-article-header {
+    @apply mb-8 pb-8 border-b border-gray-200 dark:border-gray-700;
+  }
+
+  .rss-article-meta {
+    @apply flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-4;
+  }
+
+  .rss-article-source {
+    @apply flex items-center gap-3;
+  }
+
+  .rss-source-link {
+    @apply flex items-center gap-3 hover:opacity-80 transition-opacity duration-200;
+  }
+
+  .rss-source-icon {
+    @apply w-8 h-8 object-contain rounded;
+  }
+
+  .rss-source-name {
+    @apply font-medium text-gray-900 dark:text-white;
+  }
+
+  .rss-article-info {
+    @apply flex flex-col sm:flex-row sm:items-center gap-2 text-sm text-gray-600 dark:text-gray-400;
+  }
+
+  .rss-article-date {
+    @apply font-medium;
+  }
+
+  .rss-article-author {
+    @apply before:content-['•'] before:mr-2 before:ml-2;
+  }
+
+  .rss-article-title {
+    @apply text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white leading-tight mb-4;
+  }
+
+  .rss-article-description {
+    @apply text-lg text-gray-700 dark:text-gray-300 leading-relaxed;
+  }
+
+  .rss-article-content {
+    @apply mb-8;
+  }
+
+  .rss-article-body {
+    @apply prose prose-lg dark:prose-invert max-w-none;
+  }
+
+  .rss-article-body :global(p) {
+    @apply mb-4 leading-relaxed;
+  }
+
+  .rss-article-body :global(h1),
+  .rss-article-body :global(h2),
+  .rss-article-body :global(h3) {
+    @apply mt-8 mb-4 font-bold;
+  }
+
+  .rss-article-body :global(h1) {
+    @apply text-2xl;
+  }
+
+  .rss-article-body :global(h2) {
+    @apply text-xl;
+  }
+
+  .rss-article-body :global(h3) {
+    @apply text-lg;
+  }
+
+  .rss-article-body :global(ul),
+  .rss-article-body :global(ol) {
+    @apply mb-4 ml-6;
+  }
+
+  .rss-article-body :global(li) {
+    @apply mb-2;
+  }
+
+  .rss-article-body :global(a) {
+    @apply text-blue-600 dark:text-blue-400 hover:underline;
+  }
+
+  .rss-article-body :global(img) {
+    @apply rounded-lg shadow-md my-4;
+  }
+
+  .rss-article-body :global(blockquote) {
+    @apply border-l-4 border-blue-500 pl-4 italic my-4 text-gray-700 dark:text-gray-300;
+  }
+
+  .rss-article-body :global(code) {
+    @apply bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded text-sm;
+  }
+
+  .rss-article-body :global(pre) {
+    @apply bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto my-4;
+  }
+
+  .rss-no-content {
+    @apply text-gray-500 dark:text-gray-400 italic text-center py-8;
+  }
+
+  .rss-article-actions {
+    @apply flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-12 p-6 bg-gray-50 dark:bg-gray-800/50 rounded-lg border border-gray-200 dark:border-gray-700;
+  }
+
+  .rss-read-original {
+    @apply inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 font-medium;
+  }
+
+  .rss-share-actions {
+    @apply flex gap-3;
+  }
+
+  .rss-share-btn {
+    @apply px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors duration-200 text-sm font-medium;
+  }
+
+  .rss-related-articles {
+    @apply mb-12;
+  }
+
+  .rss-related-title {
+    @apply text-xl font-semibold mb-6 text-gray-900 dark:text-white;
+  }
+
+  .rss-related-grid {
+    @apply grid grid-cols-1 sm:grid-cols-2 gap-4;
+  }
+
+  .rss-related-item {
+    @apply p-4 bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow duration-200;
+  }
+
+  .rss-related-item-title {
+    @apply text-sm font-medium text-gray-900 dark:text-white mb-2 leading-tight;
+  }
+
+  .rss-related-item-title a {
+    @apply hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200;
+  }
+
+  .rss-related-item-date {
+    @apply text-xs text-gray-500 dark:text-gray-400;
+  }
+
+  .rss-article-footer {
+    @apply flex flex-col sm:flex-row gap-4 pt-8 border-t border-gray-200 dark:border-gray-700;
+  }
+
+  .rss-back-to-source,
+  .rss-back-to-feeds {
+    @apply inline-flex items-center text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium transition-colors duration-200;
+  }
+
+  /* 响应式设计 */
+  @media (max-width: 768px) {
+    .rss-article-title {
+      @apply text-2xl;
+    }
+
+    .rss-article-actions {
+      @apply flex-col items-stretch;
+    }
+
+    .rss-share-actions {
+      @apply justify-center;
+    }
+
+    .rss-related-grid {
+      @apply grid-cols-1;
+    }
+  }
+</style>
+
+<script>
+  // 客户端交互逻辑
+  class RSSArticle extends HTMLElement {
+    connectedCallback() {
+      // 可以在这里添加阅读进度、分享等交互功能
+      this.setupShareButtons();
+    }
+
+    setupShareButtons() {
+      const shareButtons = this.querySelectorAll('.rss-share-btn');
+
+      shareButtons.forEach(button => {
+        if (button.textContent?.includes('复制链接')) {
+          button.addEventListener('click', async () => {
+            try {
+              await navigator.clipboard.writeText(window.location.href);
+              const originalText = button.textContent;
+              button.textContent = '✅ 已复制';
+              setTimeout(() => {
+                button.textContent = originalText;
+              }, 2000);
+            } catch (err) {
+              console.error('复制失败:', err);
+              button.textContent = '❌ 复制失败';
+              setTimeout(() => {
+                button.textContent = '📋 复制链接';
+              }, 2000);
+            }
+          });
+        }
+      });
+    }
+  }
+
+  customElements.define('rss-article', RSSArticle);
+</script>

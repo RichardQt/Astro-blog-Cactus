@@ -1,3 +1,10 @@
+/*
+ * @Description: 
+ * @Date: 2025-04-28 00:45:05
+ * @Author: Richard_Li
+ * @LastEditTime: 2025-08-23 21:35:01
+ * @FilePath: \Astro-blog-Cactus\src\site.config.ts
+ */
 import type { SiteConfig } from "@/types";
 import type { AstroExpressiveCodeOptions } from "astro-expressive-code";
 
@@ -25,7 +32,7 @@ export const siteConfig: SiteConfig = {
 
 // Used to generate links in both the Header & Footer.
 export const menuLinks: { path: string; title: string }[] = [
-  // 修改：改为中文
+   // 修改：改为中文
 	{
 		path: "/",
 		title: "主页",
@@ -41,6 +48,10 @@ export const menuLinks: { path: string; title: string }[] = [
 	{
 		path: "/notes/",
 		title: "笔记",
+	},
+	{
+		path: "/feeds/",
+		title: "订阅源",
 	},
 ];
 

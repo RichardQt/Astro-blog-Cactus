@@ -1,0 +1,124 @@
+---
+// RSS订阅源列表组件
+// 显示所有可用的RSS订阅源
+
+import { rssManager } from "@/utils/rss";
+import type { RSSSource, RSSFeed } from "@/types";
+
+interface Props {
+  sources?: RSSSource[];
+  showAll?: boolean;
+  maxItems?: number;
+}
+
+const {
+  sources = [],
+  showAll = true,
+  maxItems = 10
+} = Astro.props;
+
+// 获取所有订阅源
+const allSources = sources.length > 0 ? sources : rssManager.getSources();
+
+// 获取订阅源的最新内容
+const feeds: RSSFeed[] = [];
+for (const source of allSources) {
+  try {
+    const feed = await rssManager.getFeed(source.id);
+    if (feed) {
+      feeds.push(feed);
+    }
+  } catch (error) {
+    console.error(`获取订阅源 ${source.name} 失败:`, error);
+  }
+}
+
+// 限制显示数量
+const displayFeeds = showAll ? feeds : feeds.slice(0, maxItems);
+
+// 收集所有项目用于显示
+const allItems = displayFeeds.flatMap(feed => feed.items);
+const displayItems = showAll ? allItems : allItems.slice(0, maxItems);
+---
+
+<div class="rss-feed-list">
+  {displayItems.length === 0 ? (
+    <div class="rss-empty-state">
+      <p class="rss-empty-text">暂无订阅源内容</p>
+      <p class="rss-empty-subtext">请稍后刷新页面或检查订阅源配置</p>
+    </div>
+  ) : (
+    displayItems.map((item) => (
+      <div class="rss-feed-item">
+        <div class="rss-feed-header">
+          <div class="rss-feed-meta">
+            <a href={item.sourceId ? `?source=${item.sourceId}` : '#'} class="rss-feed-source">
+              {item.sourceName}
+            </a>
+            <time class="rss-feed-date" datetime={item.pubDate}>
+              {new Date(item.pubDate).toLocaleDateString('zh-CN')}
+            </time>
+          </div>
+        </div>
+
+        <h3 class="rss-feed-title">
+          <a href={item.link} target="_blank" rel="noopener noreferrer">
+            {item.title}
+          </a>
+        </h3>
+
+        {item.description && (
+          <p class="rss-feed-description">
+            {item.description.length > 200
+              ? `${item.description.substring(0, 200)}...`
+              : item.description}
+          </p>
+        )}
+
+        <div class="rss-feed-actions">
+          <a
+            href={item.link}
+            class="rss-external-link"
+            target="_blank"
+            rel="noopener noreferrer"
+            title={`阅读文章: ${item.title}`}
+          >
+            阅读全文 →
+          </a>
+        </div>
+      </div>
+    ))
+  )}
+</div>
+
+<style>
+  /* 组件特定的样式覆盖 */
+  .rss-empty-state {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: var(--text-muted);
+  }
+
+  .rss-empty-text {
+    font-size: 1.125rem;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+  }
+
+  .rss-empty-subtext {
+    font-size: 0.875rem;
+    opacity: 0.7;
+  }
+</style>
+
+<script>
+  // 客户端交互逻辑
+  class RSSFeedList extends HTMLElement {
+    connectedCallback() {
+      // 可以在这里添加交互逻辑
+      // 例如：自动刷新、加载更多等
+    }
+  }
+
+  customElements.define('rss-feed-list', RSSFeedList);
+</script>

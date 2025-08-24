@@ -1,0 +1,165 @@
+---
+// RSS订阅源主页面
+// 显示所有可用的RSS订阅源
+
+import { rssManager } from "@/utils/rss";
+import RSSFeedTable from "@/components/rss/RSSFeedTable.astro";
+import PageLayout from "@/layouts/Base.astro";
+import { Icon } from "astro-icon/components";
+import type { RSSFeed } from "@/types";
+
+export const prerender = false; // 改为false以支持动态URL参数
+
+// 获取所有订阅源
+const sources = rssManager.getSources();
+
+// 从URL参数获取选中的源
+const selectedSource = Astro.url.searchParams.get('source') || 'all';
+
+// 获取所有feeds来计算统计数据
+const allFeeds: RSSFeed[] = [];
+let totalArticles = 0;
+for (const source of sources) {
+  try {
+    const feed = await rssManager.getFeed(source.id);
+    if (feed) {
+      allFeeds.push(feed);
+      totalArticles += feed.items.length;
+    }
+  } catch (error) {
+    console.error(`获取订阅源 ${source.name} 失败:`, error);
+  }
+}
+
+const meta = {
+  title: "RSS订阅源",
+  description: "浏览来自多个来源的最新RSS订阅内容",
+  ogImage: "/og-image.png"
+};
+---
+
+<PageLayout meta={meta}>
+  <section class="rss-page-header">
+    <h1 class="title mb-6">RSS订阅源</h1>
+    <p class="mb-8 text-lg text-gray-700 dark:text-gray-300 leading-relaxed">
+      探索来自多个优质来源的最新内容，包括技术博客、新闻资讯和行业动态。
+      所有内容都经过精心筛选，为您提供最有价值的信息。
+    </p>
+
+    <!-- 订阅源统计 -->
+    <div class="rss-stats mb-8">
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+        <div class="rss-stat-card">
+          <div class="rss-stat-number text-3xl font-bold text-blue-600 dark:text-blue-400">
+            {sources.length}
+          </div>
+          <div class="rss-stat-label text-gray-600 dark:text-gray-400">
+            订阅源
+          </div>
+        </div>
+        <div class="rss-stat-card">
+          <div class="rss-stat-number text-3xl font-bold text-green-600 dark:text-green-400">
+            {totalArticles}
+          </div>
+          <div class="rss-stat-label text-gray-600 dark:text-gray-400">
+            总文章数
+          </div>
+        </div>
+        <div class="rss-stat-card">
+          <div class="rss-stat-number text-3xl font-bold text-purple-600 dark:text-purple-400">
+            {sources.filter(source => source.isActive !== false).length}
+          </div>
+          <div class="rss-stat-label text-gray-600 dark:text-gray-400">
+            活跃源
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- RSS订阅源内容（列表+分页） -->
+  <section class="rss-feeds-section">
+    <RSSFeedTable 
+      sources={sources} 
+      selectedSource={selectedSource} 
+      itemsPerPage={15}
+      currentPage={Number(Astro.url.searchParams.get('page') || '1')}
+    />
+  </section>
+
+  <!-- 页面说明 -->
+  <section class="rss-info-section mt-16">
+    <div class="rss-info-card">
+      <h3 class="text-lg font-semibold mb-4 text-gray-900 dark:text-white">
+        关于RSS订阅源
+      </h3>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm text-gray-600 dark:text-gray-400">
+        <div>
+          <h4 class="font-medium mb-2 text-gray-800 dark:text-gray-200">实时更新</h4>
+          <p>所有内容都会实时从原始来源同步，确保您看到的是最新信息。</p>
+        </div>
+        <div>
+          <h4 class="font-medium mb-2 text-gray-800 dark:text-gray-200">内容筛选</h4>
+          <p>我们只收录高质量、有价值的内容源，为您节省时间。</p>
+        </div>
+        <div>
+          <h4 class="font-medium mb-2 text-gray-800 dark:text-gray-200">多格式支持</h4>
+          <p>支持各种RSS格式，包括RSS 2.0、Atom等标准格式。</p>
+        </div>
+        <div>
+          <h4 class="font-medium mb-2 text-gray-800 dark:text-gray-200">离线阅读</h4>
+          <p>内容会缓存到本地，支持离线阅读，提升访问速度。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+</PageLayout>
+
+<style>
+  .rss-page-header {
+    @apply mb-12;
+  }
+
+  .rss-stats {
+    @apply mb-8;
+  }
+
+  .rss-stat-card {
+    @apply bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 text-center border border-gray-200 dark:border-gray-700;
+  }
+
+  .rss-stat-number {
+    @apply mb-2;
+  }
+
+  .rss-stat-label {
+    @apply text-sm font-medium;
+  }
+
+  .rss-feeds-section {
+    @apply mb-12;
+  }
+
+  .rss-info-section {
+    @apply border-t border-gray-200 dark:border-gray-700 pt-16;
+  }
+
+  .rss-info-card {
+    @apply bg-gray-50 dark:bg-gray-800/50 rounded-lg p-8 border border-gray-200 dark:border-gray-700;
+  }
+
+  /* 响应式设计 */
+  @media (max-width: 768px) {
+    .rss-page-header .title {
+      @apply text-2xl;
+    }
+
+    .rss-stats .grid {
+      @apply grid-cols-1 gap-4;
+    }
+
+    .rss-info-card .grid {
+      @apply grid-cols-1 gap-4;
+    }
+  }
+</style>

@@ -1,0 +1,527 @@
+---
+// RSS订阅源列表组件 - 表格形式
+// 每行一条新闻，支持翻页
+
+import { rssManager } from "@/utils/rss";
+import type { RSSSource, RSSFeed } from "@/types";
+import { Icon } from "astro-icon/components";
+
+interface Props {
+  sources?: RSSSource[];
+  selectedSource?: string;
+  itemsPerPage?: number;
+  currentPage?: number;
+}
+
+const {
+  sources = [],
+  selectedSource = 'all',
+  itemsPerPage = 15,
+  currentPage = 1
+} = Astro.props;
+
+// 获取所有订阅源
+const allSources = sources.length > 0 ? sources : rssManager.getSources();
+
+// 获取所有订阅源的内容（用于统计）
+const allFeeds: RSSFeed[] = [];
+const feedsMap = new Map<string, RSSFeed>();
+
+for (const source of allSources) {
+  try {
+    const feed = await rssManager.getFeed(source.id);
+    if (feed) {
+      allFeeds.push(feed);
+      feedsMap.set(source.id, feed);
+    }
+  } catch (error) {
+    console.error(`获取订阅源 ${source.name} 失败:`, error);
+  }
+}
+
+// 根据选择筛选feeds
+const feeds = selectedSource === 'all' 
+  ? allFeeds 
+  : allFeeds.filter(f => f.source.id === selectedSource);
+
+// 收集所有项目并按时间排序
+const allItems = feeds
+  .flatMap(feed => feed.items)
+  .sort((a, b) => new Date(b.pubDate).getTime() - new Date(a.pubDate).getTime());
+
+// 计算全部文章的总数（用于显示）
+const totalAllItems = allFeeds.flatMap(feed => feed.items).length;
+
+// 计算分页
+const totalItems = allItems.length;
+const totalPages = Math.ceil(totalItems / itemsPerPage);
+const startIndex = (currentPage - 1) * itemsPerPage;
+const endIndex = startIndex + itemsPerPage;
+const currentItems = allItems.slice(startIndex, endIndex);
+
+// 格式化日期
+function formatDate(dateString: string): string {
+  const date = new Date(dateString);
+  return date.toLocaleDateString('zh-CN', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+}
+
+// 获取源的颜色
+function getSourceColor(sourceId: string): string {
+  const colors = [
+    'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20',
+    'text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20',
+    'text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-900/20',
+    'text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-900/20',
+    'text-pink-600 dark:text-pink-400 bg-pink-50 dark:bg-pink-900/20',
+  ];
+  
+  let hash = 0;
+  for (let i = 0; i < sourceId.length; i++) {
+    hash = ((hash << 5) - hash) + sourceId.charCodeAt(i);
+    hash = hash & hash;
+  }
+  return colors[Math.abs(hash) % colors.length];
+}
+
+// 清理描述文本
+function cleanDescription(html: string, maxLength: number = 150): string {
+  if (!html) return '';
+  let text = html.replace(/<[^>]*>/g, ' ');
+  text = text
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&nbsp;/g, ' ');
+  text = text.replace(/\s+/g, ' ').trim();
+  if (text.length > maxLength) {
+    text = text.substring(0, maxLength) + '...';
+  }
+  return text;
+}
+
+// 生成页码数组
+function generatePageNumbers(current: number, total: number): (number | string)[] {
+  if (total <= 7) {
+    return Array.from({ length: total }, (_, i) => i + 1);
+  }
+  
+  const pages: (number | string)[] = [];
+  
+  if (current <= 3) {
+    for (let i = 1; i <= 5; i++) {
+      pages.push(i);
+    }
+    pages.push('...');
+    pages.push(total);
+  } else if (current >= total - 2) {
+    pages.push(1);
+    pages.push('...');
+    for (let i = total - 4; i <= total; i++) {
+      pages.push(i);
+    }
+  } else {
+    pages.push(1);
+    pages.push('...');
+    for (let i = current - 1; i <= current + 1; i++) {
+      pages.push(i);
+    }
+    pages.push('...');
+    pages.push(total);
+  }
+  
+  return pages;
+}
+
+const pageNumbers = generatePageNumbers(currentPage, totalPages);
+---
+
+<!-- RSS源筛选器 -->
+<div class="rss-filter-section mb-6">
+  <div class="rss-filter-header">
+    <h2 class="text-lg font-semibold">RSS订阅源</h2>
+    <div class="rss-info text-sm text-gray-600 dark:text-gray-400">
+      共 {totalItems} 篇文章，第 {currentPage}/{totalPages} 页
+    </div>
+  </div>
+  
+  <div class="rss-filter-tabs">
+    <button 
+      class={`rss-tab ${selectedSource === 'all' ? 'active' : ''}`}
+      data-source="all"
+    >
+      <span>全部</span>
+      <span class="rss-tab-count">{totalAllItems}</span>
+    </button>
+    {allSources.map(source => {
+      const sourceFeed = feedsMap.get(source.id);
+      const sourceItemCount = sourceFeed ? sourceFeed.items.length : 0;
+      return (
+        <button
+          class={`rss-tab ${selectedSource === source.id ? 'active' : ''}`}
+          data-source={source.id}
+        >
+          <span>{source.name}</span>
+          <span class="rss-tab-count">{sourceItemCount}</span>
+        </button>
+      );
+    })}
+  </div>
+</div>
+
+<!-- RSS内容列表 -->
+<div class="rss-table-container">
+  {currentItems.length === 0 ? (
+    <div class="rss-empty-state">
+      <Icon name="mdi:rss-off" class="w-12 h-12 text-gray-400 mb-4" />
+      <p class="text-lg font-medium text-gray-900 dark:text-white mb-2">暂无订阅内容</p>
+      <p class="text-sm text-gray-600 dark:text-gray-400">请稍后刷新页面或检查订阅源配置</p>
+    </div>
+  ) : (
+    <div class="rss-list">
+      {currentItems.map((item) => (
+        <article class="rss-list-item" data-source={item.sourceId}>
+          <!-- 左侧：主要内容 -->
+          <div class="rss-item-main">
+            <div class="rss-item-header">
+              <span class={`rss-source-tag ${getSourceColor(item.sourceId)}`}>
+                {item.sourceName}
+              </span>
+              <h3 class="rss-item-title">
+                <a 
+                  href={item.link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="rss-item-link"
+                >
+                  {item.title}
+                </a>
+              </h3>
+            </div>
+            
+            {item.description && (
+              <p class="rss-item-description">
+                {cleanDescription(item.description)}
+              </p>
+            )}
+            
+            <div class="rss-item-meta">
+              <time class="rss-item-time" datetime={item.pubDate}>
+                <Icon name="mdi:clock-outline" class="w-4 h-4 inline mr-1" />
+                {formatDate(item.pubDate)}
+              </time>
+              
+              {item.author && (
+                <span class="rss-item-author">
+                  <Icon name="mdi:account-outline" class="w-4 h-4 inline mr-1" />
+                  {item.author}
+                </span>
+              )}
+              
+              {item.category && item.category.length > 0 && (
+                <span class="rss-item-categories">
+                  <Icon name="mdi:tag-outline" class="w-4 h-4 inline mr-1" />
+                  {item.category.slice(0, 2).join(', ')}
+                </span>
+              )}
+            </div>
+          </div>
+          
+          <!-- 右侧：操作按钮 -->
+          <div class="rss-item-actions">
+            <a
+              href={item.link}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="rss-action-btn"
+              title="在新标签页中打开"
+            >
+              <Icon name="mdi:open-in-new" class="w-5 h-5" />
+              <span>阅读</span>
+            </a>
+          </div>
+        </article>
+      ))}
+    </div>
+  )}
+</div>
+
+<!-- 分页控件 -->
+{totalPages > 1 && (
+  <div class="rss-pagination">
+    <button
+      class={`rss-page-btn ${currentPage === 1 ? 'disabled' : ''}`}
+      data-page={currentPage - 1}
+      disabled={currentPage === 1}
+    >
+      <Icon name="mdi:chevron-left" class="w-5 h-5" />
+      上一页
+    </button>
+    
+    <div class="rss-page-numbers">
+      {pageNumbers.map((page) => (
+        typeof page === 'number' ? (
+          <button
+            class={`rss-page-number ${page === currentPage ? 'active' : ''}`}
+            data-page={page}
+          >
+            {page}
+          </button>
+        ) : (
+          <span class="rss-page-ellipsis">{page}</span>
+        )
+      ))}
+    </div>
+    
+    <button
+      class={`rss-page-btn ${currentPage === totalPages ? 'disabled' : ''}`}
+      data-page={currentPage + 1}
+      disabled={currentPage === totalPages}
+    >
+      下一页
+      <Icon name="mdi:chevron-right" class="w-5 h-5" />
+    </button>
+  </div>
+)}
+
+<style>
+  /* 筛选器部分 */
+  .rss-filter-section {
+    @apply bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm border border-gray-200 dark:border-gray-700;
+  }
+
+  .rss-filter-header {
+    @apply flex items-center justify-between mb-4;
+  }
+
+  .rss-filter-tabs {
+    @apply flex flex-wrap gap-2;
+  }
+
+  .rss-tab {
+    @apply px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200;
+    @apply bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300;
+    @apply hover:bg-gray-200 dark:hover:bg-gray-600 cursor-pointer;
+    @apply flex items-center gap-2;
+  }
+
+  .rss-tab.active {
+    background-color: hsl(var(--theme-accent));
+    color: white;
+  }
+
+  .rss-tab-count {
+    @apply inline-flex items-center justify-center px-2 py-0.5 text-xs rounded-full;
+    @apply bg-gray-200 dark:bg-gray-600;
+  }
+
+  .rss-tab.active .rss-tab-count {
+    @apply bg-white/20 text-white;
+  }
+
+  /* 列表容器 */
+  .rss-table-container {
+    @apply bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700;
+    @apply overflow-hidden;
+  }
+
+  /* 列表项 */
+  .rss-list {
+    @apply divide-y divide-gray-200 dark:divide-gray-700;
+  }
+
+  .rss-list-item {
+    @apply flex items-start gap-4 p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50;
+    @apply transition-colors duration-200;
+  }
+
+  .rss-item-main {
+    @apply flex-grow min-w-0;
+  }
+
+  .rss-item-header {
+    @apply flex items-start gap-3 mb-2;
+  }
+
+  .rss-source-tag {
+    @apply inline-flex items-center px-2 py-1 rounded text-xs font-semibold;
+    @apply flex-shrink-0;
+  }
+
+  .rss-item-title {
+    @apply flex-grow;
+  }
+
+  .rss-item-link {
+    @apply text-base font-semibold;
+    color: hsl(var(--theme-text));
+    @apply hover:underline;
+    font-family: var(--font-sans);
+  }
+
+  .rss-item-link:hover {
+    color: hsl(var(--theme-accent));
+  }
+
+  .rss-item-description {
+    @apply text-sm mb-2;
+    color: hsl(var(--theme-text) / 0.75);
+    font-family: var(--font-sans);
+  }
+
+  .rss-item-meta {
+    @apply flex flex-wrap items-center gap-4 text-xs;
+    color: hsl(var(--theme-text) / 0.6);
+  }
+
+  .rss-item-meta > * {
+    @apply flex items-center;
+  }
+
+  .rss-item-actions {
+    @apply flex-shrink-0;
+  }
+
+  .rss-action-btn {
+    @apply inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm font-medium;
+    @apply bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300;
+    @apply hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors duration-200;
+  }
+
+  /* 空状态 */
+  .rss-empty-state {
+    @apply flex flex-col items-center justify-center py-12;
+  }
+
+  /* 分页 */
+  .rss-pagination {
+    @apply flex items-center justify-between mt-6;
+    @apply bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm;
+    @apply border border-gray-200 dark:border-gray-700;
+  }
+
+  .rss-page-btn {
+    @apply inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium;
+    @apply bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300;
+    @apply hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors duration-200;
+  }
+
+  .rss-page-btn.disabled {
+    @apply opacity-50 cursor-not-allowed;
+  }
+
+  .rss-page-btn.disabled:hover {
+    @apply bg-gray-100 dark:bg-gray-700;
+  }
+
+  .rss-page-numbers {
+    @apply flex items-center gap-1;
+  }
+
+  .rss-page-number {
+    @apply w-8 h-8 rounded-lg text-sm font-medium;
+    @apply bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300;
+    @apply hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors duration-200;
+    @apply flex items-center justify-center;
+  }
+
+  .rss-page-number.active {
+    background-color: hsl(var(--theme-accent));
+    color: white;
+  }
+
+  .rss-page-ellipsis {
+    @apply px-2 text-gray-500;
+  }
+
+  /* 响应式设计 */
+  @media (max-width: 768px) {
+    .rss-filter-tabs {
+      @apply gap-1;
+    }
+
+    .rss-tab {
+      @apply px-3 py-1.5 text-xs;
+    }
+
+    .rss-list-item {
+      @apply flex-col;
+    }
+
+    .rss-item-header {
+      @apply flex-col gap-2;
+    }
+
+    .rss-item-meta {
+      @apply flex-col items-start gap-1;
+    }
+
+    .rss-item-actions {
+      @apply mt-3;
+    }
+
+    .rss-pagination {
+      @apply flex-col gap-4;
+    }
+
+    .rss-page-numbers {
+      @apply order-first;
+    }
+  }
+</style>
+
+<script>
+  // 客户端交互逻辑
+  document.addEventListener('DOMContentLoaded', () => {
+    const baseUrl = window.location.pathname;
+    
+    // 处理源筛选
+    const tabs = document.querySelectorAll('.rss-tab');
+    tabs.forEach(tab => {
+      tab.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        const source = tab.getAttribute('data-source');
+        const url = new URL(window.location.href);
+        
+        if (source === 'all') {
+          url.searchParams.delete('source');
+        } else {
+          url.searchParams.set('source', source);
+        }
+        
+        // 重置到第一页
+        url.searchParams.delete('page'); // 先删除再设置
+        url.searchParams.set('page', '1');
+        
+        window.location.href = url.toString();
+      });
+    });
+    
+    // 处理分页
+    const pageButtons = document.querySelectorAll('[data-page]:not(.disabled)');
+    pageButtons.forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        if (btn.classList.contains('disabled')) return;
+        
+        const page = btn.getAttribute('data-page');
+        if (!page) return;
+        
+        const url = new URL(window.location.href);
+        url.searchParams.set('page', page);
+        window.location.href = url.toString();
+      });
+    });
+  });
+</script>

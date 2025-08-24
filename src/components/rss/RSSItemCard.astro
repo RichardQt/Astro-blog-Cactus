@@ -1,0 +1,242 @@
+---
+// RSS项目卡片组件
+// 显示单个RSS项目的详细信息
+
+import type { RSSItem } from "@/types";
+
+interface Props {
+  item: RSSItem;
+  showSource?: boolean;
+  compact?: boolean;
+}
+
+const {
+  item,
+  showSource = true,
+  compact = false
+} = Astro.props;
+
+// 格式化日期
+const formatDate = (dateString: string) => {
+  try {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('zh-CN', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  } catch {
+    return dateString;
+  }
+};
+
+// 清理HTML内容
+const cleanContent = (content: string) => {
+  if (!content) return '';
+  // 移除HTML标签
+  const clean = content.replace(/<[^>]*>/g, '');
+  // 限制长度
+  return clean.length > 300 ? `${clean.substring(0, 300)}...` : clean;
+};
+
+// 获取阅读时间估算
+const getReadingTime = (content: string) => {
+  if (!content) return '1 分钟';
+  const words = content.replace(/<[^>]*>/g, '').split(/\s+/).length;
+  const minutes = Math.ceil(words / 200);
+  return `${minutes} 分钟`;
+};
+---
+
+<div class={`rss-item-card ${compact ? 'rss-item-compact' : ''}`}>
+  <div class="rss-item-header">
+    <div class="rss-item-meta">
+      {showSource && (
+        <span class="rss-item-source">
+          {item.sourceName}
+        </span>
+      )}
+      <time class="rss-item-date" datetime={item.pubDate}>
+        {formatDate(item.pubDate)}
+      </time>
+      <span class="rss-item-reading-time">
+        {getReadingTime(item.description || item.content || '')}
+      </span>
+    </div>
+
+    {item.author && (
+      <div class="rss-item-author">
+        作者: {item.author}
+      </div>
+    )}
+  </div>
+
+  <h3 class="rss-item-title">
+    <a href={item.link} target="_blank" rel="noopener noreferrer">
+      {item.title}
+    </a>
+  </h3>
+
+  {item.description && !compact && (
+    <div class="rss-item-description">
+      {item.description.length > 200
+        ? `${item.description.substring(0, 200)}...`
+        : item.description}
+    </div>
+  )}
+
+  {item.content && !compact && (
+    <div class="rss-item-content">
+      {cleanContent(item.content)}
+    </div>
+  )}
+
+  <div class="rss-item-footer">
+    <div class="rss-item-actions">
+      <a
+        href={item.link}
+        class="rss-read-more"
+        target="_blank"
+        rel="noopener noreferrer"
+        title={`阅读: ${item.title}`}
+      >
+        阅读全文 →
+      </a>
+
+      {item.category && item.category.length > 0 && (
+        <div class="rss-item-categories">
+          {item.category.slice(0, 3).map((cat) => (
+            <span class="rss-category-tag">{cat}</span>
+          ))}
+        </div>
+      )}
+    </div>
+
+    {item.imageUrl && (
+      <div class="rss-item-image">
+        <img
+          src={item.imageUrl}
+          alt={item.title}
+          loading="lazy"
+          onerror="this.style.display='none'"
+        />
+      </div>
+    )}
+  </div>
+</div>
+
+<style>
+.rss-item-card {
+  @apply bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 p-6 border border-gray-200 dark:border-gray-700;
+}
+
+.rss-item-card:hover {
+  @apply transform -translate-y-1;
+}
+
+.rss-item-compact {
+  @apply p-4;
+}
+
+.rss-item-header {
+  @apply flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-3;
+}
+
+.rss-item-meta {
+  @apply flex flex-wrap items-center gap-3 text-sm text-gray-600 dark:text-gray-400;
+}
+
+.rss-item-source {
+  @apply bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-2 py-1 rounded-full text-xs font-medium;
+}
+
+.rss-item-date {
+  @apply text-gray-500 dark:text-gray-400;
+}
+
+.rss-item-reading-time {
+  @apply bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 px-2 py-1 rounded text-xs;
+}
+
+.rss-item-author {
+  @apply text-sm text-gray-600 dark:text-gray-400 italic;
+}
+
+.rss-item-title {
+  @apply text-xl font-bold text-gray-900 dark:text-white mb-3 leading-tight;
+}
+
+.rss-item-title a {
+  @apply hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200;
+}
+
+.rss-item-description,
+.rss-item-content {
+  @apply text-gray-700 dark:text-gray-300 mb-4 leading-relaxed;
+}
+
+.rss-item-footer {
+  @apply flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4;
+}
+
+.rss-item-actions {
+  @apply flex flex-col sm:flex-row sm:items-center gap-3;
+}
+
+.rss-read-more {
+  @apply inline-flex items-center text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium transition-colors duration-200;
+}
+
+.rss-item-categories {
+  @apply flex flex-wrap gap-2;
+}
+
+.rss-category-tag {
+  @apply bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 px-2 py-1 rounded text-xs;
+}
+
+.rss-item-image {
+  @apply flex-shrink-0;
+}
+
+.rss-item-image img {
+  @apply w-20 h-20 object-cover rounded-lg shadow-sm;
+}
+
+/* 响应式设计 */
+@media (max-width: 640px) {
+  .rss-item-card {
+    @apply p-4;
+  }
+
+  .rss-item-title {
+    @apply text-lg;
+  }
+
+  .rss-item-meta {
+    @apply flex-col items-start gap-1;
+  }
+
+  .rss-item-footer {
+    @apply flex-col items-start gap-3;
+  }
+}
+
+/* 动画效果 */
+.rss-item-card {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+</style>
