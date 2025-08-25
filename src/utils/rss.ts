@@ -8,12 +8,18 @@ import DOMPurify from 'dompurify';
 export const defaultRSSConfig: RSSConfig = {
     sources: [
         {
+            id: "sanhua",
+            name: "三花AI资讯",
+            url: "https://sanhua.himrr.com/daily-news/feed",
+            description: "AI动态",
+            category: "AI动态",
+        },
+        {
             id: "jiqizhixin",
             name: "机器之心",
             url: "https://www.jiqizhixin.com/rss",
             description: "人工智能和科技深度报道",
             category: "AI深度",
-            fetchInterval: 120, // 2小时
         },
         {
             id: "jikegongyuan",
@@ -21,7 +27,6 @@ export const defaultRSSConfig: RSSConfig = {
             url: "https://wechat2rss.bestblogs.dev/feed/cbd08f35e4739af8372caeadd24c20333a9b0453.xml",
             description: "专注与科技创业者聊「真问题」",
             category: "AI深度",
-            fetchInterval: 120, // 2小时
         },
         {
             id: "InfoQ",
@@ -29,7 +34,6 @@ export const defaultRSSConfig: RSSConfig = {
             url: "https://wechat2rss.bestblogs.dev/feed/a2524d2d098e0fd47ed385e4999838113d3b84c1.xml",
             description: "科技圈的观察者，前沿技术的传播者",
             category: "AI深度",
-            fetchInterval: 120, // 2小时
         },
         {
             id: "qbitai",
@@ -37,7 +41,6 @@ export const defaultRSSConfig: RSSConfig = {
             url: "https://www.qbitai.com/feed",
             description: "人工智能和科技资讯",
             category: "AI科技",
-            fetchInterval: 60, // 1小时
         },
     ],
     defaultFetchInterval: 60,
