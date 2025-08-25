@@ -66,7 +66,7 @@ export const defaultRSSConfig: RSSConfig = {
         {
             id: "hellogithub",
             name: "HelloGIthub",
-            url: "https://baoyu.io/feed.xml",
+            url: "https://wechat2rss.bestblogs.dev/feed/15347672479a97910dce03fb5d60d8e55575515c.xml",
             description: "github相关",
             category: "github",
         },
