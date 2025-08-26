@@ -23,6 +23,15 @@ if (import.meta.env.PROD && secret !== expectedSecret) {
 
 // 动态导入 Redis 以避免构建问题
 let redis: any = null;
+let redisDebugInfo = {
+  hasUrl: !!import.meta.env.UPSTASH_REDIS_REST_URL,
+  hasToken: !!import.meta.env.UPSTASH_REDIS_REST_TOKEN,
+  urlPrefix: import.meta.env.UPSTASH_REDIS_REST_URL ? import.meta.env.UPSTASH_REDIS_REST_URL.substring(0, 20) + '...' : 'not set',
+  tokenPrefix: import.meta.env.UPSTASH_REDIS_REST_TOKEN ? import.meta.env.UPSTASH_REDIS_REST_TOKEN.substring(0, 10) + '...' : 'not set',
+};
+
+console.log('[CRON] Redis 环境变量状态:', redisDebugInfo);
+
 try {
   if (import.meta.env.UPSTASH_REDIS_REST_URL && import.meta.env.UPSTASH_REDIS_REST_TOKEN) {
     const { Redis } = await import('@upstash/redis');
@@ -30,14 +39,16 @@ try {
       url: import.meta.env.UPSTASH_REDIS_REST_URL,
       token: import.meta.env.UPSTASH_REDIS_REST_TOKEN,
     });
-    console.log('[CRON] Upstash Redis 已初始化');
+    console.log('[CRON] Upstash Redis 已初始化成功');
+  } else {
+    console.log('[CRON] Redis 环境变量未配置');
   }
 } catch (error) {
   console.error('[CRON] Redis 初始化失败:', error);
 }
 
 // 带超时的 fetch
-async function fetchWithTimeout(url: string, timeout: number = 5000): Promise<Response> {
+async function fetchWithTimeout(url: string, timeout: number = 3000): Promise<Response> {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), timeout);
   
@@ -60,7 +71,8 @@ async function fetchWithTimeout(url: string, timeout: number = 5000): Promise<Re
 // 解析单个RSS源
 async function fetchSingleSource(source: RSSSource): Promise<RSSFeed | null> {
   try {
-    const response = await fetchWithTimeout(source.url, 5000);
+    console.log(`[CRON] 开始获取: ${source.name}`);
+    const response = await fetchWithTimeout(source.url, 3000);
     
     if (!response.ok) {
       console.error(`[CRON] RSS源 ${source.name} 请求失败: ${response.status}`);
@@ -131,9 +143,21 @@ const startTime = Date.now();
 // 获取所有源
 const sources = defaultRSSConfig.sources;
 
-// 并行获取所有源
-const promises = sources.map(source => fetchSingleSource(source));
-const results = await Promise.allSettled(promises);
+// 分批处理源，避免并发过多
+const BATCH_SIZE = 3; // 每批处理3个源
+const results = [];
+
+for (let i = 0; i < sources.length; i += BATCH_SIZE) {
+  const batch = sources.slice(i, i + BATCH_SIZE);
+  const batchPromises = batch.map(source => fetchSingleSource(source));
+  const batchResults = await Promise.allSettled(batchPromises);
+  results.push(...batchResults);
+  
+  // 批次之间稍微延迟，避免过快请求
+  if (i + BATCH_SIZE < sources.length) {
+    await new Promise(resolve => setTimeout(resolve, 100));
+  }
+}
 
 const feeds: RSSFeed[] = [];
 const errors: string[] = [];
@@ -167,12 +191,8 @@ if (redis) {
       timestamp: new Date().toISOString(),
     };
     
+    // 只缓存主数据，不单独缓存每个源，减少 Redis 操作
     await redis.setex('rss-all-feeds', 600, JSON.stringify(cacheData)); // 10分钟过期
-    
-    // 为每个成功的源也单独缓存
-    for (const feed of feeds) {
-      await redis.setex(`rss-source-${feed.source.id}`, 600, JSON.stringify(feed));
-    }
     
     saved = true;
     console.log('[CRON] 数据已保存到 Redis');
@@ -190,6 +210,10 @@ const response = {
     failed: errors.length,
     duration,
     saved,
+  },
+  redis: {
+    configured: !!redis,
+    debug: redisDebugInfo
   },
   errors: errors.length > 0 ? errors : undefined,
   timestamp: new Date().toISOString(),

@@ -1,4 +1,12 @@
 {
+    "functions": {
+        "src/pages/cron-update-feeds.astro": {
+            "maxDuration": 30
+        },
+        "src/pages/feeds/index.astro": {
+            "maxDuration": 30
+        }
+    },
     "crons": [
         {
             "path": "/cron-update-feeds?secret=${CRON_SECRET}",
