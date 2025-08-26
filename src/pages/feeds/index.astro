@@ -16,19 +16,36 @@ const sources = rssManager.getSources();
 // 从URL参数获取选中的源
 const selectedSource = Astro.url.searchParams.get('source') || 'all';
 
-// 获取所有feeds来计算统计数据
-const allFeeds: RSSFeed[] = [];
+// 使用新的API获取RSS数据
+let allFeeds: RSSFeed[] = [];
 let totalArticles = 0;
-for (const source of sources) {
-  try {
-    const feed = await rssManager.getFeed(source.id);
-    if (feed) {
-      allFeeds.push(feed);
-      totalArticles += feed.items.length;
+let fetchError: string | null = null;
+let fetchStats: any = {};
+
+try {
+  // 调用优化后的API端点
+  const apiUrl = selectedSource !== 'all' 
+    ? `/api/feeds?source=${selectedSource}`
+    : '/api/feeds';
+    
+  const response = await fetch(new URL(apiUrl, Astro.url.origin).toString());
+  
+  if (response.ok) {
+    const data = await response.json();
+    allFeeds = data.feeds || [];
+    fetchStats = data.stats || {};
+    totalArticles = allFeeds.reduce((sum, feed) => sum + feed.items.length, 0);
+    
+    if (data.errors && data.errors.length > 0) {
+      console.warn('部分RSS源获取失败:', data.errors);
     }
-  } catch (error) {
-    console.error(`获取订阅源 ${source.name} 失败:`, error);
+  } else {
+    fetchError = `获取RSS数据失败: ${response.status} ${response.statusText}`;
+    console.error(fetchError);
   }
+} catch (error) {
+  fetchError = `获取RSS数据时发生错误: ${error instanceof Error ? error.message : '未知错误'}`;
+  console.error(fetchError);
 }
 
 const meta = {
