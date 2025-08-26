@@ -179,6 +179,11 @@ export default defineConfig({
 			WEBMENTION_PINGBACK: envField.string({ context: "client", access: "public", optional: true }),
 			OAUTH_GITHUB_CLIENT_ID: envField.string({ context: "client", access: "public" }),
 			OAUTH_GITHUB_CLIENT_SECRET: envField.string({ context: "server", access: "secret" }),
+			// Upstash Redis
+			UPSTASH_REDIS_REST_URL: envField.string({ context: "server", access: "secret", optional: true }),
+			UPSTASH_REDIS_REST_TOKEN: envField.string({ context: "server", access: "secret", optional: true }),
+			// CRON
+			CRON_SECRET: envField.string({ context: "server", access: "secret", optional: true }),
 		},
 	},
 });
