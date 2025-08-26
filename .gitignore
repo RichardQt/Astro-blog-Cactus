@@ -25,3 +25,8 @@ pnpm-debug.log*
 .astro
 
 *.md
+
+
+.kilocode
+.vercel
+.rooroo
