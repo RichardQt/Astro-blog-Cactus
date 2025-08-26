@@ -45,11 +45,16 @@ const allItems = feeds
   .sort((a, b) => new Date(b.pubDate).getTime() - new Date(a.pubDate).getTime())
   .slice(0, maxItems);
 
-// 格式化日期
+// 格式化日期为北京时间
 function formatDate(dateString: string): string {
   const date = new Date(dateString);
   const now = new Date();
-  const diffTime = Math.abs(now.getTime() - date.getTime());
+  
+  // 转换为北京时间进行比较
+  const beijingDate = new Date(date.toLocaleString('en-US', { timeZone: 'Asia/Shanghai' }));
+  const beijingNow = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Shanghai' }));
+  
+  const diffTime = Math.abs(beijingNow.getTime() - beijingDate.getTime());
   const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
   
   if (diffDays === 1) {
@@ -57,7 +62,9 @@ function formatDate(dateString: string): string {
   } else if (diffDays < 7) {
     return `${diffDays}天前`;
   } else {
+    // 使用北京时区格式化日期
     return date.toLocaleDateString('zh-CN', {
+      timeZone: 'Asia/Shanghai',
       year: 'numeric',
       month: '2-digit',
       day: '2-digit'

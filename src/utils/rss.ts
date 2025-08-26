@@ -502,17 +502,20 @@ class RSSManager {
 export const rssManager = new RSSManager();
 
 /**
- * 工具函数：格式化日期
+ * 工具函数：格式化日期为北京时间
  */
 export function formatRSSDate(dateString: string): string {
     try {
         const date = new Date(dateString);
-        return date.toLocaleDateString('zh-CN', {
+        // 使用北京时区 (Asia/Shanghai) 进行格式化
+        return date.toLocaleString('zh-CN', {
+            timeZone: 'Asia/Shanghai',
             year: 'numeric',
             month: 'long',
             day: 'numeric',
             hour: '2-digit',
             minute: '2-digit',
+            hour12: false // 使用24小时制
         });
     } catch {
         return dateString;

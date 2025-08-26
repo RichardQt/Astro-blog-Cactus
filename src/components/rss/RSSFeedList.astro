@@ -56,7 +56,12 @@ const displayItems = showAll ? allItems : allItems.slice(0, maxItems);
               {item.sourceName}
             </a>
             <time class="rss-feed-date" datetime={item.pubDate}>
-              {new Date(item.pubDate).toLocaleDateString('zh-CN')}
+              {new Date(item.pubDate).toLocaleDateString('zh-CN', {
+                timeZone: 'Asia/Shanghai',
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit'
+              })}
             </time>
           </div>
         </div>
