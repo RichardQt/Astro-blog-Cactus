@@ -26,6 +26,9 @@ importers:
       '@types/dompurify':
         specifier: ^3.2.0
         version: 3.2.0
+      '@vercel/analytics':
+        specifier: ^1.5.0
+        version: 1.5.0
       astro:
         specifier: 5.13.3
         version: 5.13.3(@types/node@24.3.0)(@vercel/functions@2.2.12)(jiti@1.21.7)(rollup@4.48.0)(typescript@5.9.2)(yaml@2.8.1)
