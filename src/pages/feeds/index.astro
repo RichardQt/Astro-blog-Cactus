@@ -24,11 +24,16 @@ let fetchStats: any = {};
 
 try {
   // 调用优化后的API端点
-  const apiUrl = selectedSource !== 'all' 
-    ? `/api/feeds?source=${selectedSource}`
-    : '/api/feeds';
+  // 使用完整的URL确保正确的路径
+  const baseUrl = import.meta.env.PROD 
+    ? 'https://blog.richardli.de'
+    : Astro.url.origin;
     
-  const response = await fetch(new URL(apiUrl, Astro.url.origin).toString());
+  const apiUrl = selectedSource !== 'all' 
+    ? `${baseUrl}/api/feeds?source=${selectedSource}`
+    : `${baseUrl}/api/feeds`;
+    
+  const response = await fetch(apiUrl);
   
   if (response.ok) {
     const data = await response.json();
