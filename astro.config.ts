@@ -31,6 +31,7 @@ export default defineConfig({
 	adapter: vercel({
 		functionPerRoute: false,
 		edgeMiddleware: false,
+		maxDuration: 30, // 设置函数最大执行时间为 30 秒
 	}),
 	image: {
 		domains: [
