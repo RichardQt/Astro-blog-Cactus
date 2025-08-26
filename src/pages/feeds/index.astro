@@ -8,18 +8,19 @@ import RSSFeedTable from "@/components/rss/RSSFeedTable.astro";
 import PageLayout from "@/layouts/Base.astro";
 import { Icon } from "astro-icon/components";
 import { XMLParser } from 'fast-xml-parser';
-import { Redis } from '@upstash/redis';
 
 export const prerender = false; // 改为false以支持动态URL参数
 
-// 初始化 Upstash Redis（如果配置了）
-let redis: Redis | null = null;
+// 动态导入 Upstash Redis 以避免构建问题
+let redis: any = null;
 try {
   if (import.meta.env.UPSTASH_REDIS_REST_URL && import.meta.env.UPSTASH_REDIS_REST_TOKEN) {
+    const { Redis } = await import('@upstash/redis');
     redis = new Redis({
       url: import.meta.env.UPSTASH_REDIS_REST_URL,
       token: import.meta.env.UPSTASH_REDIS_REST_TOKEN,
     });
+    console.log('Redis已初始化');
   }
 } catch (error) {
   console.error('Redis初始化失败:', error);

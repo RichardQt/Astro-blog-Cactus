@@ -5,7 +5,6 @@
 import { defaultRSSConfig } from "@/utils/rss";
 import type { RSSSource, RSSFeed } from "@/types";
 import { XMLParser } from 'fast-xml-parser';
-import { Redis } from '@upstash/redis';
 
 export const prerender = false;
 
@@ -22,10 +21,11 @@ if (import.meta.env.PROD && secret !== expectedSecret) {
   });
 }
 
-// 初始化 Redis
-let redis: Redis | null = null;
+// 动态导入 Redis 以避免构建问题
+let redis: any = null;
 try {
   if (import.meta.env.UPSTASH_REDIS_REST_URL && import.meta.env.UPSTASH_REDIS_REST_TOKEN) {
+    const { Redis } = await import('@upstash/redis');
     redis = new Redis({
       url: import.meta.env.UPSTASH_REDIS_REST_URL,
       token: import.meta.env.UPSTASH_REDIS_REST_TOKEN,
