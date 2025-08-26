@@ -10,13 +10,13 @@
 
 /* ========== 方案A: 字体子集化（当前使用） ========== */
 /* 字体分片文件已上传，使用子集化提高加载速度 */
-@import url('https://cdn.jsdelivr.net/gh/RichardQt/Static_Resource_Acceleration@main/fonts/result.css');
+@import url('https://cdn.mengze.vip/gh/RichardQt/Static_Resource_Acceleration/fonts/result.css');
 
 /* ========== 方案B: 完整字体（备用方案） ========== */
 /* 英文字体 */
 @font-face {
     font-family: 'SiteLatin';
-    src: url('https://cdn.jsdelivr.net/gh/RichardQt/Static_Resource_Acceleration@main/main.woff2') format('woff2');
+    src: url('https://cdn.mengze.vip/gh/RichardQt/Static_Resource_Acceleration/main.woff2') format('woff2');
     font-weight: 400;
     font-style: normal;
     font-display: swap;
@@ -26,7 +26,7 @@
 /* 如果子集化加载失败，取消下面的注释作为备用方案 */
 /* @font-face {
     font-family: 'Maple Mono NF CN';
-    src: url('https://cdn.jsdelivr.net/gh/RichardQt/Static_Resource_Acceleration@main/MapleMono-NF-CN-Regular.woff2') format('woff2');
+    src: url('https://cdn.mengze.vip/gh/RichardQt/Static_Resource_Acceleration/MapleMono-NF-CN-Regular.woff2') format('woff2');
     font-weight: 400;
     font-style: normal;
     font-display: swap;
