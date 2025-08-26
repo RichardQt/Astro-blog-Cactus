@@ -1,18 +1,7 @@
 {
-    "functions": {
-        "src/pages/api/feeds.ts": {
-            "maxDuration": 10
-        },
-        "src/pages/api/feeds-kv.ts": {
-            "maxDuration": 10
-        },
-        "src/pages/api/cron/update-feeds.ts": {
-            "maxDuration": 60
-        }
-    },
     "crons": [
         {
-            "path": "/api/cron/update-feeds?secret=${CRON_SECRET}",
+            "path": "/cron-update-feeds?secret=${CRON_SECRET}",
             "schedule": "*/10 * * * *"
         }
     ]

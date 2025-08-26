@@ -2,51 +2,222 @@
 // RSS订阅源主页面
 // 显示所有可用的RSS订阅源
 
-import { rssManager } from "@/utils/rss";
+import { defaultRSSConfig } from "@/utils/rss";
+import type { RSSSource, RSSFeed } from "@/types";
 import RSSFeedTable from "@/components/rss/RSSFeedTable.astro";
 import PageLayout from "@/layouts/Base.astro";
 import { Icon } from "astro-icon/components";
-import type { RSSFeed } from "@/types";
+import { XMLParser } from 'fast-xml-parser';
+import { Redis } from '@upstash/redis';
 
 export const prerender = false; // 改为false以支持动态URL参数
 
+// 初始化 Upstash Redis（如果配置了）
+let redis: Redis | null = null;
+try {
+  if (import.meta.env.UPSTASH_REDIS_REST_URL && import.meta.env.UPSTASH_REDIS_REST_TOKEN) {
+    redis = new Redis({
+      url: import.meta.env.UPSTASH_REDIS_REST_URL,
+      token: import.meta.env.UPSTASH_REDIS_REST_TOKEN,
+    });
+  }
+} catch (error) {
+  console.error('Redis初始化失败:', error);
+}
+
+// 内存缓存
+const memoryCache = new Map<string, { data: any; timestamp: number }>();
+const CACHE_DURATION = 5 * 60 * 1000; // 5分钟
+
+// 获取缓存
+async function getCachedData(key: string): Promise<any | null> {
+  // 先尝试 Redis
+  if (redis) {
+    try {
+      const data = await redis.get(key);
+      if (data) return typeof data === 'string' ? JSON.parse(data) : data;
+    } catch (error) {
+      console.error('Redis读取失败:', error);
+    }
+  }
+  
+  // 降级到内存缓存
+  const cached = memoryCache.get(key);
+  if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
+    return cached.data;
+  }
+  
+  return null;
+}
+
+// 设置缓存
+async function setCachedData(key: string, data: any): Promise<void> {
+  // 保存到 Redis
+  if (redis) {
+    try {
+      await redis.setex(key, 300, JSON.stringify(data)); // 5分钟过期
+    } catch (error) {
+      console.error('Redis写入失败:', error);
+    }
+  }
+  
+  // 同时保存到内存
+  memoryCache.set(key, { data, timestamp: Date.now() });
+}
+
+// 带超时的 fetch
+async function fetchWithTimeout(url: string, timeout: number = 3000): Promise<Response> {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeout);
+  
+  try {
+    const response = await fetch(url, {
+      signal: controller.signal,
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (compatible; RSS Reader)',
+        'Accept': 'application/rss+xml, application/xml, text/xml',
+      },
+    });
+    clearTimeout(timeoutId);
+    return response;
+  } catch (error) {
+    clearTimeout(timeoutId);
+    throw error;
+  }
+}
+
+// 解析单个RSS源
+async function fetchSingleSource(source: RSSSource): Promise<RSSFeed | null> {
+  try {
+    const response = await fetchWithTimeout(source.url, 3000);
+    
+    if (!response.ok) {
+      console.error(`RSS源 ${source.name} 请求失败: ${response.status}`);
+      return null;
+    }
+
+    const xmlText = await response.text();
+    
+    const parser = new XMLParser({
+      ignoreAttributes: false,
+      attributeNamePrefix: "@_",
+      textNodeName: "#text",
+      parseAttributeValue: true,
+      parseTagValue: true,
+      trimValues: true,
+    });
+
+    const result = parser.parse(xmlText);
+    const rss = result.rss || result.feed;
+    
+    if (!rss) {
+      console.error(`RSS源 ${source.name} 格式无效`);
+      return null;
+    }
+
+    const channel = rss.channel || rss;
+    const itemElements = channel.item || channel.entry || [];
+    const itemsArray = Array.isArray(itemElements) ? itemElements : [itemElements];
+    
+    const items = itemsArray.slice(0, 20).map((item: any, index: number) => {
+      const title = item.title?.['#text'] || item.title || '';
+      const description = item.description?.['#text'] || item.description || item.summary || '';
+      const link = item.link?.['#text'] || item.link || '';
+      const pubDate = item.pubDate || item.published || item.updated || new Date().toISOString();
+      
+      return {
+        id: `${source.id}-${index}`,
+        title: typeof title === 'string' ? title.trim() : '',
+        description: typeof description === 'string' ? description.trim().slice(0, 500) : '',
+        content: description,
+        link: typeof link === 'string' ? link.trim() : '',
+        pubDate,
+        sourceId: source.id,
+        sourceName: source.name,
+        read: false,
+      };
+    }).filter((item: any) => item.title && item.link);
+
+    return {
+      source,
+      items,
+      lastBuildDate: channel.lastBuildDate || new Date().toISOString(),
+    };
+  } catch (error) {
+    console.error(`获取RSS源 ${source.name} 失败:`, error);
+    return null;
+  }
+}
+
 // 获取所有订阅源
-const sources = rssManager.getSources();
+const sources = defaultRSSConfig.sources;
 
 // 从URL参数获取选中的源
 const selectedSource = Astro.url.searchParams.get('source') || 'all';
+const forceRefresh = Astro.url.searchParams.get('refresh') === 'true';
 
-// 使用新的API获取RSS数据
+// 获取RSS数据
 let allFeeds: RSSFeed[] = [];
 let totalArticles = 0;
 let fetchError: string | null = null;
 let fetchStats: any = {};
+let fromCache = false;
 
 try {
-  // 调用优化后的API端点
-  // 使用完整的URL确保正确的路径
-  const baseUrl = import.meta.env.PROD 
-    ? 'https://blog.richardli.de'
-    : Astro.url.origin;
-    
-  const apiUrl = selectedSource !== 'all' 
-    ? `${baseUrl}/api/feeds?source=${selectedSource}`
-    : `${baseUrl}/api/feeds`;
-    
-  const response = await fetch(apiUrl);
+  const cacheKey = 'rss-all-feeds';
   
-  if (response.ok) {
-    const data = await response.json();
-    allFeeds = data.feeds || [];
-    fetchStats = data.stats || {};
-    totalArticles = allFeeds.reduce((sum, feed) => sum + feed.items.length, 0);
-    
-    if (data.errors && data.errors.length > 0) {
-      console.warn('部分RSS源获取失败:', data.errors);
+  // 检查缓存（除非强制刷新）
+  if (!forceRefresh) {
+    const cachedData = await getCachedData(cacheKey);
+    if (cachedData) {
+      allFeeds = cachedData.feeds || [];
+      fetchStats = cachedData.stats || {};
+      totalArticles = allFeeds.reduce((sum: number, feed: RSSFeed) => sum + feed.items.length, 0);
+      fromCache = true;
+      console.log('使用缓存的RSS数据');
     }
-  } else {
-    fetchError = `获取RSS数据失败: ${response.status} ${response.statusText}`;
-    console.error(fetchError);
+  }
+  
+  // 如果没有缓存或强制刷新，并行获取所有源
+  if (!fromCache || forceRefresh) {
+    console.log('并行获取RSS源...');
+    const startTime = Date.now();
+    
+    // 使用 Promise.allSettled 并行获取
+    const promises = sources.map(source => fetchSingleSource(source));
+    const results = await Promise.allSettled(promises);
+    
+    const errors: string[] = [];
+    
+    results.forEach((result, index) => {
+      if (result.status === 'fulfilled' && result.value) {
+        allFeeds.push(result.value);
+      } else {
+        const sourceName = sources[index]?.name || `源 ${index + 1}`;
+        errors.push(`${sourceName}: 获取失败`);
+      }
+    });
+    
+    totalArticles = allFeeds.reduce((sum: number, feed: RSSFeed) => sum + feed.items.length, 0);
+    
+    const duration = Date.now() - startTime;
+    fetchStats = {
+      total: sources.length,
+      successful: allFeeds.length,
+      failed: errors.length,
+      duration,
+      fromCache: false,
+    };
+    
+    // 保存到缓存
+    const cacheData = {
+      feeds: allFeeds,
+      stats: fetchStats,
+      timestamp: new Date().toISOString(),
+    };
+    await setCachedData(cacheKey, cacheData);
+    
+    console.log(`获取完成，耗时: ${duration}ms，成功: ${allFeeds.length}/${sources.length}`);
   }
 } catch (error) {
   fetchError = `获取RSS数据时发生错误: ${error instanceof Error ? error.message : '未知错误'}`;

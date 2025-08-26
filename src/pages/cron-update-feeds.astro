@@ -1,0 +1,212 @@
+---
+// CRON 任务页面 - 用于定时更新 RSS feeds
+// 访问路径: /cron-update-feeds?secret=sk-123456
+
+import { defaultRSSConfig } from "@/utils/rss";
+import type { RSSSource, RSSFeed } from "@/types";
+import { XMLParser } from 'fast-xml-parser';
+import { Redis } from '@upstash/redis';
+
+export const prerender = false;
+
+// 验证密钥
+const secret = Astro.url.searchParams.get('secret');
+const expectedSecret = import.meta.env.CRON_SECRET || 'sk-123456';
+
+if (import.meta.env.PROD && secret !== expectedSecret) {
+  return new Response(JSON.stringify({
+    error: '未授权的请求',
+  }), {
+    status: 401,
+    headers: { 'Content-Type': 'application/json' },
+  });
+}
+
+// 初始化 Redis
+let redis: Redis | null = null;
+try {
+  if (import.meta.env.UPSTASH_REDIS_REST_URL && import.meta.env.UPSTASH_REDIS_REST_TOKEN) {
+    redis = new Redis({
+      url: import.meta.env.UPSTASH_REDIS_REST_URL,
+      token: import.meta.env.UPSTASH_REDIS_REST_TOKEN,
+    });
+    console.log('[CRON] Upstash Redis 已初始化');
+  }
+} catch (error) {
+  console.error('[CRON] Redis 初始化失败:', error);
+}
+
+// 带超时的 fetch
+async function fetchWithTimeout(url: string, timeout: number = 5000): Promise<Response> {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeout);
+  
+  try {
+    const response = await fetch(url, {
+      signal: controller.signal,
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (compatible; RSS Reader)',
+        'Accept': 'application/rss+xml, application/xml, text/xml',
+      },
+    });
+    clearTimeout(timeoutId);
+    return response;
+  } catch (error) {
+    clearTimeout(timeoutId);
+    throw error;
+  }
+}
+
+// 解析单个RSS源
+async function fetchSingleSource(source: RSSSource): Promise<RSSFeed | null> {
+  try {
+    const response = await fetchWithTimeout(source.url, 5000);
+    
+    if (!response.ok) {
+      console.error(`[CRON] RSS源 ${source.name} 请求失败: ${response.status}`);
+      return null;
+    }
+
+    const xmlText = await response.text();
+    
+    const parser = new XMLParser({
+      ignoreAttributes: false,
+      attributeNamePrefix: "@_",
+      textNodeName: "#text",
+      parseAttributeValue: true,
+      parseTagValue: true,
+      trimValues: true,
+    });
+
+    const result = parser.parse(xmlText);
+    const rss = result.rss || result.feed;
+    
+    if (!rss) {
+      console.error(`[CRON] RSS源 ${source.name} 格式无效`);
+      return null;
+    }
+
+    const channel = rss.channel || rss;
+    const itemElements = channel.item || channel.entry || [];
+    const itemsArray = Array.isArray(itemElements) ? itemElements : [itemElements];
+    
+    const items = itemsArray.slice(0, 30).map((item: any, index: number) => {
+      const title = item.title?.['#text'] || item.title || '';
+      const description = item.description?.['#text'] || item.description || item.summary || '';
+      const link = item.link?.['#text'] || item.link || '';
+      const pubDate = item.pubDate || item.published || item.updated || new Date().toISOString();
+      
+      const cleanDescription = typeof description === 'string' 
+        ? description.replace(/<[^>]*>/g, '').trim().slice(0, 500) 
+        : '';
+      
+      return {
+        id: `${source.id}-${index}`,
+        title: typeof title === 'string' ? title.trim().slice(0, 300) : '',
+        description: cleanDescription,
+        content: description,
+        link: typeof link === 'string' ? link.trim() : '',
+        pubDate,
+        sourceId: source.id,
+        sourceName: source.name,
+        read: false,
+      };
+    }).filter((item: any) => item.title && item.link);
+
+    return {
+      source,
+      items,
+      lastBuildDate: channel.lastBuildDate || new Date().toISOString(),
+    };
+  } catch (error) {
+    console.error(`[CRON] 获取RSS源 ${source.name} 失败:`, error);
+    return null;
+  }
+}
+
+// 执行 CRON 任务
+console.log('[CRON] 开始更新 RSS feeds...');
+const startTime = Date.now();
+
+// 获取所有源
+const sources = defaultRSSConfig.sources;
+
+// 并行获取所有源
+const promises = sources.map(source => fetchSingleSource(source));
+const results = await Promise.allSettled(promises);
+
+const feeds: RSSFeed[] = [];
+const errors: string[] = [];
+
+results.forEach((result, index) => {
+  if (result.status === 'fulfilled' && result.value) {
+    feeds.push(result.value);
+  } else {
+    const sourceName = sources[index]?.name || `源 ${index + 1}`;
+    errors.push(`${sourceName}: 获取失败`);
+  }
+});
+
+const duration = Date.now() - startTime;
+
+// 保存到 Redis
+let saved = false;
+if (redis) {
+  try {
+    const cacheData = {
+      feeds,
+      errors,
+      stats: {
+        total: sources.length,
+        successful: feeds.length,
+        failed: errors.length,
+        duration,
+        fromCache: false,
+        lastUpdate: new Date().toISOString(),
+      },
+      timestamp: new Date().toISOString(),
+    };
+    
+    await redis.setex('rss-all-feeds', 600, JSON.stringify(cacheData)); // 10分钟过期
+    
+    // 为每个成功的源也单独缓存
+    for (const feed of feeds) {
+      await redis.setex(`rss-source-${feed.source.id}`, 600, JSON.stringify(feed));
+    }
+    
+    saved = true;
+    console.log('[CRON] 数据已保存到 Redis');
+  } catch (error) {
+    console.error('[CRON] 保存到 Redis 失败:', error);
+  }
+}
+
+const response = {
+  success: true,
+  message: `CRON任务完成，更新了 ${feeds.length}/${sources.length} 个RSS源`,
+  stats: {
+    total: sources.length,
+    successful: feeds.length,
+    failed: errors.length,
+    duration,
+    saved,
+  },
+  errors: errors.length > 0 ? errors : undefined,
+  timestamp: new Date().toISOString(),
+};
+
+console.log(`[CRON] 任务完成，耗时: ${duration}ms，成功: ${feeds.length}/${sources.length}`);
+---
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CRON Update Status</title>
+</head>
+<body style="font-family: monospace; padding: 20px; background: #1a1a1a; color: #0f0;">
+  <h1>CRON Update Status</h1>
+  <pre>{JSON.stringify(response, null, 2)}</pre>
+</body>
+</html>
