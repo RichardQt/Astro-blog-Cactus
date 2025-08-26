@@ -6,7 +6,7 @@ import Footer from "@/components/layout/Footer.astro";
 import Header from "@/components/layout/Header.astro";
 import { siteConfig } from "@/site.config";
 import type { SiteMeta } from "@/types";
-import { inject } from "@vercel/analytics";
+import Analytics from "@vercel/analytics/astro";
 
 interface Props {
 	meta: SiteMeta;
@@ -15,14 +15,12 @@ interface Props {
 const {
 	meta: { articleDate, description = siteConfig.description, ogImage, title },
 } = Astro.props;
-
-// 在服务器端注入 Analytics
-inject();
 ---
 
 <html class="scroll-smooth" lang={siteConfig.lang}>
 	<head>
 		<BaseHead articleDate={articleDate} description={description} ogImage={ogImage} title={title} />
+		<Analytics />
 	</head>
 	<!-- 修改 max-w-6xl 最大宽度-->
 	<body
