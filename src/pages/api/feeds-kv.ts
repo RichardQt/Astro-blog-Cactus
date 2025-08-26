@@ -2,15 +2,24 @@ import type { APIRoute } from 'astro';
 import { defaultRSSConfig } from '@/utils/rss';
 import type { RSSSource, RSSFeed } from '@/types';
 import { XMLParser } from 'fast-xml-parser';
+import { Redis } from '@upstash/redis';
 
-// Vercel KV support (需要安装 @vercel/kv 包)
-let kv: any = null;
+// Upstash Redis 初始化
+let redis: Redis | null = null;
 try {
-  // 尝试导入Vercel KV（仅在生产环境可用）
-  const kvModule = await import('@vercel/kv');
-  kv = kvModule.kv;
-} catch {
-  console.log('Vercel KV不可用，使用内存缓存');
+  // 从环境变量初始化 Upstash Redis
+  if (import.meta.env.UPSTASH_REDIS_REST_URL && import.meta.env.UPSTASH_REDIS_REST_TOKEN) {
+    redis = new Redis({
+      url: import.meta.env.UPSTASH_REDIS_REST_URL,
+      token: import.meta.env.UPSTASH_REDIS_REST_TOKEN,
+    });
+    console.log('Upstash Redis 已初始化');
+  } else {
+    console.log('Upstash Redis 配置缺失，使用内存缓存');
+  }
+} catch (error) {
+  console.error('Upstash Redis 初始化失败:', error);
+  console.log('降级到内存缓存');
 }
 
 // 内存缓存作为后备
@@ -20,11 +29,15 @@ const CACHE_DURATION = 5 * 60; // 5分钟（秒）
 // 统一的缓存接口
 const cacheAdapter = {
   async get(key: string): Promise<any | null> {
-    if (kv) {
+    if (redis) {
       try {
-        return await kv.get(key);
+        const data = await redis.get(key);
+        if (data) {
+          // Upstash 会自动序列化/反序列化 JSON
+          return data;
+        }
       } catch (error) {
-        console.error('KV获取失败:', error);
+        console.error('Redis获取失败:', error);
       }
     }
     
@@ -44,12 +57,13 @@ const cacheAdapter = {
   },
   
   async set(key: string, data: any, ttlSeconds: number = CACHE_DURATION): Promise<void> {
-    if (kv) {
+    if (redis) {
       try {
-        await kv.setex(key, ttlSeconds, data);
+        // Upstash setex: 设置键值对并设置过期时间（秒）
+        await redis.setex(key, ttlSeconds, JSON.stringify(data));
         return;
       } catch (error) {
-        console.error('KV设置失败:', error);
+        console.error('Redis设置失败:', error);
       }
     }
     
@@ -61,11 +75,11 @@ const cacheAdapter = {
   },
   
   async delete(key: string): Promise<void> {
-    if (kv) {
+    if (redis) {
       try {
-        await kv.del(key);
+        await redis.del(key);
       } catch (error) {
-        console.error('KV删除失败:', error);
+        console.error('Redis删除失败:', error);
       }
     }
     memoryCache.delete(key);
@@ -73,14 +87,27 @@ const cacheAdapter = {
   
   async clear(): Promise<void> {
     // 清除所有RSS相关的缓存
-    if (kv) {
+    if (redis) {
       try {
-        const keys = await kv.keys('rss-*');
+        // Upstash 使用 scan 命令查找键
+        const keys: string[] = [];
+        let cursor = 0;
+        
+        do {
+          const result = await redis.scan(cursor, {
+            match: 'rss-*',
+            count: 100
+          });
+          cursor = result[0];
+          keys.push(...result[1]);
+        } while (cursor !== 0);
+        
         if (keys.length > 0) {
-          await Promise.all(keys.map(key => kv.del(key)));
+          // Upstash 支持批量删除
+          await redis.del(...keys);
         }
       } catch (error) {
-        console.error('KV清除失败:', error);
+        console.error('Redis清除失败:', error);
       }
     }
     memoryCache.clear();

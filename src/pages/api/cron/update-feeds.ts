@@ -2,14 +2,22 @@ import type { APIRoute } from 'astro';
 import { defaultRSSConfig } from '@/utils/rss';
 import type { RSSSource, RSSFeed } from '@/types';
 import { XMLParser } from 'fast-xml-parser';
+import { Redis } from '@upstash/redis';
 
-// Vercel KV support
-let kv: any = null;
+// Upstash Redis 初始化
+let redis: Redis | null = null;
 try {
-  const kvModule = await import('@vercel/kv');
-  kv = kvModule.kv;
-} catch {
-  console.log('Vercel KV不可用');
+  if (import.meta.env.UPSTASH_REDIS_REST_URL && import.meta.env.UPSTASH_REDIS_REST_TOKEN) {
+    redis = new Redis({
+      url: import.meta.env.UPSTASH_REDIS_REST_URL,
+      token: import.meta.env.UPSTASH_REDIS_REST_TOKEN,
+    });
+    console.log('[CRON] Upstash Redis 已初始化');
+  } else {
+    console.log('[CRON] Upstash Redis 配置缺失');
+  }
+} catch (error) {
+  console.error('[CRON] Upstash Redis 初始化失败:', error);
 }
 
 // 带超时的fetch函数
@@ -146,19 +154,20 @@ async function fetchAllSourcesForCron(sources: RSSSource[]): Promise<{
   };
 }
 
-// 保存到KV或缓存
+// 保存到Redis缓存
 async function saveToCache(key: string, data: any, ttlSeconds: number = 600): Promise<boolean> {
   try {
-    if (kv) {
-      await kv.setex(key, ttlSeconds, JSON.stringify(data));
+    if (redis) {
+      // Upstash 自动处理JSON序列化
+      await redis.setex(key, ttlSeconds, JSON.stringify(data));
       return true;
     }
     
-    // 如果没有KV，可以保存到其他地方（如数据库）
-    console.log('[CRON] 没有可用的持久化存储，数据未保存');
+    // 如果没有Redis，记录日志
+    console.log('[CRON] 没有可用的Redis存储，数据未保存');
     return false;
   } catch (error) {
-    console.error('[CRON] 保存缓存失败:', error);
+    console.error('[CRON] 保存到Redis失败:', error);
     return false;
   }
 }
