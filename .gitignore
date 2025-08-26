@@ -30,3 +30,8 @@ pnpm-debug.log*
 .kilocode
 .vercel
 .rooroo
+
+# Font processing workspace (temporary files)
+font-workspace/
+fonts-config.css
+FONT_SETUP_GUIDE.md

@@ -21,10 +21,9 @@ const socialImageURL = new URL(ogImage ? ogImage : "/social-card.avif", Astro.ur
 <meta content="width=device-width, initial-scale=1.0" name="viewport" />
 <title>{siteTitle}</title>
 
-{/* Preload custom English font */}
+{/* Preload custom fonts for faster loading */}
 <link rel="preload" as="font" href="https://cdn.mengze.vip/gh/RichardQt/Static_Resource_Acceleration/main.woff2" type="font/woff2" crossorigin>
-{/* Chinese font (Maple Mono NF CN) stylesheet */}
-<link rel="stylesheet" href="https://cdn.mengze.vip/gh/RichardQt/Static_Resource_Acceleration/result.css" />
+{/* Note: Chinese font is now loaded via @font-face in global.css */}
 
 {/* Icons */}
 <link href="/icons/logo-planet-small.png" rel="icon" type="image/png" />
