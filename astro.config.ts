@@ -9,7 +9,7 @@ import webmanifest from "astro-webmanifest";
 import { defineConfig, envField } from "astro/config";
 import { expressiveCodeOptions } from "./src/site.config";
 import { siteConfig } from "./src/site.config";
-import vercel from "@astrojs/vercel";
+import vercel from "@astrojs/vercel/serverless";
 
 // Remark plugins
 import remarkDirective from "remark-directive";
@@ -28,7 +28,10 @@ import remarkEmoji from "remark-emoji";
 // https://astro.build/config
 export default defineConfig({
 	output: "server",
-	adapter: vercel(),
+	adapter: vercel({
+		functionPerRoute: false,
+		edgeMiddleware: false,
+	}),
 	image: {
 		domains: [
 			"webmention.io",
