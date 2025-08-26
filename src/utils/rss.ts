@@ -15,6 +15,20 @@ export const defaultRSSConfig: RSSConfig = {
             category: "AI动态",
         },
         {
+            id: "meowweekly",
+            name: "猫鱼周刊",
+            url: "https://ameow.xyz/feed/categories/weekly.xml",
+            description: "分享与动态",
+            category: "分享与动态",
+        },
+        {
+            id: "ruanyifeng",
+            name: "阮一峰的网络日志",
+            url: "http://feeds.feedburner.com/ruanyifeng",
+            description: "阮一峰的网络日志",
+            category: "分享与动态",
+        },
+        {
             id: "jiqizhixin",
             name: "机器之心",
             url: "https://www.jiqizhixin.com/rss",
