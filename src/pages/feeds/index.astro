@@ -163,6 +163,20 @@ let totalArticles = 0;
 let fetchError: string | null = null;
 let fetchStats: any = {};
 let fromCache = false;
+let lastUpdateTime: string | null = null;
+
+// 获取最后更新时间
+try {
+  if (redis) {
+    const updateLog = await redis.get('rss-update-log');
+    if (updateLog) {
+      const logData = typeof updateLog === 'string' ? JSON.parse(updateLog) : updateLog;
+      lastUpdateTime = logData.timestamp;
+    }
+  }
+} catch (error) {
+  console.error('获取更新日志失败:', error);
+}
 
 try {
   const cacheKey = 'rss-all-feeds';
@@ -243,14 +257,23 @@ const meta = {
   <!-- 订阅源统计 -->
   <div class="rss-stats mb-8">
     <!-- 最后更新时间 -->
-    {fetchStats.lastUpdate && (
+    {lastUpdateTime && (
       <div class="rss-update-info">
-        <span class="rss-update-label">最后更新：</span>
+        <span class="rss-update-label">🕒 最后更新：</span>
         <span class="rss-update-time">
-          {new Date(fetchStats.lastUpdate).toLocaleString('zh-CN')}
+          {new Date(lastUpdateTime).toLocaleString('zh-CN', {
+            timeZone: 'Asia/Shanghai',
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            hour12: false
+          })}
         </span>
         {fromCache && (
-          <span class="rss-cache-badge">从缓存加载</span>
+          <span class="rss-cache-badge">✓ 缓存加载</span>
         )}
       </div>
     )}
@@ -353,6 +376,23 @@ const meta = {
 
   .rss-info-card {
     @apply bg-gray-50 dark:bg-gray-800/50 rounded-lg p-8 border border-gray-200 dark:border-gray-700;
+  }
+
+  /* 更新时间显示 */
+  .rss-update-info {
+    @apply bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-gray-800 dark:to-gray-700 rounded-lg p-4 mb-6 flex items-center gap-3 shadow-sm border border-blue-100 dark:border-gray-600;
+  }
+
+  .rss-update-label {
+    @apply text-gray-600 dark:text-gray-300 font-medium;
+  }
+
+  .rss-update-time {
+    @apply text-gray-900 dark:text-white font-semibold;
+  }
+
+  .rss-cache-badge {
+    @apply ml-auto bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300 px-3 py-1 rounded-full text-sm font-medium;
   }
 
   /* 响应式设计 */
