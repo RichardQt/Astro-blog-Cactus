@@ -240,9 +240,22 @@ const meta = {
       所有内容都经过精心筛选，为您提供最有价值的信息。
     </p>
 
-    <!-- 订阅源统计 -->
-    <div class="rss-stats mb-8">
-      <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+  <!-- 订阅源统计 -->
+  <div class="rss-stats mb-8">
+    <!-- 最后更新时间 -->
+    {fetchStats.lastUpdate && (
+      <div class="rss-update-info">
+        <span class="rss-update-label">最后更新：</span>
+        <span class="rss-update-time">
+          {new Date(fetchStats.lastUpdate).toLocaleString('zh-CN')}
+        </span>
+        {fromCache && (
+          <span class="rss-cache-badge">从缓存加载</span>
+        )}
+      </div>
+    )}
+    
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 mt-4">
         <div class="rss-stat-card">
           <div class="rss-stat-number text-3xl font-bold text-blue-600 dark:text-blue-400">
             {sources.length}

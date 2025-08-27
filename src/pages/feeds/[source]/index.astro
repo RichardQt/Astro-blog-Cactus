@@ -6,17 +6,70 @@ import { rssManager } from "@/utils/rss";
 import PageLayout from "@/layouts/Base.astro";
 import type { RSSFeed } from "@/types";
 
-export const prerender = true;
+// Disable prerendering to fetch fresh RSS data on each request
+export const prerender = false;
 
-export async function getStaticPaths() {
-  const sources = rssManager.getSources();
-  return sources.map((source) => ({
-    params: { source: source.id },
-    props: { source },
-  }));
+// 动态导入 Upstash Redis 以支持缓存
+let redis: any = null;
+try {
+  if (import.meta.env.UPSTASH_REDIS_REST_URL && import.meta.env.UPSTASH_REDIS_REST_TOKEN) {
+    const { Redis } = await import('@upstash/redis');
+    redis = new Redis({
+      url: import.meta.env.UPSTASH_REDIS_REST_URL,
+      token: import.meta.env.UPSTASH_REDIS_REST_TOKEN,
+    });
+  }
+} catch (error) {
+  console.error('Redis初始化失败:', error);
 }
 
-const { source } = Astro.props;
+// 内存缓存作为降级方案
+const memoryCache = new Map<string, { data: any; timestamp: number }>();
+const CACHE_DURATION = 5 * 60 * 1000; // 5分钟
+
+// 获取缓存
+async function getCachedData(key: string): Promise<any | null> {
+  // 先尝试 Redis
+  if (redis) {
+    try {
+      const data = await redis.get(key);
+      if (data) return typeof data === 'string' ? JSON.parse(data) : data;
+    } catch (error) {
+      console.error('Redis读取失败:', error);
+    }
+  }
+  
+  // 降级到内存缓存
+  const cached = memoryCache.get(key);
+  if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
+    return cached.data;
+  }
+  
+  return null;
+}
+
+// 设置缓存
+async function setCachedData(key: string, data: any): Promise<void> {
+  // 保存到 Redis
+  if (redis) {
+    try {
+      await redis.setex(key, 300, JSON.stringify(data)); // 5分钟过期
+    } catch (error) {
+      console.error('Redis写入失败:', error);
+    }
+  }
+  
+  // 同时保存到内存
+  memoryCache.set(key, { data, timestamp: Date.now() });
+}
+
+// Get source ID from params for SSR
+const sourceId = Astro.params.source;
+const source = rssManager.getSourceById(sourceId);
+
+if (!source) {
+  return Astro.redirect("/404");
+}
 
 const meta = {
   title: `${source.name} - RSS订阅源`,
@@ -24,9 +77,44 @@ const meta = {
   ogImage: "/og-image.png"
 };
 
+// 检查是否强制刷新
+const forceRefresh = Astro.url.searchParams.get('refresh') === 'true';
+
 // 获取特定订阅源的内容
-const feed: RSSFeed | null = await rssManager.getFeed(source.id);
-const items = feed ? feed.items : [];
+let feed: RSSFeed | null = null;
+let items: any[] = [];
+let fromCache = false;
+
+const cacheKey = `rss-feed-${source.id}`;
+
+// 优先从缓存读取（由cron job定期更新）
+if (!forceRefresh) {
+  const cachedData = await getCachedData(cacheKey);
+  if (cachedData) {
+    feed = cachedData;
+    items = feed ? feed.items : [];
+    fromCache = true;
+    console.log(`使用缓存的RSS数据: ${source.name}`);
+  }
+}
+
+// 只有在没有缓存或强制刷新时才实时获取
+if (!feed) {
+  console.log(`实时获取RSS源: ${source.name}`);
+  try {
+    feed = await rssManager.getFeed(source.id);
+    items = feed ? feed.items : [];
+    
+    // 获取成功后更新缓存（TTL设置为2小时）
+    if (feed) {
+      await setCachedData(cacheKey, feed);
+    }
+  } catch (error) {
+    console.error(`获取RSS源失败: ${source.name}`, error);
+    // 获取失败时使用空数组，避免页面错误
+    items = [];
+  }
+}
 ---
 
 <PageLayout meta={meta}>

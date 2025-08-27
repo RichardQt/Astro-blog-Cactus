@@ -191,8 +191,27 @@ if (redis) {
       timestamp: new Date().toISOString(),
     };
     
-    // 只缓存主数据，不单独缓存每个源，减少 Redis 操作
-    await redis.setex('rss-all-feeds', 600, JSON.stringify(cacheData)); // 10分钟过期
+    // 缓存主数据
+    await redis.setex('rss-all-feeds', 7200, JSON.stringify(cacheData)); // 2小时过期
+    
+    // 也缓存每个源的数据，方便单独页面使用
+    for (const feed of feeds) {
+      const feedKey = `rss-feed-${feed.source.id}`;
+      await redis.setex(feedKey, 7200, JSON.stringify(feed)); // 2小时过期
+    }
+    
+    // 保存更新日志供 /api/rss-status 使用
+    const updateLog = {
+      timestamp: new Date().toISOString(),
+      duration,
+      stats: cacheData.stats,
+      sources: feeds.map(f => ({
+        id: f.source.id,
+        name: f.source.name,
+        items: f.items.length
+      }))
+    };
+    await redis.setex('rss-update-log', 86400, JSON.stringify(updateLog)); // 24小时过期
     
     saved = true;
     console.log('[CRON] 数据已保存到 Redis');
