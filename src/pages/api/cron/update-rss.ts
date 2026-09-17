@@ -74,15 +74,29 @@ async function fetchSingleSource(source: RSSSource): Promise<RSSFeed | null> {
     const itemsArray = Array.isArray(itemElements) ? itemElements : [itemElements];
     
     const items = itemsArray.slice(0, 20).map((item: any, index: number) => {
-      const title = item.title?.['#text'] || item.title || '';
-      const description = item.description?.['#text'] || item.description || item.summary || '';
-      const link = item.link?.['#text'] || item.link || '';
+      const rawTitle = item.title?.['#text'] || item.title || '';
+      const title = typeof rawTitle === 'string' ? rawTitle.trim() : (rawTitle?.['#text'] || '');
+      const rawDesc = item.description?.['#text'] || item.description || item.summary?.['#text'] || item.summary || item.content?.['#text'] || item.content || '';
+      const description = typeof rawDesc === 'string' ? rawDesc.trim().slice(0, 500) : '';
+      
+      let link = '';
+      if (typeof item.link === 'string') {
+        link = item.link;
+      } else if (item.link?.['@_href']) {
+        link = item.link['@_href'];
+      } else if (item.link?.['#text']) {
+        link = item.link['#text'];
+      } else if (Array.isArray(item.link)) {
+        const alt = item.link.find((l: any) => l?.['@_rel'] === 'alternate' || l?.['@_href']);
+        link = alt?.['@_href'] || alt?.['#text'] || '';
+      }
+      
       const pubDate = item.pubDate || item.published || item.updated || new Date().toISOString();
       
       return {
         id: `${source.id}-${index}`,
         title: typeof title === 'string' ? title.trim() : '',
-        description: typeof description === 'string' ? description.trim().slice(0, 500) : '',
+        description,
         content: description,
         link: typeof link === 'string' ? link.trim() : '',
         pubDate,
@@ -145,28 +159,40 @@ export const GET: APIRoute = async ({ request }) => {
     for (let i = 0; i < results.length; i++) {
       const result = results[i];
       const source = sources[i];
+      if (!result || !source) continue;
       
-      if (result.status === 'fulfilled' && result.value) {
+      if (result.status === 'fulfilled') {
         const feed = result.value;
-        allFeeds.push(feed);
-        
-        // 缓存单个源的数据（7200秒 = 2小时）
-        const cacheKey = `rss-feed-${source.id}`;
-        await redis.setex(cacheKey, 7200, JSON.stringify(feed));
-        
-        updateResults.push({
-          source: source.name,
-          status: 'success',
-          items: feed.items.length,
-        });
-        
-        console.log(`✓ ${source.name}: ${feed.items.length} 项`);
+        if (feed) {
+          allFeeds.push(feed);
+          
+          // 缓存单个源的数据（7200秒 = 2小时）
+          const cacheKey = `rss-feed-${source.id}`;
+          await redis.setex(cacheKey, 7200, JSON.stringify(feed));
+          
+          updateResults.push({
+            source: source.name,
+            status: 'success',
+            items: feed.items.length,
+          });
+          
+          console.log(`✓ ${source.name}: ${feed.items.length} 项`);
+        } else {
+          errors.push(`${source.name}: 获取失败`);
+          updateResults.push({
+            source: source.name,
+            status: 'failed',
+            error: 'Feed parse returned null',
+          });
+          console.error(`✗ ${source.name}: 失败`);
+        }
       } else {
+        const errorMessage = result.reason instanceof Error ? result.reason.message : String(result.reason || 'Unknown error');
         errors.push(`${source.name}: 获取失败`);
         updateResults.push({
           source: source.name,
           status: 'failed',
-          error: result.status === 'rejected' ? result.reason?.message : 'Unknown error',
+          error: errorMessage,
         });
         
         console.error(`✗ ${source.name}: 失败`);

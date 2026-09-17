@@ -67,6 +67,10 @@ const sourceId = Astro.params.source;
 const itemId = Astro.params.id;
 const forceRefresh = Astro.url.searchParams.get('refresh') === 'true';
 
+if (!sourceId) {
+  return Astro.redirect("/404");
+}
+
 // Get source
 const source = rssManager.getSourceById(sourceId);
 if (!source) {
@@ -141,7 +145,7 @@ const cleanContent = (content: string) => {
 
 // 获取相关文章（同源的最新文章）
 const relatedItems = feed.items
-  .filter(feedItem => feedItem.id !== item.id)
+  .filter((feedItem: any) => feedItem.id !== item.id)
   .slice(0, 4);
 ---
 
@@ -234,7 +238,7 @@ const relatedItems = feed.items
       <section class="rss-related-articles">
         <h3 class="rss-related-title">相关文章</h3>
         <div class="rss-related-grid">
-          {relatedItems.map((relatedItem) => (
+          {relatedItems.map((relatedItem: any) => (
             <div class="rss-related-item">
               <h4 class="rss-related-item-title">
                 <a href={`/feeds/${source.id}/${relatedItem.id || 'unknown'}`}>

@@ -11,7 +11,8 @@
 		"format": "pnpm run format:code && pnpm run format:imports",
 		"format:code": "biome format . --write && prettier -w \"**/*\" \"!**/*.{md,mdx}\" --ignore-unknown --cache",
 		"format:imports": "biome check --formatter-enabled=false --write",
-		"check": "astro check"
+		"check": "astro check",
+		"test:rss": "node scripts/test-rss.mjs"
 	},
 	"dependencies": {
 		"@astrojs/mdx": "4.3.4",
@@ -57,6 +58,7 @@
 		"@astrojs/check": "^0.9.4",
 		"@biomejs/biome": "^1.9.4",
 		"@iconify-json/mdi": "^1.2.1",
+		"@img/sharp-win32-x64": "^0.35.4",
 		"@pagefind/default-ui": "^1.2.0",
 		"@resvg/resvg-js": "^2.6.2",
 		"@tailwindcss/typography": "^0.5.15",

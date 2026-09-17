@@ -8,6 +8,7 @@ import { Icon } from "astro-icon/components";
 
 interface Props {
   sources?: RSSSource[];
+  feeds?: RSSFeed[];
   selectedSource?: string;
   itemsPerPage?: number;
   currentPage?: number;
@@ -15,6 +16,7 @@ interface Props {
 
 const {
   sources = [],
+  feeds: passedFeeds,
   selectedSource = 'all',
   itemsPerPage = 15,
   currentPage = 1
@@ -23,19 +25,26 @@ const {
 // 获取所有订阅源
 const allSources = sources.length > 0 ? sources : rssManager.getSources();
 
-// 获取所有订阅源的内容（用于统计）
+// 获取所有订阅源的内容（优先使用外部传入的已拉取 feeds，避免二次重复请求性能硬伤）
 const allFeeds: RSSFeed[] = [];
 const feedsMap = new Map<string, RSSFeed>();
 
-for (const source of allSources) {
-  try {
-    const feed = await rssManager.getFeed(source.id);
-    if (feed) {
-      allFeeds.push(feed);
-      feedsMap.set(source.id, feed);
+if (passedFeeds && passedFeeds.length > 0) {
+  for (const feed of passedFeeds) {
+    allFeeds.push(feed);
+    feedsMap.set(feed.source.id, feed);
+  }
+} else {
+  for (const source of allSources) {
+    try {
+      const feed = await rssManager.getFeed(source.id);
+      if (feed) {
+        allFeeds.push(feed);
+        feedsMap.set(source.id, feed);
+      }
+    } catch (error) {
+      console.error(`获取订阅源 ${source.name} 失败:`, error);
     }
-  } catch (error) {
-    console.error(`获取订阅源 ${source.name} 失败:`, error);
   }
 }
 
@@ -88,7 +97,7 @@ function getSourceColor(sourceId: string): string {
     hash = ((hash << 5) - hash) + sourceId.charCodeAt(i);
     hash = hash & hash;
   }
-  return colors[Math.abs(hash) % colors.length];
+  return colors[Math.abs(hash) % colors.length] || colors[0]!;
 }
 
 // 清理描述文本
@@ -482,8 +491,6 @@ const pageNumbers = generatePageNumbers(currentPage, totalPages);
 <script>
   // 客户端交互逻辑
   document.addEventListener('DOMContentLoaded', () => {
-    const baseUrl = window.location.pathname;
-    
     // 处理源筛选
     const tabs = document.querySelectorAll('.rss-tab');
     tabs.forEach(tab => {
@@ -494,7 +501,7 @@ const pageNumbers = generatePageNumbers(currentPage, totalPages);
         const source = tab.getAttribute('data-source');
         const url = new URL(window.location.href);
         
-        if (source === 'all') {
+        if (!source || source === 'all') {
           url.searchParams.delete('source');
         } else {
           url.searchParams.set('source', source);

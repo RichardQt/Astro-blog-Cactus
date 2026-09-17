@@ -7,12 +7,13 @@ export const prerender = true;
 
 <site-search class="ms-auto" id="search">
 	<button
+		aria-label="打开搜索"
 		class="flex h-9 w-9 items-center justify-center rounded-md hover:text-accent"
 		data-open-modal
 		disabled
 	>
 		<svg
-			aria-label="search"
+			aria-label="搜索"
 			class="h-7 w-7"
 			fill="none"
 			height="16"
@@ -29,20 +30,20 @@ export const prerender = true;
 		</svg>
 	</button>
 	<dialog
-		aria-label="search"
+		aria-label="站内搜索"
 		class="h-full max-h-full w-full max-w-full border border-zinc-400 bg-bgColor shadow backdrop:backdrop-blur sm:mx-auto sm:mb-auto sm:mt-16 sm:h-max sm:max-h-[calc(100%-8rem)] sm:min-h-[15rem] sm:w-5/6 sm:max-w-[48rem] sm:rounded-md"
 	>
 		<div class="dialog-frame flex flex-col gap-4 p-6 pt-12 sm:pt-6">
 			<button
 				class="ms-auto cursor-pointer rounded-md bg-zinc-200 p-2 font-semibold dark:bg-zinc-700"
-				data-close-modal>Close</button
+				data-close-modal>关闭</button
 			>
 			{
 				import.meta.env.DEV ? (
 					<div class="mx-auto text-center">
 						<p>
-							Search is only available in production builds. <br />
-							Try building and previewing the site to test it out locally.
+							搜索功能仅在生产构建中可用。<br />
+							请执行构建并在本地预览以测试搜索功能。
 						</p>
 					</div>
 				) : (
@@ -123,6 +124,19 @@ export const prerender = true;
 					element: "#cactus__search",
 					showImages: false,
 					showSubResults: true,
+					translations: {
+						placeholder: "搜索文章...",
+						clear_search: "清除",
+						load_more: "加载更多结果",
+						search_label: "站内搜索",
+						filters_label: "筛选",
+						zero_results: "未找到关于 [SEARCH_TERM] 的结果",
+						many_results: "找到 [COUNT] 条关于 [SEARCH_TERM] 的结果",
+						one_result: "找到 1 条关于 [SEARCH_TERM] 的结果",
+						alt_search: "未找到关于 [SEARCH_TERM] 的结果。改为显示关于 [DIFFERENT_TERM] 的结果",
+						search_suggestion: "未找到关于 [SEARCH_TERM] 的结果。请尝试以下搜索之一：",
+						searching: "正在搜索 [SEARCH_TERM]...",
+					},
 				});
 			});
 		}

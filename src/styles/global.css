@@ -1,3 +1,7 @@
+/* ========== 方案A: 字体子集化（当前使用） ========== */
+/* 字体分片文件已上传，使用子集化提高加载速度 */
+@import url('https://cdn.mengze.vip/gh/RichardQt/Static_Resource_Acceleration/fonts/result.css');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -7,10 +11,6 @@
  * 方案A: 使用字体子集化（推荐，需要上传所有分片文件）
  * 方案B: 使用完整字体（简单，但文件较大）
  */
-
-/* ========== 方案A: 字体子集化（当前使用） ========== */
-/* 字体分片文件已上传，使用子集化提高加载速度 */
-@import url('https://cdn.mengze.vip/gh/RichardQt/Static_Resource_Acceleration/fonts/result.css');
 
 /* ========== 方案B: 完整字体（备用方案） ========== */
 /* 英文字体 */
@@ -34,6 +34,13 @@
 } */
 
 @layer base {
+    html {
+        scrollbar-gutter: stable;
+    }
+
+    :target {
+        scroll-margin-block: 5ex;
+    }
 
     :root,
     :root[data-theme="light"] {

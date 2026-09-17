@@ -6,10 +6,10 @@ import expressiveCode from "astro-expressive-code";
 import icon from "astro-icon";
 import robotsTxt from "astro-robots-txt";
 import webmanifest from "astro-webmanifest";
-import { defineConfig, envField } from "astro/config";
+import { defineConfig, envField, passthroughImageService } from "astro/config";
 import { expressiveCodeOptions } from "./src/site.config";
 import { siteConfig } from "./src/site.config";
-import vercel from "@astrojs/vercel/serverless";
+import vercel from "@astrojs/vercel";
 
 // Remark plugins
 import remarkDirective from "remark-directive";
@@ -29,21 +29,14 @@ import remarkEmoji from "remark-emoji";
 export default defineConfig({
 	output: "server",
 	adapter: vercel({
-		functionPerRoute: false,
 		edgeMiddleware: false,
 		maxDuration: 30, // 设置函数最大执行时间为 30 秒
 	}),
 	image: {
 		domains: [
 			"webmention.io",
-			"cdn.mengze.vip",
 		],
-		service: {
-			entrypoint: "astro/assets/services/sharp",
-			config: {
-				formats: ["webp", "avif", "png", "jpg", "jpeg"],
-			},
-		},
+		service: passthroughImageService(),
 	},
 	integrations: [
 		expressiveCode(expressiveCodeOptions),
@@ -178,8 +171,8 @@ export default defineConfig({
 			WEBMENTION_API_KEY: envField.string({ context: "server", access: "secret", optional: true }),
 			WEBMENTION_URL: envField.string({ context: "client", access: "public", optional: true }),
 			WEBMENTION_PINGBACK: envField.string({ context: "client", access: "public", optional: true }),
-			OAUTH_GITHUB_CLIENT_ID: envField.string({ context: "client", access: "public" }),
-			OAUTH_GITHUB_CLIENT_SECRET: envField.string({ context: "server", access: "secret" }),
+			OAUTH_GITHUB_CLIENT_ID: envField.string({ context: "client", access: "public", optional: true }),
+			OAUTH_GITHUB_CLIENT_SECRET: envField.string({ context: "server", access: "secret", optional: true }),
 			// Upstash Redis
 			UPSTASH_REDIS_REST_URL: envField.string({ context: "server", access: "secret", optional: true }),
 			UPSTASH_REDIS_REST_TOKEN: envField.string({ context: "server", access: "secret", optional: true }),

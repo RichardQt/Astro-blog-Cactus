@@ -8,12 +8,14 @@ import { Icon } from "astro-icon/components";
 
 interface Props {
   sources?: RSSSource[];
+  feeds?: RSSFeed[];
   selectedSource?: string;
   maxItems?: number;
 }
 
 const {
   sources = [],
+  feeds: passedFeeds,
   selectedSource = 'all',
   maxItems = 20
 } = Astro.props;
@@ -23,19 +25,27 @@ const allSources = sources.length > 0 ? sources : rssManager.getSources();
 
 // 获取订阅源的最新内容
 const feeds: RSSFeed[] = [];
-for (const source of allSources) {
-  // 如果选择了特定源，只获取该源
-  if (selectedSource !== 'all' && source.id !== selectedSource) {
-    continue;
-  }
-  
-  try {
-    const feed = await rssManager.getFeed(source.id);
-    if (feed) {
+if (passedFeeds && passedFeeds.length > 0) {
+  for (const feed of passedFeeds) {
+    if (selectedSource === 'all' || feed.source.id === selectedSource) {
       feeds.push(feed);
     }
-  } catch (error) {
-    console.error(`获取订阅源 ${source.name} 失败:`, error);
+  }
+} else {
+  for (const source of allSources) {
+    // 如果选择了特定源，只获取该源
+    if (selectedSource !== 'all' && source.id !== selectedSource) {
+      continue;
+    }
+    
+    try {
+      const feed = await rssManager.getFeed(source.id);
+      if (feed) {
+        feeds.push(feed);
+      }
+    } catch (error) {
+      console.error(`获取订阅源 ${source.name} 失败:`, error);
+    }
   }
 }
 
@@ -88,7 +98,7 @@ function getSourceColor(sourceId: string): string {
     hash = ((hash << 5) - hash) + sourceId.charCodeAt(i);
     hash = hash & hash;
   }
-  return colors[Math.abs(hash) % colors.length];
+  return colors[Math.abs(hash) % colors.length] || colors[0]!;
 }
 
 // 清理HTML内容
@@ -407,7 +417,7 @@ function cleanDescription(html: string): string {
         
         // 更新URL（可选）
         const url = new URL(window.location.href);
-        if (source === 'all') {
+        if (!source || source === 'all') {
           url.searchParams.delete('source');
         } else {
           url.searchParams.set('source', source);

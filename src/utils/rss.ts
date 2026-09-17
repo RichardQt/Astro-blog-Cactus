@@ -11,134 +11,106 @@ export const defaultRSSConfig: RSSConfig = {
             id: "sanhua",
             name: "三花AI资讯",
             url: "https://sanhua.himrr.com/daily-news/feed",
-            description: "AI动态",
-            category: "AI动态",
+            description: "AI行业热点与产品前沿快讯",
+            category: "AI资讯",
+        },
+        {
+            id: "qbitai",
+            name: "量子位",
+            url: "https://www.qbitai.com/feed",
+            description: "追踪人工智能与前沿科技新动态",
+            category: "AI资讯",
+        },
+        {
+            id: "aibase",
+            name: "AI Base 资讯",
+            url: "https://rsshub.bestblogs.dev/aibase/news",
+            description: "全球人工智能创新产品与大模型资讯",
+            category: "AI资讯",
+        },
+        {
+            id: "zhihu",
+            name: "知乎热榜",
+            url: "https://rsshub.bestblogs.dev/zhihu/hot",
+            description: "知乎全站实时热搜与高赞讨论",
+            category: "热榜",
+        },
+        {
+            id: "readhub",
+            name: "Readhub 科技",
+            url: "https://rsshub.bestblogs.dev/readhub/daily",
+            description: "科技圈热门事件聚合与每日早报",
+            category: "热榜",
+        },
+        {
+            id: "kr36",
+            name: "36氪热榜",
+            url: "https://rsshub.bestblogs.dev/36kr/hot-list",
+            description: "聚焦前沿科技、创投与创新商业热门榜单",
+            category: "热榜",
+        },
+        {
+            id: "juejinweekly",
+            name: "掘金本周最热",
+            url: "https://rsshub.bestblogs.dev/juejin/trending/all/weekly",
+            description: "掘金开发者社区每周最受欢迎技术文章",
+            category: "开发",
+        },
+        {
+            id: "hellogithub",
+            name: "HelloGitHub",
+            url: "https://hellogithub.com/rss",
+            description: "分享 GitHub 上有趣、有用的开源项目",
+            category: "开发",
+        },
+        {
+            id: "freecodecamp",
+            name: "freeCodeCamp",
+            url: "https://www.freecodecamp.org/news/rss/",
+            description: "全球开源开发者学习社区精选教程",
+            category: "开发",
+        },
+        {
+            id: "bytebytego",
+            name: "ByteByteGo",
+            url: "https://blog.bytebytego.com/feed",
+            description: "深入解析高并发分布式系统与架构设计",
+            category: "开发",
+        },
+        {
+            id: "v2ex",
+            name: "V2EX 社区",
+            url: "https://www.v2ex.com/index.xml",
+            description: "创意工作者、极客与开发者热门讨论",
+            category: "开发",
         },
         {
             id: "meowweekly",
             name: "猫鱼周刊",
             url: "https://ameow.xyz/feed/categories/weekly.xml",
-            description: "分享与动态",
+            description: "见闻、思考与生活方式精选周刊",
             category: "分享与动态",
         },
         {
             id: "ruanyifeng",
             name: "阮一峰的网络日志",
             url: "http://feeds.feedburner.com/ruanyifeng",
-            description: "阮一峰的网络日志",
+            description: "每周科技爱好者周刊与技术深度随笔",
             category: "分享与动态",
-        },
-        {
-            id: "juejinweekly",
-            name: "掘金本周最热文章",
-            url: "https://rsshub.bestblogs.dev/juejin/trending/all/weekly",
-            description: "掘金本周最热",
-            category: "分享与动态",
-        },
-        {
-            id: "jiqizhixin",
-            name: "机器之心",
-            url: "https://www.jiqizhixin.com/rss",
-            description: "人工智能和科技深度报道",
-            category: "AI深度",
-        },
-        {
-            id: "jikegongyuan",
-            name: "极客公园",
-            url: "https://wechat2rss.bestblogs.dev/feed/cbd08f35e4739af8372caeadd24c20333a9b0453.xml",
-            description: "专注与科技创业者聊「真问题」",
-            category: "AI深度",
-        },
-        {
-            id: "InfoQ",
-            name: "InfoQ 中文",
-            url: "https://wechat2rss.bestblogs.dev/feed/a2524d2d098e0fd47ed385e4999838113d3b84c1.xml",
-            description: "科技圈的观察者，前沿技术的传播者",
-            category: "AI深度",
-        },
-        {
-            id: "qbitai",
-            name: "量子位",
-            url: "https://www.qbitai.com/feed",
-            description: "人工智能和科技资讯",
-            category: "AI科技",
-        },
-        {
-            id: "zhihu",
-            name: "知乎热榜",
-            url: "https://rsshub.app/zhihu/hot",
-            description: "知乎热榜",
-            category: "热榜",
-        },
-        {
-            id: "githubtrending",
-            name: "逛逛GitHub热榜",
-            url: "https://wechat2rss.bestblogs.dev/feed/c34cc325f2457fe4d819f06f9ce5b6ef878a4f88.xml",
-            description: "GitHub热榜",
-            category: "热榜",
         },
         {
             id: "baoyublog",
             name: "宝玉的blog",
-            url: "https://baoyu.io/feed.xml",
-            description: "个人blog",
+            url: "https://s.baoyu.io/feed.xml",
+            description: "软件工程实践、AI重塑开发流程思考",
             category: "blog",
         },
         {
-            id: "hellogithub",
-            name: "HelloGIthub",
-            url: "https://wechat2rss.bestblogs.dev/feed/15347672479a97910dce03fb5d60d8e55575515c.xml",
-            description: "github相关",
-            category: "github",
-        },
-        {
-            id: "guizangAI",
-            name: "歸藏的AI工具箱",
-            url: "https://wechat2rss.bestblogs.dev/feed/1fc32fedbf5da37e8e819a9298ae80724c12cb03.xml",
-            description: "歸藏的AI工具箱",
-            category: "AI资讯",
-        },
-        {
-            id: "ModelScope",
-            name: "魔搭ModelScope社区",
-            url: "https://wechat2rss.bestblogs.dev/feed/330a050a26a02613d26332a21f9dfe939e587ccd.xml",
-            description: "魔搭ModelScope社区",
-            category: "AI资讯",
-        },
-        {
-            id: "xinzhiyuan",
-            name: "新智元",
-            url: "https://wechat2rss.bestblogs.dev/feed/17f0b2b14e1ae24309b5dcb229ebd0aa4c1c2782.xml",
-            description: "AI资讯",
-            category: "AI资讯",
-        },
-        {
-            id: "shizilukoucrossing",
-            name: "十字路口Crossing",
-            url: "https://wechat2rss.bestblogs.dev/feed/8347fd36fcd0a5861a9f556522e936157143d2fe.xml",
-            description: "十字路口Crossing",
-            category: "AI资讯",
-        },
-        {
-            id: "aliyundev",
-            name: "阿里云开发者社区",
-            url: "https://wechat2rss.bestblogs.dev/feed/f41453d9eb529aba187a1fad61c6f896b50c29b9.xml",
-            description: "阿里云开发者社区",
+            id: "sspai",
+            name: "少数派",
+            url: "https://sspai.com/feed",
+            description: "高效数字生活、优质软硬件测评与生产力工具",
             category: "分享与动态",
-        },
-        {
-            id: "freecodecamp",
-            name: "freecodecamp",
-            url: "https://www.freecodecamp.org/news/rss/",
-            description: "freecodecamp",
-            category: "开发",
-        },
-        {
-            id: "bytebytego",
-            name: "bytebytego",
-            url: "https://blog.bytebytego.com/feed",
-            description: "",
-            category: "人工智能",
         },
     ],
     defaultFetchInterval: 60,
@@ -227,7 +199,7 @@ class RSSManager {
             }
 
             const items: RSSItem[] = [];
-            const itemElements = channel.item || [];
+            const itemElements = channel.item || channel.entry || [];
 
             // 确保itemElements是数组
             const itemsArray = Array.isArray(itemElements) ? itemElements : [itemElements];
@@ -238,11 +210,14 @@ class RSSManager {
 
                     const title = this.getElementValue(item, "title");
                     const link = this.getElementValue(item, "link");
-                    const description = this.getElementValue(item, "description");
-                    const content = this.getElementValue(item, "content:encoded");
-                    const pubDate = this.getElementValue(item, "pubDate");
-                    const author = this.getElementValue(item, "author") || this.getElementValue(item, "dc:creator");
-                    const guid = this.getElementValue(item, "guid");
+                    const description = this.getElementValue(item, "description") || this.getElementValue(item, "summary");
+                    const content = this.getElementValue(item, "content:encoded") || this.getElementValue(item, "content");
+                    const pubDate = this.getElementValue(item, "pubDate") || this.getElementValue(item, "published") || this.getElementValue(item, "updated");
+                    let author = this.getElementValue(item, "author") || this.getElementValue(item, "dc:creator");
+                    if (!author && item.author?.name) {
+                        author = typeof item.author.name === 'string' ? item.author.name.trim() : item.author.name['#text'] || '';
+                    }
+                    const guid = this.getElementValue(item, "guid") || this.getElementValue(item, "id");
 
                     // 解析分类
                     const categories = this.parseCategories(item);
@@ -293,20 +268,33 @@ class RSSManager {
     private getElementValue(obj: any, key: string): string {
         if (!obj) return "";
 
+        // 特殊处理 link 属性为对象或数组的情况 (Atom 规范支持)
+        if (key === 'link') {
+            if (typeof obj.link === 'string') return obj.link.trim();
+            if (obj.link?.['#text']) return obj.link['#text'].trim();
+            if (obj.link?.['@_href']) return obj.link['@_href'].trim();
+            if (Array.isArray(obj.link)) {
+                const alt = obj.link.find((l: any) => l?.['@_rel'] === 'alternate' || l?.['@_href']);
+                if (alt?.['@_href']) return alt['@_href'].trim();
+                if (alt?.['#text']) return alt['#text'].trim();
+            }
+        }
+
         // 直接访问属性
-        if (obj[key]) {
+        if (obj[key] !== undefined) {
             const value = obj[key];
             if (typeof value === 'string') return value.trim();
-            if (value['#text']) return value['#text'].trim();
-            if (typeof value === 'object' && value['#text']) return value['#text'].trim();
+            if (value?.['#text']) return String(value['#text']).trim();
+            if (typeof value === 'object' && value?.['@_href']) return String(value['@_href']).trim();
         }
 
         // 处理带命名空间的属性
         const namespacedKey = key.replace(':', '');
-        if (obj[namespacedKey]) {
+        if (obj[namespacedKey] !== undefined) {
             const value = obj[namespacedKey];
             if (typeof value === 'string') return value.trim();
-            if (value['#text']) return value['#text'].trim();
+            if (value?.['#text']) return String(value['#text']).trim();
+            if (typeof value === 'object' && value?.['@_href']) return String(value['@_href']).trim();
         }
 
         return "";
@@ -394,6 +382,7 @@ class RSSManager {
 
         try {
             const response = await fetch(source.url, {
+                signal: AbortSignal.timeout(6000),
                 headers: {
                     'User-Agent': 'Mozilla/5.0 (compatible; RSS Reader)',
                     'Accept': 'application/rss+xml, application/xml, text/xml',

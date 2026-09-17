@@ -24,8 +24,10 @@
 		root.setAttribute("data-theme", newTheme);
 
 		const colorThemeMetaTag = document.querySelector("meta[name='theme-color']");
-		const bgColour = getComputedStyle(document.body).getPropertyValue("--theme-bg");
-		colorThemeMetaTag.setAttribute("content", `hsl(${bgColour})`);
+		if (colorThemeMetaTag && document.body) {
+			const bgColour = getComputedStyle(document.body).getPropertyValue("--theme-bg");
+			colorThemeMetaTag.setAttribute("content", `hsl(${bgColour})`);
+		}
 		if (typeof localStorage !== "undefined") {
 			localStorage.setItem("theme", newTheme);
 		}
@@ -33,6 +35,13 @@
 
 	// initial setup
 	setTheme(getUserPref());
+
+	// listen for pageshow event, browser restored page from bfcache
+	window.addEventListener("pageshow", (e) => {
+		if (e.persisted) {
+			setTheme(getUserPref());
+		}
+	});
 
 	// View Transitions hook to restore theme
 	document.addEventListener("astro:after-swap", () => setTheme(getUserPref()));

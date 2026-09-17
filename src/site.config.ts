@@ -28,6 +28,8 @@ export const siteConfig: SiteConfig = {
 	ogLocale: "zh-CN",
 	// Used to construct the meta title property found in src/components/BaseHead.astro L:11, and webmanifest name found in astro.config.ts L:42
 	title: "Richard Castle",
+	// 控制页头 Logo 图标是否显示
+	showLogo: true,
 };
 
 // Used to generate links in both the Header & Footer.

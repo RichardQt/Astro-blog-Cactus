@@ -121,15 +121,29 @@ async function fetchSingleSource(source: RSSSource): Promise<RSSFeed | null> {
     const itemsArray = Array.isArray(itemElements) ? itemElements : [itemElements];
     
     const items = itemsArray.slice(0, 20).map((item: any, index: number) => {
-      const title = item.title?.['#text'] || item.title || '';
-      const description = item.description?.['#text'] || item.description || item.summary || '';
-      const link = item.link?.['#text'] || item.link || '';
+      const rawTitle = item.title?.['#text'] || item.title || '';
+      const title = typeof rawTitle === 'string' ? rawTitle.trim() : (rawTitle?.['#text'] || '');
+      const rawDesc = item.description?.['#text'] || item.description || item.summary?.['#text'] || item.summary || item.content?.['#text'] || item.content || '';
+      const description = typeof rawDesc === 'string' ? rawDesc.trim().slice(0, 500) : '';
+      
+      let link = '';
+      if (typeof item.link === 'string') {
+        link = item.link;
+      } else if (item.link?.['@_href']) {
+        link = item.link['@_href'];
+      } else if (item.link?.['#text']) {
+        link = item.link['#text'];
+      } else if (Array.isArray(item.link)) {
+        const alt = item.link.find((l: any) => l?.['@_rel'] === 'alternate' || l?.['@_href']);
+        link = alt?.['@_href'] || alt?.['#text'] || '';
+      }
+      
       const pubDate = item.pubDate || item.published || item.updated || new Date().toISOString();
       
       return {
         id: `${source.id}-${index}`,
         title: typeof title === 'string' ? title.trim() : '',
-        description: typeof description === 'string' ? description.trim().slice(0, 500) : '',
+        description,
         content: description,
         link: typeof link === 'string' ? link.trim() : '',
         pubDate,
@@ -311,6 +325,7 @@ const meta = {
   <section class="rss-feeds-section">
     <RSSFeedTable 
       sources={sources} 
+      feeds={allFeeds}
       selectedSource={selectedSource} 
       itemsPerPage={15}
       currentPage={Number(Astro.url.searchParams.get('page') || '1')}

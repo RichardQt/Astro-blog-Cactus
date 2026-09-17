@@ -117,7 +117,7 @@ export default {
 						/* Admonitions/Aside */
 						".aside": {
 							"--admonition-color": "var(--tw-prose-quotes)",
-							"@apply my-4 py-4 ps-4 border-s-2 border-[--admonition-color]": "",
+							"@apply my-4 py-4 ps-4 pe-4 border-s-2 border-[--admonition-color]": "",
 							".aside-title": {
 								"@apply font-bold text-base flex items-center gap-2 my-0 capitalize text-[--admonition-color]":
 									"",
