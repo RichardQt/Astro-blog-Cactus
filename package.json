@@ -12,7 +12,9 @@
 		"format:code": "biome format . --write && prettier -w \"**/*\" \"!**/*.{md,mdx}\" --ignore-unknown --cache",
 		"format:imports": "biome check --formatter-enabled=false --write",
 		"check": "astro check",
-		"test:rss": "node scripts/test-rss.mjs"
+		"test:rss": "node scripts/test-rss.mjs",
+		"sync:obsidian": "node scripts/sync-obsidian.mjs",
+		"sync:obsidian:dry": "node scripts/sync-obsidian.mjs --dry-run"
 	},
 	"dependencies": {
 		"@astrojs/mdx": "4.3.4",
