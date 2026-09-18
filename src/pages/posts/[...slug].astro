@@ -1,25 +1,49 @@
 ---
-import { render } from "astro:content";
+import { render, type CollectionEntry } from "astro:content";
 import { getAllPosts } from "@/data/post";
 import PostLayout from "@/layouts/BlogPost.astro";
+import { collectionDateSort } from "@/utils/date";
 import type { GetStaticPaths, InferGetStaticPropsType } from "astro";
 export const prerender = true;
 
-// if you're using an adaptor in SSR mode, getStaticPaths wont work -> https://docs.astro.build/en/guides/routing/#modifying-the-slug-example-for-ssr
 export const getStaticPaths = (async () => {
-	const blogEntries = await getAllPosts();
-	return blogEntries.map((post) => ({
+	function getRelatedPosts(currentPost: CollectionEntry<"post">, all: CollectionEntry<"post">[]) {
+		const currentTags = new Set(currentPost.data.tags || []);
+		if (currentTags.size === 0) return [];
+		return all
+			.filter((p) => p.id !== currentPost.id)
+			.map((p) => {
+				const sharedCount = (p.data.tags || []).filter((t) => currentTags.has(t)).length;
+				return { post: p, sharedCount };
+			})
+			.filter((item) => item.sharedCount > 0)
+			.sort(
+				(a, b) =>
+					b.sharedCount - a.sharedCount ||
+					b.post.data.publishDate.getTime() - a.post.data.publishDate.getTime(),
+			)
+			.slice(0, 3)
+			.map((item) => item.post);
+	}
+
+	const blogEntries = (await getAllPosts()).sort(collectionDateSort);
+	return blogEntries.map((post, index) => ({
 		params: { slug: post.id },
-		props: { post },
+		props: {
+			post,
+			prevPost: index < blogEntries.length - 1 ? blogEntries[index + 1] : null,
+			nextPost: index > 0 ? blogEntries[index - 1] : null,
+			relatedPosts: getRelatedPosts(post, blogEntries),
+		},
 	}));
 }) satisfies GetStaticPaths;
 
 type Props = InferGetStaticPropsType<typeof getStaticPaths>;
 
-const { post } = Astro.props;
+const { post, prevPost, nextPost, relatedPosts } = Astro.props;
 const { Content } = await render(post);
 ---
 
-<PostLayout post={post}>
+<PostLayout post={post} prevPost={prevPost} nextPost={nextPost} relatedPosts={relatedPosts}>
 	<Content />
 </PostLayout>

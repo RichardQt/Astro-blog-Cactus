@@ -10,13 +10,17 @@ import BaseLayout from "./Base.astro";
 
 interface Props {
 	post: CollectionEntry<"post">;
+	prevPost?: CollectionEntry<"post"> | null | undefined;
+	nextPost?: CollectionEntry<"post"> | null | undefined;
+	relatedPosts?: CollectionEntry<"post">[] | undefined;
 }
 
-const { post } = Astro.props;
+const { post, prevPost, nextPost, relatedPosts = [] } = Astro.props;
 const { ogImage, title, description, updatedDate, publishDate } = post.data;
 const socialImage = ogImage ?? `/og-image/${post.id}.png`;
 const articleDate = updatedDate?.toISOString() ?? publishDate.toISOString();
-const { headings } = await render(post);
+const { headings, remarkPluginFrontmatter } = await render(post);
+const readingTime = remarkPluginFrontmatter?.readingTime as string | undefined;
 ---
 
 <BaseLayout
@@ -27,14 +31,93 @@ const { headings } = await render(post);
 		title,
 	}}
 >
+	{/* 顶部极细阅读进度条 */}
+	<div
+		id="reading-progress"
+		class="fixed top-0 start-0 z-50 h-[3px] w-0 bg-accent transition-[width] duration-150 ease-out"
+		aria-hidden="true"
+	></div>
+
 	<div class="gap-x-10 lg:flex lg:items-start">
 		{!!headings.length && <TOC headings={headings} />}
 		<article class="flex-grow break-words" data-pagefind-body>
-			<div id="blog-hero"><Masthead content={post} /></div>
+			<div id="blog-hero"><Masthead content={post} readingTime={readingTime} /></div>
 			<div
-				class="prose prose-base mx-auto mt-12 max-w-3xl dark:prose-invert prose-headings:font-sans prose-headings:text-accent-2 prose-h1:text-4xl prose-h1:font-bold prose-h2:text-3xl prose-h2:font-bold prose-h3:text-2xl prose-h3:font-semibold prose-h4:text-xl prose-h4:font-semibold prose-h5:text-lg prose-h5:font-medium prose-h6:text-base prose-h6:font-medium prose-a:text-accent-2 prose-a:decoration-accent-2 prose-a:decoration-1 hover:prose-a:text-accent hover:prose-a:decoration-accent prose-blockquote:border-l-4 prose-blockquote:border-accent-2 prose-blockquote:bg-accent/5 prose-blockquote:px-4 prose-blockquote:py-1 prose-blockquote:not-italic prose-strong:text-accent-2 prose-em:text-accent-2 prose-code:rounded prose-code:bg-accent/10 prose-code:px-1 prose-code:py-0.5 prose-code:text-accent-2 prose-code:before:content-none prose-code:after:content-none prose-pre:rounded-lg prose-pre:bg-[#1d1f21] prose-pre:shadow-md prose-li:marker:text-accent-2 prose-table:border-collapse prose-th:border prose-th:border-accent/20 prose-th:bg-accent/5 prose-th:p-2 prose-td:border prose-td:border-accent/20 prose-td:p-2 prose-img:rounded-lg prose-img:shadow-md prose-hr:border-accent/20 [&_*]:no-underline"
+				class="prose prose-base mx-auto mt-12 max-w-3xl dark:prose-invert prose-headings:font-sans prose-headings:text-accent-2 prose-headings:no-underline prose-h1:text-4xl prose-h1:font-bold prose-h2:text-3xl prose-h2:font-bold prose-h3:text-2xl prose-h3:font-semibold prose-h4:text-xl prose-h4:font-semibold prose-h5:text-lg prose-h5:font-medium prose-h6:text-base prose-h6:font-medium prose-a:text-accent-2 prose-a:underline prose-a:underline-offset-2 prose-a:decoration-accent/40 hover:prose-a:text-accent hover:prose-a:decoration-accent prose-blockquote:border-l-4 prose-blockquote:border-accent-2 prose-blockquote:bg-accent/5 prose-blockquote:px-4 prose-blockquote:py-1 prose-blockquote:not-italic prose-strong:text-accent-2 prose-em:text-accent-2 prose-code:rounded prose-code:bg-accent/10 prose-code:px-1 prose-code:py-0.5 prose-code:text-accent-2 prose-code:before:content-none prose-code:after:content-none prose-pre:rounded-lg prose-pre:bg-[#1d1f21] prose-pre:shadow-md prose-li:marker:text-accent-2 prose-table:border-collapse prose-th:border prose-th:border-accent/20 prose-th:bg-accent/5 prose-th:p-2 prose-td:border prose-td:border-accent/20 prose-td:p-2 prose-img:rounded-lg prose-img:shadow-md prose-hr:border-accent/20"
 			>
 				<slot />
+
+				{/* 相关文章推荐 */}
+				{
+					relatedPosts.length > 0 && (
+						<section class="mt-14 border-t border-accent/20 pt-8 not-prose" aria-label="相关文章推荐">
+							<h2 class="title mb-4 text-lg font-semibold text-accent-2">相关推荐</h2>
+							<ul class="space-y-3" role="list">
+								{relatedPosts.map((rPost) => (
+									<li class="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between">
+										<a
+											class="cactus-link text-base font-medium hover:text-accent"
+											href={`/posts/${rPost.id}/`}
+										>
+											{rPost.data.title}
+										</a>
+										<span class="text-xs text-gray-500 whitespace-nowrap">
+											{rPost.data.publishDate.toLocaleDateString("zh-CN", {
+												year: "numeric",
+												month: "2-digit",
+												day: "2-digit",
+											})}
+										</span>
+									</li>
+								))}
+							</ul>
+						</section>
+					)
+				}
+
+				{/* 上一篇 / 下一篇 导航卡片 */}
+				{
+					(prevPost || nextPost) && (
+						<nav
+							class="mt-10 grid gap-4 sm:grid-cols-2 not-prose border-t border-accent/20 pt-6"
+							aria-label="文章上下篇导航"
+						>
+							{prevPost ? (
+								<a
+									href={`/posts/${prevPost.id}/`}
+									class="group flex flex-col rounded-lg border border-accent/20 bg-textColor/5 p-4 transition-colors hover:border-accent hover:bg-accent/5"
+									rel="prev"
+								>
+									<span class="text-xs text-gray-500 group-hover:text-accent flex items-center gap-1">
+										← 上一篇
+									</span>
+									<span class="mt-1 font-semibold text-textColor group-hover:text-accent line-clamp-2">
+										{prevPost.data.title}
+									</span>
+								</a>
+							) : (
+								<div class="hidden sm:block" />
+							)}
+							{nextPost ? (
+								<a
+									href={`/posts/${nextPost.id}/`}
+									class="group flex flex-col items-end text-right rounded-lg border border-accent/20 bg-textColor/5 p-4 transition-colors hover:border-accent hover:bg-accent/5 sm:col-start-2"
+									rel="next"
+								>
+									<span class="text-xs text-gray-500 group-hover:text-accent flex items-center gap-1">
+										下一篇 →
+									</span>
+									<span class="mt-1 font-semibold text-textColor group-hover:text-accent line-clamp-2">
+										{nextPost.data.title}
+									</span>
+								</a>
+							) : (
+								<div class="hidden sm:block" />
+							)}
+						</nav>
+					)
+				}
+
 				<!-- <WebMentions /> -->
 				<PostComments />
 			</div>
@@ -58,23 +141,103 @@ const { headings } = await render(post);
 			<path d="M4.5 15.75l7.5-7.5 7.5 7.5" stroke-linecap="round" stroke-linejoin="round"></path>
 		</svg>
 	</button>
+
+	{/* 图片灯箱放大预览容器 */}
+	<div
+		id="image-lightbox"
+		class="fixed inset-0 z-[100] hidden items-center justify-center bg-black/80 backdrop-blur-sm opacity-0 transition-opacity duration-200 cursor-zoom-out p-4"
+		aria-hidden="true"
+	>
+		<img
+			id="lightbox-img"
+			class="max-h-[92vh] max-w-[92vw] object-contain rounded-lg shadow-2xl transition-transform duration-200 scale-95"
+			alt="放大图片"
+		/>
+	</div>
 </BaseLayout>
 
 <script>
-	const scrollBtn = document.getElementById("to-top-btn") as HTMLButtonElement;
-	const targetHeader = document.getElementById("blog-hero") as HTMLDivElement;
+	const scrollBtn = document.getElementById("to-top-btn") as HTMLButtonElement | null;
+	const targetHeader = document.getElementById("blog-hero") as HTMLDivElement | null;
+	const progressBar = document.getElementById("reading-progress") as HTMLDivElement | null;
+	const lightbox = document.getElementById("image-lightbox") as HTMLDivElement | null;
+	const lightboxImg = document.getElementById("lightbox-img") as HTMLImageElement | null;
 
 	function callback(entries: IntersectionObserverEntry[]) {
 		entries.forEach((entry) => {
-			// only show the scroll to top button when the heading is out of view
-			scrollBtn.dataset.show = (!entry.isIntersecting).toString();
+			if (scrollBtn) {
+				scrollBtn.dataset.show = (!entry.isIntersecting).toString();
+			}
 		});
 	}
 
-	scrollBtn.addEventListener("click", () => {
+	function updateReadingProgress() {
+		if (!progressBar) return;
+		const totalHeight = document.documentElement.scrollHeight - window.innerHeight;
+		if (totalHeight <= 0) {
+			progressBar.style.width = "0%";
+			return;
+		}
+		const progress = Math.min(100, Math.max(0, (window.scrollY / totalHeight) * 100));
+		progressBar.style.width = `${progress}%`;
+	}
+
+	// ========== 图片灯箱交互逻辑 ==========
+	function initImageLightbox() {
+		const lb = lightbox;
+		const lbImg = lightboxImg;
+		if (!lb || !lbImg) return;
+
+		const proseImages = document.querySelectorAll<HTMLImageElement>(".prose img");
+		proseImages.forEach((img) => {
+			// 忽略小图标、Logo、徽章或已包含特定样式的图片
+			if (img.width > 0 && img.width < 48 && img.height > 0 && img.height < 48) return;
+			img.classList.add("cursor-zoom-in");
+			img.addEventListener("click", () => {
+				lbImg.src = img.currentSrc || img.src;
+				lb.classList.remove("hidden");
+				lb.classList.add("flex");
+				requestAnimationFrame(() => {
+					lb.classList.remove("opacity-0");
+					lb.classList.add("opacity-100");
+					lbImg.classList.remove("scale-95");
+					lbImg.classList.add("scale-100");
+				});
+			});
+		});
+
+		function closeLightbox() {
+			if (!lb || !lbImg) return;
+			lb.classList.remove("opacity-100");
+			lb.classList.add("opacity-0");
+			lbImg.classList.remove("scale-100");
+			lbImg.classList.add("scale-95");
+			setTimeout(() => {
+				lb.classList.remove("flex");
+				lb.classList.add("hidden");
+				lbImg.src = "";
+			}, 200);
+		}
+
+		lb.addEventListener("click", closeLightbox);
+		window.addEventListener("keydown", (e) => {
+			if (e.key === "Escape" && lb && !lb.classList.contains("hidden")) {
+				closeLightbox();
+			}
+		});
+	}
+
+	scrollBtn?.addEventListener("click", () => {
 		document.documentElement.scrollTo({ behavior: "smooth", top: 0 });
 	});
 
-	const observer = new IntersectionObserver(callback);
-	observer.observe(targetHeader);
+	window.addEventListener("scroll", updateReadingProgress, { passive: true });
+	updateReadingProgress();
+
+	if (targetHeader && scrollBtn) {
+		const observer = new IntersectionObserver(callback);
+		observer.observe(targetHeader);
+	}
+
+	initImageLightbox();
 </script>

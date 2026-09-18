@@ -300,7 +300,7 @@ git push -u origin main
 
 创建 `.gitignore` 文件来排除不需要版本控制的文件:
 
-```gitignore
+```bash
 # 忽略单个文件
 demo.txt
 

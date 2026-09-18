@@ -5,10 +5,12 @@ import FormattedDate from "@/components/FormattedDate.astro";
 
 interface Props {
 	content: CollectionEntry<"post">;
+	readingTime?: string | undefined;
 }
 
 const {
 	content: { data },
+	readingTime,
 } = Astro.props;
 
 const dateTimeOptions: Intl.DateTimeFormatOptions = {
@@ -35,9 +37,8 @@ const dateTimeOptions: Intl.DateTimeFormatOptions = {
 </h1>
 <div class="flex flex-wrap items-center gap-x-3 gap-y-2">
 	<p class="font-semibold">
-		<FormattedDate date={data.publishDate} dateTimeOptions={dateTimeOptions} /> /{" "}
-		{/* @ts-ignore:next-line. TODO: add reading time to collection schema? */}
-		{data.readingTime}
+		<FormattedDate date={data.publishDate} dateTimeOptions={dateTimeOptions} />
+		{readingTime && ` / ${readingTime}`}
 	</p>
 	{
 		data.updatedDate && (

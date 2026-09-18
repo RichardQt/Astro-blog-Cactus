@@ -38,20 +38,9 @@ export const prerender = true;
 				class="ms-auto cursor-pointer rounded-md bg-zinc-200 p-2 font-semibold dark:bg-zinc-700"
 				data-close-modal>关闭</button
 			>
-			{
-				import.meta.env.DEV ? (
-					<div class="mx-auto text-center">
-						<p>
-							搜索功能仅在生产构建中可用。<br />
-							请执行构建并在本地预览以测试搜索功能。
-						</p>
-					</div>
-				) : (
-					<div class="search-container">
-						<div id="cactus__search" />
-					</div>
-				)
-			}
+			<div class="search-container">
+				<div id="cactus__search" />
+			</div>
 		</div>
 	</dialog>
 </site-search>
@@ -62,6 +51,8 @@ export const prerender = true;
 		private dialog: HTMLDialogElement;
 		private dialogFrame: HTMLDivElement;
 		private openBtn: HTMLButtonElement;
+
+		private pagefindInitialized: boolean = false;
 
 		closeModal = () => {
 			if (this.dialog.open) {
@@ -90,40 +81,36 @@ export const prerender = true;
 			}
 		};
 
-		openModal = (event?: MouseEvent) => {
-			this.dialog.showModal();
-			this.querySelector("input")?.focus();
-			event?.stopPropagation();
-			window.addEventListener("click", this.onWindowClick);
-		};
+		initPagefind = async () => {
+			if (this.pagefindInitialized) return;
+			this.pagefindInitialized = true;
 
-		constructor() {
-			super();
-			this.openBtn = this.querySelector<HTMLButtonElement>("button[data-open-modal]")!;
-			this.closeBtn = this.querySelector<HTMLButtonElement>("button[data-close-modal]")!;
-			this.dialog = this.querySelector("dialog")!;
-			this.dialogFrame = this.querySelector(".dialog-frame")!;
-
-			this.openBtn.addEventListener("click", this.openModal);
-			this.openBtn.disabled = false;
-			this.closeBtn.addEventListener("click", this.closeModal);
-		}
-
-		connectedCallback() {
-			// Listen for keyboard shortcut
-			window.addEventListener("keydown", this.onWindowKeydown);
-
-			// only add pagefind in production
-			if (import.meta.env.DEV) return;
-			const onIdle = window.requestIdleCallback || ((cb) => setTimeout(cb, 1));
-			onIdle(async () => {
+			try {
 				const { PagefindUI } = await import("@pagefind/default-ui");
 				new PagefindUI({
 					baseUrl: import.meta.env.BASE_URL,
 					bundlePath: import.meta.env.BASE_URL.replace(/\/$/, "") + "/pagefind/",
 					element: "#cactus__search",
 					showImages: false,
-					showSubResults: true,
+					showSubResults: false,
+					pageSize: 5,
+					debounceTimeoutMs: 350,
+					processTerm: (term: string) => {
+						if (!term || typeof term !== "string") return "";
+						// 解决中文分词缺失问题：通过现代浏览器内置 Intl.Segmenter 将连续中文词（如"大模型"）切分为"大 模型"
+						if (typeof Intl !== "undefined" && Intl.Segmenter) {
+							try {
+								const segmenter = new Intl.Segmenter("zh-CN", { granularity: "word" });
+								const words = Array.from(segmenter.segment(term))
+									.map((s) => s.segment.trim())
+									.filter(Boolean);
+								return words.join(" ");
+							} catch {
+								return term;
+							}
+						}
+						return term;
+					},
 					translations: {
 						placeholder: "搜索文章...",
 						clear_search: "清除",
@@ -138,6 +125,45 @@ export const prerender = true;
 						searching: "正在搜索 [SEARCH_TERM]...",
 					},
 				});
+			} catch (err) {
+				console.error("PagefindUI 初始化失败:", err);
+				const searchEl = this.querySelector("#cactus__search");
+				if (searchEl && import.meta.env.DEV) {
+					searchEl.innerHTML = `<div class="mx-auto text-center p-4 text-sm text-zinc-500 dark:text-zinc-400">
+						未检测到本地搜索索引。<br />请在终端执行 <code>pnpm build:search</code> 或 <code>pnpm build</code> 生成索引。
+					</div>`;
+				}
+			}
+		};
+
+		openModal = (event?: MouseEvent) => {
+			this.dialog.showModal();
+			this.initPagefind();
+			this.querySelector("input")?.focus();
+			event?.stopPropagation();
+			window.addEventListener("click", this.onWindowClick);
+		};
+
+		constructor() {
+			super();
+			this.openBtn = this.querySelector<HTMLButtonElement>("button[data-open-modal]")!;
+			this.closeBtn = this.querySelector<HTMLButtonElement>("button[data-close-modal]")!;
+			this.dialog = this.querySelector("dialog")!;
+			this.dialogFrame = this.querySelector(".dialog-frame")!;
+
+			this.openBtn.addEventListener("click", this.openModal);
+			this.openBtn.addEventListener("mouseenter", this.initPagefind, { once: true });
+			this.openBtn.disabled = false;
+			this.closeBtn.addEventListener("click", this.closeModal);
+		}
+
+		connectedCallback() {
+			// Listen for keyboard shortcut
+			window.addEventListener("keydown", this.onWindowKeydown);
+
+			const onIdle = window.requestIdleCallback || ((cb) => setTimeout(cb, 1));
+			onIdle(() => {
+				this.initPagefind();
 			});
 		}
 

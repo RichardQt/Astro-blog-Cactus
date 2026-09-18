@@ -1,7 +1,4 @@
-.katex-html {
-    display: none;
-} 
-
+/* KaTeX 公式由官方 CSS 规范接管展示，避免 MathML/HTML 冲突 */
 
 .small-text {
     font-size: 0.85em;

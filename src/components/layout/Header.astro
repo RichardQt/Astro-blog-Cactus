@@ -20,6 +20,10 @@ import { menuLinks, siteConfig } from "@/site.config";
 					<img
 						src="/icons/dog-fly.png"
 						alt="Logo"
+						width="64"
+						height="64"
+						loading="eager"
+						decoding="async"
 						class="me-3 h-10 w-10 sm:absolute sm:start-[-5rem] sm:top-[-0.4rem] sm:me-0 sm:h-16 sm:w-16"
 					/>
 				)
@@ -37,7 +41,7 @@ import { menuLinks, siteConfig } from "@/site.config";
 					<a
 						aria-current={Astro.url.pathname === link.path ? "page" : false}
 						class="px-4 py-4 underline-offset-2 sm:py-0 sm:hover:underline"
-						data-astro-prefetch
+						data-astro-prefetch={link.path.startsWith("/feeds") ? "false" : undefined}
 						href={link.path}
 					>
 						{link.title}

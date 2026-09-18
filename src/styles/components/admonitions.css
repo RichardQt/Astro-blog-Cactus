@@ -1,0 +1,132 @@
+/* Markdown Admonitions / Callout 提示框样式 */
+
+.aside {
+    position: relative;
+    margin: 1.5rem 0;
+    padding: 1rem 1.25rem;
+    border-radius: 0.5rem;
+    border-left: 4px solid var(--aside-border);
+    background-color: var(--aside-bg);
+    color: inherit;
+}
+
+.aside-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0 !important;
+    font-size: 0.95rem;
+    font-weight: 700;
+    line-height: 1.4;
+    color: var(--aside-title);
+    text-transform: capitalize;
+}
+
+.aside-title::before {
+    content: "";
+    display: inline-block;
+    width: 1.2rem;
+    height: 1.2rem;
+    flex-shrink: 0;
+    background-color: currentColor;
+    -webkit-mask-size: contain;
+    mask-size: contain;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+    mask-position: center;
+}
+
+.aside-content {
+    margin-top: 0.625rem;
+    font-size: 0.925rem;
+    line-height: 1.65;
+}
+
+.aside-content > :first-child {
+    margin-top: 0 !important;
+}
+
+.aside-content > :last-child {
+    margin-bottom: 0 !important;
+}
+
+/* 1. Note (信息/备忘 - 蓝灰色) */
+.aside-note {
+    --aside-border: #3b82f6;
+    --aside-bg: rgba(59, 130, 246, 0.07);
+    --aside-title: #2563eb;
+}
+:root[data-theme="dark"] .aside-note {
+    --aside-border: #60a5fa;
+    --aside-bg: rgba(59, 130, 246, 0.12);
+    --aside-title: #93c5fd;
+}
+.aside-note .aside-title::before {
+    -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Cline x1='12' y1='16' x2='12' y2='12'/%3E%3Cline x1='12' y1='8' x2='12.01' y2='8'/%3E%3C/svg%3E");
+    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Cline x1='12' y1='16' x2='12' y2='12'/%3E%3Cline x1='12' y1='8' x2='12.01' y2='8'/%3E%3C/svg%3E");
+}
+
+/* 2. Tip (技巧/建议 - 绿色) */
+.aside-tip {
+    --aside-border: #10b981;
+    --aside-bg: rgba(16, 185, 129, 0.07);
+    --aside-title: #059669;
+}
+:root[data-theme="dark"] .aside-tip {
+    --aside-border: #34d399;
+    --aside-bg: rgba(16, 185, 129, 0.12);
+    --aside-title: #6ee7b7;
+}
+.aside-tip .aside-title::before {
+    -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9 18h6'/%3E%3Cpath d='M10 22h4'/%3E%3Cpath d='M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .23 2.23 1.5 3.5A4.61 4.61 0 0 1 8.91 14'/%3E%3C/svg%3E");
+    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9 18h6'/%3E%3Cpath d='M10 22h4'/%3E%3Cpath d='M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .23 2.23 1.5 3.5A4.61 4.61 0 0 1 8.91 14'/%3E%3C/svg%3E");
+}
+
+/* 3. Important (重要提醒 - 紫色) */
+.aside-important {
+    --aside-border: #8b5cf6;
+    --aside-bg: rgba(139, 92, 246, 0.07);
+    --aside-title: #7c3aed;
+}
+:root[data-theme="dark"] .aside-important {
+    --aside-border: #a78bfa;
+    --aside-bg: rgba(139, 92, 246, 0.12);
+    --aside-title: #c4b5fd;
+}
+.aside-important .aside-title::before {
+    -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M13 2L3 14h9l-1 8 10-12h-9l1-8z'/%3E%3C/svg%3E");
+    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M13 2L3 14h9l-1 8 10-12h-9l1-8z'/%3E%3C/svg%3E");
+}
+
+/* 4. Warning (警告 - 橙黄色) */
+.aside-warning {
+    --aside-border: #f59e0b;
+    --aside-bg: rgba(245, 158, 11, 0.07);
+    --aside-title: #d97706;
+}
+:root[data-theme="dark"] .aside-warning {
+    --aside-border: #fbbf24;
+    --aside-bg: rgba(245, 158, 11, 0.12);
+    --aside-title: #fde68a;
+}
+.aside-warning .aside-title::before {
+    -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z'/%3E%3Cline x1='12' y1='9' x2='12' y2='13'/%3E%3Cline x1='12' y1='17' x2='12.01' y2='17'/%3E%3C/svg%3E");
+    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z'/%3E%3Cline x1='12' y1='9' x2='12' y2='13'/%3E%3Cline x1='12' y1='17' x2='12.01' y2='17'/%3E%3C/svg%3E");
+}
+
+/* 5. Caution (危险/禁止 - 红色) */
+.aside-caution {
+    --aside-border: #ef4444;
+    --aside-bg: rgba(239, 68, 68, 0.07);
+    --aside-title: #dc2626;
+}
+:root[data-theme="dark"] .aside-caution {
+    --aside-border: #f87171;
+    --aside-bg: rgba(239, 68, 68, 0.12);
+    --aside-title: #fca5a5;
+}
+.aside-caution .aside-title::before {
+    -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Cline x1='4.93' y1='4.93' x2='19.07' y2='19.07'/%3E%3C/svg%3E");
+    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Cline x1='4.93' y1='4.93' x2='19.07' y2='19.07'/%3E%3C/svg%3E");
+}

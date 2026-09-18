@@ -18,6 +18,56 @@ const toc = generateToc(headings);
 	</ul>
 </aside>
 
+<script>
+	function initTocHighlight() {
+		const tocLinks = document.querySelectorAll<HTMLAnchorElement>("aside a[href^='#']");
+		if (!tocLinks.length) return;
+
+		const headingMap = new Map<string, HTMLElement>();
+		tocLinks.forEach((link) => {
+			const href = link.getAttribute("href");
+			if (href && href.length > 1) {
+				const id = decodeURIComponent(href.slice(1));
+				const el = document.getElementById(id);
+				if (el) headingMap.set(id, el);
+			}
+		});
+
+		if (!headingMap.size) return;
+
+		function setActive(id: string) {
+			tocLinks.forEach((link) => {
+				const href = link.getAttribute("href");
+				const linkId = href ? decodeURIComponent(href.slice(1)) : "";
+				const isCurrent = linkId === id;
+				link.classList.toggle("text-accent", isCurrent);
+				link.classList.toggle("font-bold", isCurrent);
+			});
+		}
+
+		const observer = new IntersectionObserver(
+			(entries) => {
+				const visible = entries.filter((e) => e.isIntersecting);
+				if (visible.length > 0) {
+					const topMost = visible.reduce((prev, curr) =>
+						prev.boundingClientRect.top < curr.boundingClientRect.top ? prev : curr,
+					);
+					setActive(topMost.target.id);
+				}
+			},
+			{ rootMargin: "0px 0px -60% 0px", threshold: [0, 1] },
+		);
+
+		headingMap.forEach((el) => observer.observe(el));
+	}
+
+	if (document.readyState === "loading") {
+		document.addEventListener("DOMContentLoaded", initTocHighlight, { once: true });
+	} else {
+		initTocHighlight();
+	}
+</script>
+
 <style>
 	ul {
 		scrollbar-width: thin;

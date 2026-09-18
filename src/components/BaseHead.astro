@@ -4,6 +4,7 @@ import type { SiteMeta } from "@/types";
 import "@/styles/global.css";
 import "../styles/other.css";
 import "@/styles/components/github-card.css";
+import "@/styles/components/admonitions.css";
 
 type Props = SiteMeta;
 
@@ -22,9 +23,20 @@ const socialImageURL = new URL(ogImage ? ogImage : "/social-card.avif", Astro.ur
 <meta content="width=device-width, initial-scale=1.0" name="viewport" />
 <title>{siteTitle}</title>
 
+{/* Preconnect & DNS prefetch for CDN */}
+<link rel="preconnect" href="https://cdn.mengze.vip" crossorigin />
+<link rel="dns-prefetch" href="https://cdn.mengze.vip" />
+
 {/* Preload custom fonts for faster loading */}
 <link rel="preload" as="font" href="https://cdn.mengze.vip/gh/RichardQt/Static_Resource_Acceleration/main.woff2" type="font/woff2" crossorigin>
 {/* Note: Chinese font is now loaded via @font-face in global.css */}
+
+{/* KaTeX Math typesetting styles */}
+<link
+	rel="stylesheet"
+	href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"
+	crossorigin="anonymous"
+/>
 
 {/* Icons */}
 <link href="/icons/logo-planet-small.png" rel="icon" type="image/png" />
@@ -49,7 +61,7 @@ const socialImageURL = new URL(ogImage ? ogImage : "/social-card.avif", Astro.ur
 <meta content={siteConfig.author} name="author" />
 
 {/* Theme Colour */}
-<meta content="" name="theme-color" />
+<meta content="#1d1f21" name="theme-color" />
 
 {/* Open Graph / Facebook */}
 <meta content={articleDate ? "article" : "website"} property="og:type" />

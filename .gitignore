@@ -35,3 +35,9 @@ pnpm-debug.log*
 font-workspace/
 fonts-config.css
 FONT_SETUP_GUIDE.md
+
+# Local search index for dev preview
+public/pagefind/
+
+# CodeGraph local index
+.codegraph/

@@ -18,6 +18,7 @@ import { remarkReadingTime } from "./src/plugins/remark-reading-time";
 // Rehype plugins
 import rehypeExternalLinks from "rehype-external-links";
 import rehypeUnwrapImages from "rehype-unwrap-images";
+import { rehypeLazyImages } from "./src/plugins/rehype-lazy-images";
 import decapCmsOauth from "astro-decap-cms-oauth";
 import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
@@ -33,10 +34,8 @@ export default defineConfig({
 		maxDuration: 30, // 设置函数最大执行时间为 30 秒
 	}),
 	image: {
-		domains: [
-			"webmention.io",
-		],
 		service: passthroughImageService(),
+		domains: ["webmention.io"],
 	},
 	integrations: [
 		expressiveCode(expressiveCodeOptions),
@@ -97,7 +96,7 @@ export default defineConfig({
 			[
 				rehypeExternalLinks,
 				{
-					rel: ["nofollow, noreferrer"],
+					rel: ["nofollow", "noopener", "noreferrer"],
 					target: "_blank",
 				},
 			],
@@ -114,6 +113,7 @@ export default defineConfig({
 				},
 			],
 			rehypeUnwrapImages,
+			rehypeLazyImages,
 			rehypeSlug,
 			[rehypeAutolinkHeadings, { behavior: "append" }],
 		],
@@ -147,7 +147,7 @@ export default defineConfig({
 	},
 	// https://docs.astro.build/en/guides/prefetch/
 	prefetch: {
-		defaultStrategy: "viewport",
+		defaultStrategy: "hover",
 		prefetchAll: true,
 	},
 	// ! 改为你的网站地址，不然社交图片无法加载

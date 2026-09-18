@@ -12,20 +12,33 @@ const GISCUS_CONFIG = {
 	<div class="giscus"></div>
 </div>
 
-<script define:vars={{ config: GISCUS_CONFIG }}>
+<script is:inline define:vars={{ config: GISCUS_CONFIG }}>
 	function getCurrentTheme() {
-		const isDark = document.documentElement.classList.contains("dark");
-		console.log("isDark:", isDark);
-		const theme = isDark ? "dark_dimmed" : "light";
-		console.log("returning theme:", theme);
-		return theme;
+		const isDark = document.documentElement.getAttribute("data-theme") === "dark";
+		return isDark ? "dark_dimmed" : "light";
+	}
+
+	function updateGiscusTheme(theme) {
+		const iframe = document.querySelector("iframe.giscus-frame");
+		if (iframe && iframe.contentWindow) {
+			try {
+				iframe.contentWindow.postMessage(
+					{ giscus: { setConfig: { theme } } },
+					"https://giscus.app"
+				);
+			} catch (_) {}
+		}
 	}
 
 	function createGiscusScript() {
 		const container = document.querySelector(".giscus");
+		if (!container) return;
+		
+		// 避免重复创建
+		if (container.querySelector("script[src*='giscus.app']")) return;
+
 		const theme = getCurrentTheme();
-		console.log("Current theme:", theme);
-		let script = document.createElement("script");
+		const script = document.createElement("script");
 		script.src = "https://giscus.app/client.js";
 		script.setAttribute("data-repo", config.REPO);
 		script.setAttribute("data-repo-id", config.REPO_ID);
@@ -43,56 +56,33 @@ const GISCUS_CONFIG = {
 		script.setAttribute("data-host", "https://giscus.app");
 		script.setAttribute("data-origins", window.location.origin);
 		script.async = true;
-		container && container.appendChild(script);
+		container.appendChild(script);
 	}
 
-	// 等待 DOM 完全加载
 	if (document.readyState === "loading") {
-		document.addEventListener("DOMContentLoaded", createGiscusScript);
+		document.addEventListener("DOMContentLoaded", createGiscusScript, { once: true });
 	} else {
 		createGiscusScript();
 	}
 
-	// 替换为监听主题变化事件
+	// 监听主题切换事件
 	document.addEventListener("theme-change", (e) => {
-		const theme = e.detail.theme === "dark" ? "dark_dimmed" : "light";
-		console.log("Theme change event received:", theme);
-		
-		const iframe = document.querySelector("iframe.giscus-frame");
-		if (iframe) {
-			try {
-				iframe.contentWindow.postMessage(
-					{ giscus: { setConfig: { theme } } },
-					"https://giscus.app"
-				);
-				console.log("Theme message sent to iframe");
-			} catch (e) {
-				console.error("Failed to update giscus theme:", e);
-			}
-		} else {
-			console.warn("Giscus iframe not found");
-		}
+		const theme = e.detail?.theme === "dark" ? "dark_dimmed" : "light";
+		updateGiscusTheme(theme);
 	});
 
-	// MutationObserver 可以保留作为备份
+	// 监听 data-theme 属性变化兜底
 	const observer = new MutationObserver((mutations) => {
-		mutations.forEach((mutation) => {
-			if (mutation.attributeName === "class") {
-				const isDark = document.documentElement.classList.contains("dark");
-				const theme = isDark ? "dark_dimmed" : "light";
-				const iframe = document.querySelector("iframe.giscus-frame");
-				if (iframe) {
-					iframe.contentWindow.postMessage(
-						{ giscus: { setConfig: { theme } } },
-						"https://giscus.app"
-					);
-				}
+		for (const mutation of mutations) {
+			if (mutation.attributeName === "data-theme") {
+				updateGiscusTheme(getCurrentTheme());
+				break;
 			}
-		});
+		}
 	});
 
 	observer.observe(document.documentElement, {
 		attributes: true,
-		attributeFilter: ["class"]
+		attributeFilter: ["data-theme"],
 	});
 </script>
