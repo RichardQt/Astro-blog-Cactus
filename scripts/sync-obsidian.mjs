@@ -1,8 +1,9 @@
 /**
  * 单向同步：Obsidian 发布区 → Astro content
  *
- * 博客/  → src/content/post
- * 随记/  → src/content/note
+ * 博客发布/博客/  → src/content/post
+ * 博客发布/随记/  → src/content/note
+ * 博客发布/草稿/  不同步
  *
  * 规则：
  * - 只拷贝顶层 .md，不碰 dest 里的 demo/ 等子目录
@@ -34,12 +35,12 @@ const vaultRoot =
 const mappings = [
 	{
 		kind: "post",
-		src: path.join(vaultRoot, "博客"),
+		src: path.join(vaultRoot, "博客发布", "博客"),
 		dest: path.join(repoRoot, "src", "content", "post"),
 	},
 	{
 		kind: "note",
-		src: path.join(vaultRoot, "随记"),
+		src: path.join(vaultRoot, "博客发布", "随记"),
 		dest: path.join(repoRoot, "src", "content", "note"),
 	},
 ];
