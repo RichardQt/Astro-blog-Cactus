@@ -6,11 +6,13 @@ import type { RSSFeed, RSSSource } from '@/types';
 // 动态导入 Redis
 async function getRedis() {
   try {
-    if (import.meta.env.UPSTASH_REDIS_REST_URL && import.meta.env.UPSTASH_REDIS_REST_TOKEN) {
+    const redisUrl = import.meta.env.UPSTASH_REDIS_REST_URL || import.meta.env.KV_REST_API_URL;
+    const redisToken = import.meta.env.UPSTASH_REDIS_REST_TOKEN || import.meta.env.KV_REST_API_TOKEN;
+    if (redisUrl && redisToken) {
       const { Redis } = await import('@upstash/redis');
       return new Redis({
-        url: import.meta.env.UPSTASH_REDIS_REST_URL,
-        token: import.meta.env.UPSTASH_REDIS_REST_TOKEN,
+        url: redisUrl,
+        token: redisToken,
       });
     }
   } catch (error) {
@@ -166,9 +168,9 @@ export const GET: APIRoute = async ({ request }) => {
         if (feed) {
           allFeeds.push(feed);
           
-          // 缓存单个源的数据（7200秒 = 2小时）
+          // 缓存单个源的数据（86400秒 = 24小时）
           const cacheKey = `rss-feed-${source.id}`;
-          await redis.setex(cacheKey, 7200, JSON.stringify(feed));
+          await redis.setex(cacheKey, 86400, JSON.stringify(feed));
           
           updateResults.push({
             source: source.name,
@@ -213,7 +215,7 @@ export const GET: APIRoute = async ({ request }) => {
       timestamp: new Date().toISOString(),
     };
     
-    await redis.setex('rss-all-feeds', 7200, JSON.stringify(cacheData));
+    await redis.setex('rss-all-feeds', 86400, JSON.stringify(cacheData));
     
     const duration = Date.now() - startTime;
     

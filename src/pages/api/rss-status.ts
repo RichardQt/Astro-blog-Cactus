@@ -3,11 +3,13 @@ import type { APIRoute } from 'astro';
 // 动态导入 Redis
 async function getRedis() {
   try {
-    if (import.meta.env.UPSTASH_REDIS_REST_URL && import.meta.env.UPSTASH_REDIS_REST_TOKEN) {
+    const redisUrl = import.meta.env.UPSTASH_REDIS_REST_URL || import.meta.env.KV_REST_API_URL;
+    const redisToken = import.meta.env.UPSTASH_REDIS_REST_TOKEN || import.meta.env.KV_REST_API_TOKEN;
+    if (redisUrl && redisToken) {
       const { Redis } = await import('@upstash/redis');
       return new Redis({
-        url: import.meta.env.UPSTASH_REDIS_REST_URL,
-        token: import.meta.env.UPSTASH_REDIS_REST_TOKEN,
+        url: redisUrl,
+        token: redisToken,
       });
     }
   } catch (error) {

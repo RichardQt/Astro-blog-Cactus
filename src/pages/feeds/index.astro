@@ -11,14 +11,16 @@ import { XMLParser } from 'fast-xml-parser';
 
 export const prerender = false; // 改为false以支持动态URL参数
 
-// 动态导入 Upstash Redis 以避免构建问题
+// 动态导入 Upstash Redis / Vercel KV 以避免构建问题
 let redis: any = null;
 try {
-  if (import.meta.env.UPSTASH_REDIS_REST_URL && import.meta.env.UPSTASH_REDIS_REST_TOKEN) {
+  const redisUrl = import.meta.env.UPSTASH_REDIS_REST_URL || import.meta.env.KV_REST_API_URL;
+  const redisToken = import.meta.env.UPSTASH_REDIS_REST_TOKEN || import.meta.env.KV_REST_API_TOKEN;
+  if (redisUrl && redisToken) {
     const { Redis } = await import('@upstash/redis');
     redis = new Redis({
-      url: import.meta.env.UPSTASH_REDIS_REST_URL,
-      token: import.meta.env.UPSTASH_REDIS_REST_TOKEN,
+      url: redisUrl,
+      token: redisToken,
     });
     console.log('Redis已初始化');
   }
@@ -28,7 +30,7 @@ try {
 
 // 内存缓存
 const memoryCache = new Map<string, { data: any; timestamp: number }>();
-const CACHE_DURATION = 5 * 60 * 1000; // 5分钟
+const CACHE_DURATION = 30 * 60 * 1000; // 30分钟
 
 // 获取缓存
 async function getCachedData(key: string): Promise<any | null> {
@@ -53,10 +55,10 @@ async function getCachedData(key: string): Promise<any | null> {
 
 // 设置缓存
 async function setCachedData(key: string, data: any): Promise<void> {
-  // 保存到 Redis
+  // 保存到 Redis（86400秒 = 24小时，全天有效）
   if (redis) {
     try {
-      await redis.setex(key, 300, JSON.stringify(data)); // 5分钟过期
+      await redis.setex(key, 86400, JSON.stringify(data));
     } catch (error) {
       console.error('Redis写入失败:', error);
     }
@@ -170,6 +172,17 @@ const sources = defaultRSSConfig.sources;
 // 从URL参数获取选中的源
 const selectedSource = Astro.url.searchParams.get('source') || 'all';
 const forceRefresh = Astro.url.searchParams.get('refresh') === 'true';
+
+// 设置 HTTP 缓存响应头
+if (forceRefresh) {
+  Astro.response.headers.set('Cache-Control', 'no-store, max-age=0');
+} else {
+  // 浏览器缓存 60秒，Vercel CDN 边缘缓存 30分钟，后台平滑重验证 24小时
+  Astro.response.headers.set(
+    'Cache-Control',
+    'public, max-age=60, s-maxage=1800, stale-while-revalidate=86400'
+  );
+}
 
 // 获取RSS数据
 let allFeeds: RSSFeed[] = [];

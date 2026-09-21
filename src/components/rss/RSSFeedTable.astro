@@ -1,6 +1,6 @@
 ---
 // RSS订阅源列表组件 - 表格形式
-// 每行一条新闻，支持翻页
+// 每行一条新闻，支持客户端无刷新秒级切源与翻页
 
 import { rssManager } from "@/utils/rss";
 import type { RSSSource, RSSFeed } from "@/types";
@@ -47,26 +47,6 @@ if (passedFeeds && passedFeeds.length > 0) {
     }
   }
 }
-
-// 根据选择筛选feeds
-const feeds = selectedSource === 'all' 
-  ? allFeeds 
-  : allFeeds.filter(f => f.source.id === selectedSource);
-
-// 收集所有项目并按时间排序
-const allItems = feeds
-  .flatMap(feed => feed.items)
-  .sort((a, b) => new Date(b.pubDate).getTime() - new Date(a.pubDate).getTime());
-
-// 计算全部文章的总数（用于显示）
-const totalAllItems = allFeeds.flatMap(feed => feed.items).length;
-
-// 计算分页
-const totalItems = allItems.length;
-const totalPages = Math.ceil(totalItems / itemsPerPage);
-const startIndex = (currentPage - 1) * itemsPerPage;
-const endIndex = startIndex + itemsPerPage;
-const currentItems = allItems.slice(startIndex, endIndex);
 
 // 格式化日期为北京时间
 function formatDate(dateString: string): string {
@@ -118,6 +98,47 @@ function cleanDescription(html: string, maxLength: number = 150): string {
   return text;
 }
 
+// 全量项目按时间降序排好
+const allItemsSorted = allFeeds
+  .flatMap(feed => feed.items)
+  .sort((a, b) => new Date(b.pubDate).getTime() - new Date(a.pubDate).getTime());
+
+// 预处理客户端所需的全量数据
+const clientItemsData = allItemsSorted.map(item => ({
+  id: item.id,
+  sourceId: item.sourceId,
+  sourceName: item.sourceName,
+  sourceColor: getSourceColor(item.sourceId),
+  title: item.title,
+  link: item.link,
+  description: cleanDescription(item.description || ''),
+  pubDate: item.pubDate,
+  formattedDate: formatDate(item.pubDate),
+  author: item.author || '',
+  category: item.category || [],
+}));
+
+// 根据选择筛选当前feeds（用于首屏SSR服务端直出）
+const feeds = selectedSource === 'all' 
+  ? allFeeds 
+  : allFeeds.filter(f => f.source.id === selectedSource);
+
+// 收集当前筛选的项目并按时间排序
+const allItems = feeds
+  .flatMap(feed => feed.items)
+  .sort((a, b) => new Date(b.pubDate).getTime() - new Date(a.pubDate).getTime());
+
+// 计算全部文章的总数（用于显示）
+const totalAllItems = allItemsSorted.length;
+
+// 计算分页
+const totalItems = allItems.length;
+const totalPages = Math.max(1, Math.ceil(totalItems / itemsPerPage));
+const validCurrentPage = Math.min(Math.max(1, currentPage), totalPages);
+const startIndex = (validCurrentPage - 1) * itemsPerPage;
+const endIndex = startIndex + itemsPerPage;
+const currentItems = allItems.slice(startIndex, endIndex);
+
 // 生成页码数组
 function generatePageNumbers(current: number, total: number): (number | string)[] {
   if (total <= 7) {
@@ -151,19 +172,22 @@ function generatePageNumbers(current: number, total: number): (number | string)[
   return pages;
 }
 
-const pageNumbers = generatePageNumbers(currentPage, totalPages);
+const pageNumbers = generatePageNumbers(validCurrentPage, totalPages);
 ---
+
+<!-- 注入客户端使用的全量数据，用于无刷新切换与翻页 -->
+<script type="application/json" id="rss-all-items-data" is:inline set:html={JSON.stringify(clientItemsData)}></script>
 
 <!-- RSS源筛选器 -->
 <div class="rss-filter-section mb-6">
   <div class="rss-filter-header">
     <h2 class="text-lg font-semibold">RSS订阅源</h2>
-    <div class="rss-info text-sm text-gray-600 dark:text-gray-400">
-      共 {totalItems} 篇文章，第 {currentPage}/{totalPages} 页
+    <div class="rss-info text-sm text-gray-600 dark:text-gray-400" id="rss-pagination-info">
+      共 {totalItems} 篇文章，第 {validCurrentPage}/{totalPages} 页
     </div>
   </div>
   
-  <div class="rss-filter-tabs">
+  <div class="rss-filter-tabs" id="rss-tabs-container">
     <button 
       class={`rss-tab ${selectedSource === 'all' ? 'active' : ''}`}
       data-source="all"
@@ -188,7 +212,7 @@ const pageNumbers = generatePageNumbers(currentPage, totalPages);
 </div>
 
 <!-- RSS内容列表 -->
-<div class="rss-table-container">
+<div class="rss-table-container" id="rss-table-container">
   {currentItems.length === 0 ? (
     <div class="rss-empty-state">
       <Icon name="mdi:rss-off" class="w-12 h-12 text-gray-400 mb-4" />
@@ -264,43 +288,45 @@ const pageNumbers = generatePageNumbers(currentPage, totalPages);
   )}
 </div>
 
-<!-- 分页控件 -->
-{totalPages > 1 && (
-  <div class="rss-pagination">
-    <button
-      class={`rss-page-btn ${currentPage === 1 ? 'disabled' : ''}`}
-      data-page={currentPage - 1}
-      disabled={currentPage === 1}
-    >
-      <Icon name="mdi:chevron-left" class="w-5 h-5" />
-      上一页
-    </button>
-    
-    <div class="rss-page-numbers">
-      {pageNumbers.map((page) => (
-        typeof page === 'number' ? (
-          <button
-            class={`rss-page-number ${page === currentPage ? 'active' : ''}`}
-            data-page={page}
-          >
-            {page}
-          </button>
-        ) : (
-          <span class="rss-page-ellipsis">{page}</span>
-        )
-      ))}
-    </div>
-    
-    <button
-      class={`rss-page-btn ${currentPage === totalPages ? 'disabled' : ''}`}
-      data-page={currentPage + 1}
-      disabled={currentPage === totalPages}
-    >
-      下一页
-      <Icon name="mdi:chevron-right" class="w-5 h-5" />
-    </button>
+<!-- 分页控件（由客户端与服务端同步控制） -->
+<div 
+  class="rss-pagination" 
+  id="rss-pagination-container" 
+  style={totalPages > 1 ? "" : "display: none;"}
+>
+  <button
+    class={`rss-page-btn ${validCurrentPage === 1 ? 'disabled' : ''}`}
+    data-page={validCurrentPage - 1}
+    disabled={validCurrentPage === 1}
+  >
+    <Icon name="mdi:chevron-left" class="w-5 h-5" />
+    上一页
+  </button>
+  
+  <div class="rss-page-numbers">
+    {pageNumbers.map((page) => (
+      typeof page === 'number' ? (
+        <button
+          class={`rss-page-number ${page === validCurrentPage ? 'active' : ''}`}
+          data-page={page}
+        >
+          {page}
+        </button>
+      ) : (
+        <span class="rss-page-ellipsis">{page}</span>
+      )
+    ))}
   </div>
-)}
+  
+  <button
+    class={`rss-page-btn ${validCurrentPage === totalPages ? 'disabled' : ''}`}
+    data-page={validCurrentPage + 1}
+    disabled={validCurrentPage === totalPages}
+  >
+    下一页
+    <Icon name="mdi:chevron-right" class="w-5 h-5" />
+  </button>
+</div>
 
 <style>
   /* 筛选器部分 */
@@ -488,49 +514,253 @@ const pageNumbers = generatePageNumbers(currentPage, totalPages);
   }
 </style>
 
-<script>
-  // 客户端交互逻辑
-  document.addEventListener('DOMContentLoaded', () => {
-    // 处理源筛选
-    const tabs = document.querySelectorAll('.rss-tab');
-    tabs.forEach(tab => {
-      tab.addEventListener('click', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        
-        const source = tab.getAttribute('data-source');
+<script is:inline>
+  (function() {
+    function initRSSFeed() {
+      const dataEl = document.getElementById('rss-all-items-data');
+      if (!dataEl) return;
+      
+      let allItems = [];
+      try {
+        allItems = JSON.parse(dataEl.textContent || '[]');
+      } catch (e) {
+        console.error('Failed to parse RSS items data', e);
+        return;
+      }
+      
+      const itemsPerPage = 15;
+      const tabsContainer = document.getElementById('rss-tabs-container');
+      const tableContainer = document.getElementById('rss-table-container');
+      const infoEl = document.getElementById('rss-pagination-info');
+      const paginationContainer = document.getElementById('rss-pagination-container');
+      
+      if (!tableContainer) return;
+
+      // 获取当前状态（从 URL 读取）
+      function getCurrentState() {
         const url = new URL(window.location.href);
-        
-        if (!source || source === 'all') {
-          url.searchParams.delete('source');
+        const source = url.searchParams.get('source') || 'all';
+        const page = parseInt(url.searchParams.get('page') || '1', 10);
+        return { source, page: isNaN(page) || page < 1 ? 1 : page };
+      }
+
+      // 转义 HTML 防止 XSS
+      function escapeHtml(str) {
+        if (!str) return '';
+        return String(str)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#039;');
+      }
+
+      // 生成页码数组
+      function generatePageNumbers(current, total) {
+        if (total <= 7) {
+          return Array.from({ length: total }, (_, i) => i + 1);
+        }
+        const pages = [];
+        if (current <= 3) {
+          for (let i = 1; i <= 5; i++) pages.push(i);
+          pages.push('...');
+          pages.push(total);
+        } else if (current >= total - 2) {
+          pages.push(1);
+          pages.push('...');
+          for (let i = total - 4; i <= total; i++) pages.push(i);
         } else {
-          url.searchParams.set('source', source);
+          pages.push(1);
+          pages.push('...');
+          for (let i = current - 1; i <= current + 1; i++) pages.push(i);
+          pages.push('...');
+          pages.push(total);
+        }
+        return pages;
+      }
+
+      // 纯客户端瞬时渲染
+      function render(source, page, updateHistory = true) {
+        // 1. 过滤
+        const filtered = (source === 'all') 
+          ? allItems 
+          : allItems.filter(item => item.sourceId === source);
+        
+        const totalItems = filtered.length;
+        const totalPages = Math.max(1, Math.ceil(totalItems / itemsPerPage));
+        const currentPage = Math.min(Math.max(1, page), totalPages);
+        
+        const start = (currentPage - 1) * itemsPerPage;
+        const end = start + itemsPerPage;
+        const currentItems = filtered.slice(start, end);
+        
+        // 2. 更新 URL（无刷新，使用 history.pushState）
+        if (updateHistory) {
+          const url = new URL(window.location.href);
+          if (source === 'all') {
+            url.searchParams.delete('source');
+          } else {
+            url.searchParams.set('source', source);
+          }
+          if (currentPage === 1) {
+            url.searchParams.delete('page');
+          } else {
+            url.searchParams.set('page', String(currentPage));
+          }
+          window.history.pushState({ source, page: currentPage }, '', url.toString());
         }
         
-        // 重置到第一页
-        url.searchParams.delete('page'); // 先删除再设置
-        url.searchParams.set('page', '1');
+        // 3. 更新 Tab 激活状态
+        if (tabsContainer) {
+          const tabs = tabsContainer.querySelectorAll('.rss-tab');
+          tabs.forEach(tab => {
+            const tabSource = tab.getAttribute('data-source');
+            if (tabSource === source) {
+              tab.classList.add('active');
+            } else {
+              tab.classList.remove('active');
+            }
+          });
+        }
         
-        window.location.href = url.toString();
+        // 4. 更新顶部计数文字
+        if (infoEl) {
+          infoEl.textContent = `共 ${totalItems} 篇文章，第 ${currentPage}/${totalPages} 页`;
+        }
+        
+        // 5. 更新列表 DOM
+        if (currentItems.length === 0) {
+          tableContainer.innerHTML = `
+            <div class="rss-empty-state">
+              <svg class="w-12 h-12 text-gray-400 mb-4" viewBox="0 0 24 24" fill="currentColor"><path d="M2.81 2.81L1.39 4.22L4.46 7.3C4.16 8.76 4 10.32 4 12c0 2.21.89 4.21 2.34 5.66S9.79 20 12 20c1.68 0 3.24-.16 4.7-.46l3.08 3.08l1.41-1.42zM6 12c0-1.12.14-2.18.39-3.19l9.8 9.8c-1.01.25-2.07.39-3.19.39c-3.87 0-7-3.13-7-7m-.86-8.99l2.25 2.25C9.09 5.09 10.5 5 12 5c3.87 0 7 3.13 7 7c0 1.5-.09 2.91-.26 4.61l2.25 2.25c.65-2.08 1.01-4.39 1.01-6.86c0-5.52-4.48-10-10-10c-2.47 0-4.78.36-6.86 1.01M12 8c2.21 0 4 1.79 4 4c0 .41-.07.8-.18 1.18l1.63 1.63C17.77 13.9 18 12.98 18 12c0-3.31-2.69-6-6-6c-.98 0-1.9.23-2.81.55l1.63 1.63c.38-.11.77-.18 1.18-.18"/></svg>
+              <p class="text-lg font-medium text-gray-900 dark:text-white mb-2">暂无订阅内容</p>
+              <p class="text-sm text-gray-600 dark:text-gray-400">请稍后刷新页面或检查订阅源配置</p>
+            </div>
+          `;
+        } else {
+          const itemsHtml = currentItems.map(item => {
+            const descHtml = item.description 
+              ? `<p class="rss-item-description">${escapeHtml(item.description)}</p>` 
+              : '';
+            const authorHtml = item.author 
+              ? `<span class="rss-item-author">
+                  <svg class="w-4 h-4 inline mr-1" viewBox="0 0 24 24" fill="currentColor"><path d="M12 4a4 4 0 0 1 4 4a4 4 0 0 1-4 4a4 4 0 0 1-4-4a4 4 0 0 1 4-4m0 10c4.42 0 8 1.79 8 4v2H4v-2c0-2.21 3.58-4 8-4m0-12a6 6 0 0 0-6 6a6 6 0 0 0 6 6a6 6 0 0 0 6-6a6 6 0 0 0-6-6m0 14c-2.67 0-8 1.34-8 4v4h16v-4c0-2.66-5.33-4-8-4"/></svg>
+                  ${escapeHtml(item.author)}
+                 </span>`
+              : '';
+            const catList = Array.isArray(item.category) ? item.category : [];
+            const catHtml = catList.length > 0 
+              ? `<span class="rss-item-categories">
+                  <svg class="w-4 h-4 inline mr-1" viewBox="0 0 24 24" fill="currentColor"><path d="m21.41 11.58l-9-9C12.05 2.22 11.55 2 11 2H4c-1.1 0-2 .9-2 2v7c0 .55.22 1.05.59 1.42l9 9c.36.36.86.58 1.41.58s1.05-.22 1.41-.59l7-7c.37-.36.59-.86.59-1.41s-.23-1.06-.59-1.42M13 20.01L4 11V4h7v-.01l9 9zM6.5 8C5.67 8 5 7.33 5 6.5S5.67 5 6.5 5S8 5.67 8 6.5S7.33 8 6.5 8"/></svg>
+                  ${escapeHtml(catList.slice(0, 2).join(', '))}
+                 </span>`
+              : '';
+
+            return `
+              <article class="rss-list-item" data-source="${escapeHtml(item.sourceId)}">
+                <div class="rss-item-main">
+                  <div class="rss-item-header">
+                    <span class="rss-source-tag ${item.sourceColor}">
+                      ${escapeHtml(item.sourceName)}
+                    </span>
+                    <h3 class="rss-item-title">
+                      <a href="${escapeHtml(item.link)}" target="_blank" rel="noopener noreferrer" class="rss-item-link">
+                        ${escapeHtml(item.title)}
+                      </a>
+                    </h3>
+                  </div>
+                  ${descHtml}
+                  <div class="rss-item-meta">
+                    <time class="rss-item-time" datetime="${escapeHtml(item.pubDate)}">
+                      <svg class="w-4 h-4 inline mr-1" viewBox="0 0 24 24" fill="currentColor"><path d="M12 20c4.4 0 8-3.6 8-8s-3.6-8-8-8s-8 3.6-8 8s3.6 8 8 8m0-18c5.5 0 10 4.5 10 10s-4.5 10-10 10S2 17.5 2 12S6.5 2 12 2m.5 5v5.25l4.5 2.67l-.75 1.23L11 13V7z"/></svg>
+                      ${escapeHtml(item.formattedDate)}
+                    </time>
+                    ${authorHtml}
+                    ${catHtml}
+                  </div>
+                </div>
+                <div class="rss-item-actions">
+                  <a href="${escapeHtml(item.link)}" target="_blank" rel="noopener noreferrer" class="rss-action-btn" title="在新标签页中打开">
+                    <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M14 3v2h3.59l-9.83 9.83l1.41 1.41L19 6.41V10h2V3m-2 16H5V5h7V3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7h-2z"/></svg>
+                    <span>阅读</span>
+                  </a>
+                </div>
+              </article>
+            `;
+          }).join('');
+          tableContainer.innerHTML = `<div class="rss-list">${itemsHtml}</div>`;
+        }
+        
+        // 6. 更新分页条 DOM
+        if (paginationContainer) {
+          if (totalPages <= 1) {
+            paginationContainer.style.display = 'none';
+          } else {
+            paginationContainer.style.display = 'flex';
+            const pages = generatePageNumbers(currentPage, totalPages);
+            const pagesHtml = pages.map(p => {
+              if (typeof p === 'number') {
+                return `<button class="rss-page-number ${p === currentPage ? 'active' : ''}" data-page="${p}">${p}</button>`;
+              } else {
+                return `<span class="rss-page-ellipsis">${p}</span>`;
+              }
+            }).join('');
+            
+            paginationContainer.innerHTML = `
+              <button class="rss-page-btn ${currentPage === 1 ? 'disabled' : ''}" data-page="${currentPage - 1}" ${currentPage === 1 ? 'disabled' : ''}>
+                <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M15.41 16.58L10.83 12l4.58-4.59L14 6l-6 6l6 6z"/></svg>
+                上一页
+              </button>
+              <div class="rss-page-numbers">${pagesHtml}</div>
+              <button class="rss-page-btn ${currentPage === totalPages ? 'disabled' : ''}" data-page="${currentPage + 1}" ${currentPage === totalPages ? 'disabled' : ''}>
+                下一页
+                <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M8.59 16.58L13.17 12L8.59 7.41L10 6l6 6l-6 6z"/></svg>
+              </button>
+            `;
+          }
+        }
+      }
+
+      // 事件委托绑定 Tab 点击
+      if (tabsContainer) {
+        tabsContainer.addEventListener('click', (e) => {
+          const btn = e.target.closest('.rss-tab');
+          if (!btn) return;
+          e.preventDefault();
+          const source = btn.getAttribute('data-source') || 'all';
+          render(source, 1, true);
+        });
+      }
+
+      // 事件委托绑定分页点击
+      if (paginationContainer) {
+        paginationContainer.addEventListener('click', (e) => {
+          const btn = e.target.closest('[data-page]');
+          if (!btn || btn.hasAttribute('disabled') || btn.classList.contains('disabled')) return;
+          e.preventDefault();
+          const targetPage = parseInt(btn.getAttribute('data-page') || '1', 10);
+          const { source } = getCurrentState();
+          render(source, targetPage, true);
+          
+          // 平滑滚动到列表顶部
+          const filterSection = document.querySelector('.rss-filter-section');
+          if (filterSection) {
+            filterSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+        });
+      }
+
+      // 监听浏览器前进/后退
+      window.addEventListener('popstate', () => {
+        const { source, page } = getCurrentState();
+        render(source, page, false);
       });
-    });
-    
-    // 处理分页
-    const pageButtons = document.querySelectorAll('[data-page]:not(.disabled)');
-    pageButtons.forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        
-        if (btn.classList.contains('disabled')) return;
-        
-        const page = btn.getAttribute('data-page');
-        if (!page) return;
-        
-        const url = new URL(window.location.href);
-        url.searchParams.set('page', page);
-        window.location.href = url.toString();
-      });
-    });
-  });
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initRSSFeed);
+    } else {
+      initRSSFeed();
+    }
+  })();
 </script>

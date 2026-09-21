@@ -23,23 +23,26 @@ if (import.meta.env.PROD && secret !== expectedSecret) {
 
 // 动态导入 Redis 以避免构建问题
 let redis: any = null;
+const redisUrl = import.meta.env.UPSTASH_REDIS_REST_URL || import.meta.env.KV_REST_API_URL;
+const redisToken = import.meta.env.UPSTASH_REDIS_REST_TOKEN || import.meta.env.KV_REST_API_TOKEN;
+
 let redisDebugInfo = {
-  hasUrl: !!import.meta.env.UPSTASH_REDIS_REST_URL,
-  hasToken: !!import.meta.env.UPSTASH_REDIS_REST_TOKEN,
-  urlPrefix: import.meta.env.UPSTASH_REDIS_REST_URL ? import.meta.env.UPSTASH_REDIS_REST_URL.substring(0, 20) + '...' : 'not set',
-  tokenPrefix: import.meta.env.UPSTASH_REDIS_REST_TOKEN ? import.meta.env.UPSTASH_REDIS_REST_TOKEN.substring(0, 10) + '...' : 'not set',
+  hasUrl: !!redisUrl,
+  hasToken: !!redisToken,
+  urlPrefix: redisUrl ? redisUrl.substring(0, 20) + '...' : 'not set',
+  tokenPrefix: redisToken ? redisToken.substring(0, 10) + '...' : 'not set',
 };
 
 console.log('[CRON] Redis 环境变量状态:', redisDebugInfo);
 
 try {
-  if (import.meta.env.UPSTASH_REDIS_REST_URL && import.meta.env.UPSTASH_REDIS_REST_TOKEN) {
+  if (redisUrl && redisToken) {
     const { Redis } = await import('@upstash/redis');
     redis = new Redis({
-      url: import.meta.env.UPSTASH_REDIS_REST_URL,
-      token: import.meta.env.UPSTASH_REDIS_REST_TOKEN,
+      url: redisUrl,
+      token: redisToken,
     });
-    console.log('[CRON] Upstash Redis 已初始化成功');
+    console.log('[CRON] Upstash Redis / Vercel KV 已初始化成功');
   } else {
     console.log('[CRON] Redis 环境变量未配置');
   }
@@ -191,13 +194,13 @@ if (redis) {
       timestamp: new Date().toISOString(),
     };
     
-    // 缓存主数据
-    await redis.setex('rss-all-feeds', 7200, JSON.stringify(cacheData)); // 2小时过期
+    // 缓存主数据（86400秒 = 24小时过期，匹配每日定时任务）
+    await redis.setex('rss-all-feeds', 86400, JSON.stringify(cacheData));
     
-    // 也缓存每个源的数据，方便单独页面使用
+    // 也缓存每个源的数据，方便单独页面使用（86400秒 = 24小时过期）
     for (const feed of feeds) {
       const feedKey = `rss-feed-${feed.source.id}`;
-      await redis.setex(feedKey, 7200, JSON.stringify(feed)); // 2小时过期
+      await redis.setex(feedKey, 86400, JSON.stringify(feed));
     }
     
     // 保存更新日志供 /api/rss-status 使用
