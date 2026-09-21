@@ -106,24 +106,46 @@ async function fetchSingleSource(source: RSSSource): Promise<RSSFeed | null> {
     const itemsArray = Array.isArray(itemElements) ? itemElements : [itemElements];
     
     const items = itemsArray.slice(0, 30).map((item: any, index: number) => {
-      const title = item.title?.['#text'] || item.title || '';
-      const description = item.description?.['#text'] || item.description || item.summary || '';
-      const link = item.link?.['#text'] || item.link || '';
-      const pubDate = item.pubDate || item.published || item.updated || new Date().toISOString();
+      const rawTitle = item.title?.['#text'] || item.title || '';
+      const title = typeof rawTitle === 'string' ? rawTitle.trim() : (rawTitle?.['#text'] || '');
+      const rawDesc = item.description?.['#text'] || item.description || item.summary?.['#text'] || item.summary || item.content?.['#text'] || item.content || '';
+      const description = typeof rawDesc === 'string' ? rawDesc.trim().slice(0, 500) : '';
       
-      const cleanDescription = typeof description === 'string' 
+      let link = '';
+      if (typeof item.link === 'string') {
+        link = item.link;
+      } else if (item.link?.['@_href']) {
+        link = item.link['@_href'];
+      } else if (item.link?.['#text']) {
+        link = item.link['#text'];
+      } else if (Array.isArray(item.link)) {
+        const alt = item.link.find((l: any) => l?.['@_rel'] === 'alternate' || l?.['@_href']);
+        link = alt?.['@_href'] || alt?.['#text'] || '';
+      }
+      
+      const pubDate = item.pubDate || item.published || item.updated || new Date().toISOString();
+      const rawAuthor = item.author?.name || item.author || item['dc:creator'] || '';
+      const author = typeof rawAuthor === 'string' ? rawAuthor.trim() : (rawAuthor?.['#text'] || '');
+      
+      const category = Array.isArray(item.category) 
+        ? item.category.map((c: any) => typeof c === 'string' ? c : (c?.['#text'] || c?.['@_term'] || '')).filter(Boolean)
+        : (item.category ? [typeof item.category === 'string' ? item.category : (item.category?.['#text'] || item.category?.['@_term'] || '')].filter(Boolean) : []);
+      
+      const cleanDesc = typeof description === 'string' 
         ? description.replace(/<[^>]*>/g, '').trim().slice(0, 500) 
         : '';
       
       return {
         id: `${source.id}-${index}`,
         title: typeof title === 'string' ? title.trim().slice(0, 300) : '',
-        description: cleanDescription,
+        description: cleanDesc,
         content: description,
         link: typeof link === 'string' ? link.trim() : '',
         pubDate,
         sourceId: source.id,
         sourceName: source.name,
+        author: typeof author === 'string' ? author : '',
+        category,
         read: false,
       };
     }).filter((item: any) => item.title && item.link);
